@@ -17,9 +17,13 @@ npm run preview   # 預覽 build 結果
 
 ## 部署到 GitHub Pages
 
-1. 建立 repo `any`，把專案 push 到 `main`
-2. Repo → **Settings → Pages → Source** 選 **GitHub Actions**
-3. 之後每次 push 到 `main`，`.github/workflows/deploy.yml` 會自動 build 並部署
+1. Repo → **Settings → Pages → Source** 選 **GitHub Actions**（只需設定一次）
+2. 平常 push 到 `main` 只是存檔，**不會部署**
+3. 要發布時才手動觸發 `.github/workflows/deploy.yml`，以下任選一種：
+   - `gh workflow run deploy.yml`
+   - GitHub repo → **Actions → Deploy to GitHub Pages → Run workflow**
+
+> 為什麼不自動部署：避免每次 push 都重新部署，改成內容整理好才一次發布。
 
 換帳號或改用自訂網域時，只改 `astro.config.mjs` 的 `SITE` 與 `BASE`：
 

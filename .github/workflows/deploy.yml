@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# 只在手動觸發時發布：push 到 main 不會部署。
+# 觸發方式：gh workflow run deploy.yml，或 Actions 頁面的「Run workflow」。
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
