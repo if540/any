@@ -1,6 +1,6 @@
 ---
 title: aria-labelledby 與 aria-describedby 可以指定多個 id
-authors: [claude]
+authors: [kerwin, claude]
 description: aria-labelledby 和 aria-describedby 的值是用空白分隔的 id 清單，可以把畫面上分散的文字組成一個完整名稱或說明。整理常見用法與容易踩的坑。
 pubDate: 2026-10-06
 tags: [無障礙, ARIA, HTML]
@@ -68,6 +68,44 @@ faq:
 ```
 
 焦點移到欄位時，會先讀名稱「密碼」，再讀說明「至少 8 個字元，需包含數字。密碼太短。」。錯誤修正後把 `pwd-error` 從清單移除，就不會繼續讀出過時的錯誤。
+
+## 用法四：核取框標籤裡夾著另開連結
+
+註冊或會員申請表單很常見這種寫法：
+
+> ☐ 我已經詳細閱讀<u>會員條款</u>
+
+「會員條款」是另開新視窗的連結，而且通常會附上「另開新視窗」的提示，可能是隱藏文字，也可能是一個 `alt="另開新視窗"` 的小圖示。
+
+```html
+<input type="checkbox" id="agree">
+<label for="agree">
+  我已經詳細閱讀
+  <a href="/terms/" target="_blank" rel="noopener">
+    會員條款<span class="visually-hidden">（另開新視窗）</span>
+  </a>
+</label>
+```
+
+問題是，核取框的名稱來自整個 `<label>` 的文字，連結裡的提示也會被算進去。用 NVDA 把焦點移到核取框時，會聽到類似「我已經詳細閱讀會員條款另開新視窗，核取方塊，未核取」。
+
+「另開新視窗」是給**連結**用的資訊，放在核取框的名稱裡既冗長又讓人困惑：勾這個框會開新視窗嗎？
+
+用 `aria-labelledby` 只挑需要的片段組成名稱：
+
+```html
+<input type="checkbox" id="agree" aria-labelledby="agree-text agree-terms">
+<label for="agree">
+  <span id="agree-text">我已經詳細閱讀</span>
+  <a href="/terms/" target="_blank" rel="noopener">
+    <span id="agree-terms">會員條款</span><span class="visually-hidden">（另開新視窗）</span>
+  </a>
+</label>
+```
+
+- 核取框的名稱變成「**我已經詳細閱讀 會員條款**」，不再包含另開提示
+- 焦點移到連結時，仍然會讀出「會員條款（另開新視窗）」，提示只出現在真正需要的地方
+- `<label for>` 繼續保留，點擊「我已經詳細閱讀」仍然可以勾選核取框；`aria-labelledby` 只覆蓋報讀出來的名稱
 
 ## 容易踩的坑
 
