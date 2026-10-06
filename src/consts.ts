@@ -37,6 +37,10 @@ export const DEFAULT_AUTHORS: AuthorKey[] = [OWNER];
 export const authorNames = (keys: readonly AuthorKey[]) =>
   keys.map((k) => AUTHORS[k].name).join('、');
 
+// 自動封面的幾何符號（src/utils/og.ts）
+export const MOTIF_NAMES = ['chain', 'target', 'grid', 'stack', 'code', 'bars'] as const;
+export type MotifName = (typeof MOTIF_NAMES)[number];
+
 export const NAV = [
   { href: '/', label: '首頁' },
   { href: '/articles/', label: '文章' },

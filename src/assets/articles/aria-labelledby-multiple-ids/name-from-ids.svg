@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 600" width="720" height="600" role="img" aria-labelledby="t">
+  <title id="t">aria-labelledby 依 id 順序組成名稱</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}.o{fill:#ff6b1a}.ostroke{stroke:#ff6b1a}
+    .code{fill:#111111}.codetext{fill:#fafaf7}.codeid{fill:#ff6b1a}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}.code{fill:#1b1b1b}
+    }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" class="fg"/>
+    </marker>
+  </defs>
+
+  <rect width="720" height="600" class="bg"/>
+
+  <!-- 1. 屬性值 -->
+  <text x="20" y="34" font-size="22" font-weight="700" class="mut">屬性值：用空白分隔的 id 清單</text>
+  <rect x="20" y="50" width="680" height="76" class="code stroke" stroke-width="3"/>
+  <text x="40" y="98" font-size="23" class="mono codetext">aria-labelledby="<tspan class="codeid">post-1-more</tspan> <tspan class="codeid">post-1-title</tspan>"</text>
+
+  <!-- 箭頭：依序取出 -->
+  <path d="M185 126v62" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M535 126v62" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="360" y="166" font-size="20" font-weight="700" text-anchor="middle" class="mut">依清單順序取出文字</text>
+
+  <!-- 2. 兩個被引用的元素 -->
+  <g>
+    <rect x="28" y="206" width="322" height="128" class="o"/>
+    <rect x="20" y="198" width="322" height="128" class="card stroke" stroke-width="3"/>
+    <text x="40" y="238" font-size="22" font-weight="700" class="ink">① #post-1-more</text>
+    <text x="40" y="294" font-size="30" font-weight="900" class="fg">閱讀更多</text>
+  </g>
+  <g>
+    <rect x="378" y="206" width="322" height="128" class="o"/>
+    <rect x="370" y="198" width="322" height="128" class="card stroke" stroke-width="3"/>
+    <text x="390" y="238" font-size="22" font-weight="700" class="ink">② #post-1-title</text>
+    <text x="390" y="294" font-size="30" font-weight="900" class="fg">春季料理的五種香草</text>
+  </g>
+
+  <!-- 箭頭：串接 -->
+  <path d="M181 334v40h174v34M531 334v40h-166v34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="372" y="368" font-size="20" font-weight="700" class="mut">用空白串接</text>
+
+  <!-- 3. 結果 -->
+  <rect x="28" y="432" width="680" height="140" class="fg"/>
+  <rect x="20" y="424" width="680" height="140" class="o stroke" stroke-width="3"/>
+  <text x="44" y="468" font-size="22" font-weight="700" class="onO">計算出的名稱（Accessible Name）</text>
+  <text x="44" y="530" font-size="34" font-weight="900" class="onO">閱讀更多 春季料理的五種香草</text>
+</svg>

@@ -16,5 +16,10 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.3.6"
+  },
+  "devDependencies": {
+    "@expo-google-fonts/noto-sans-tc": "^0.4.4",
+    "@resvg/resvg-js": "^2.6.2",
+    "satori": "^0.35.0"
   }
 }

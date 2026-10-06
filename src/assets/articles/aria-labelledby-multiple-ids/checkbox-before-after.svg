@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 660" width="720" height="660" role="img" aria-labelledby="t">
+  <title id="t">核取框改寫前後，NVDA 報讀內容的比較</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.inkstroke{stroke:#b8430a}.mut{fill:#5e5e5e}.o{fill:#ff6b1a}.ostroke{stroke:#ff6b1a}
+    .tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.inkstroke{stroke:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="660" class="bg"/>
+
+  <!-- ===== 改寫前 ===== -->
+  <rect x="20" y="20" width="96" height="40" class="tag"/>
+  <text x="68" y="48" font-size="22" font-weight="700" text-anchor="middle" class="tagtext">改寫前</text>
+
+  <!-- 畫面 -->
+  <rect x="20" y="80" width="680" height="72" class="card stroke" stroke-width="3"/>
+  <rect x="44" y="102" width="28" height="28" fill="none" class="stroke" stroke-width="3"/>
+  <text x="88" y="126" font-size="24" class="fg">我已經詳細閱讀<tspan class="ink" font-weight="700" text-decoration="underline">會員條款</tspan></text>
+  <!-- 另開圖示 -->
+  <g transform="translate(360 104)" fill="none" class="inkstroke" stroke-width="2.5">
+    <path d="M10 2H2v20h20v-8"/><path d="M14 2h8v8M22 2 11 13"/>
+  </g>
+
+  <!-- NVDA 對話框 -->
+  <path d="M60 172l16 -20 16 20" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="170" width="680" height="120" class="card stroke" stroke-width="3"/>
+  <rect x="60" y="168" width="32" height="6" class="card"/>
+  <text x="44" y="206" font-size="20" font-weight="700" class="mut">焦點在核取框時，NVDA 報讀：</text>
+  <!-- 「另開新視窗」在第 12–16 字（全形字寬 = 字級 24） -->
+  <rect x="330" y="226" width="120" height="38" class="o"/>
+  <text x="42" y="254" font-size="24" class="fg">「我已經詳細閱讀會員條款<tspan class="onO" font-weight="700">另開新視窗</tspan>，核取方塊，未核取」</text>
+  <text x="390" y="284" font-size="18" font-weight="700" text-anchor="middle" class="ink">↑ 給連結用的提示，混進核取框的名稱</text>
+
+  <!-- 分隔 -->
+  <path d="M20 330h680" class="stroke" stroke-width="3" stroke-dasharray="10 8"/>
+
+  <!-- ===== 改寫後 ===== -->
+  <rect x="20" y="360" width="96" height="40" class="o"/>
+  <text x="68" y="388" font-size="22" font-weight="700" text-anchor="middle" class="onO">改寫後</text>
+  <text x="132" y="388" font-size="20" font-weight="700" class="mut">aria-labelledby="agree-text agree-terms"</text>
+
+  <rect x="20" y="420" width="680" height="72" class="card stroke" stroke-width="3"/>
+  <rect x="44" y="442" width="28" height="28" fill="none" class="stroke" stroke-width="3"/>
+  <text x="88" y="466" font-size="24" class="fg">我已經詳細閱讀<tspan class="ink" font-weight="700" text-decoration="underline">會員條款</tspan></text>
+  <g transform="translate(360 444)" fill="none" class="inkstroke" stroke-width="2.5">
+    <path d="M10 2H2v20h20v-8"/><path d="M14 2h8v8M22 2 11 13"/>
+  </g>
+
+  <path d="M60 512l16 -20 16 20" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="510" width="680" height="130" class="card stroke" stroke-width="3"/>
+  <rect x="60" y="508" width="32" height="6" class="card"/>
+  <text x="44" y="546" font-size="20" font-weight="700" class="mut">焦點在核取框時，NVDA 報讀：</text>
+  <text x="42" y="594" font-size="24" class="fg">「我已經詳細閱讀 會員條款，核取方塊，未核取」</text>
+  <text x="44" y="626" font-size="18" font-weight="700" class="ink">✓ 另開提示只在焦點移到連結時才讀出</text>
+</svg>

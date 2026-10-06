@@ -66,8 +66,10 @@ pubDate: 2026-01-01
 updatedDate: 2026-01-15        # 選填
 authors: [kerwin, claude]      # 掛名作者，預設 [kerwin]
 tags: [標籤一, 標籤二]
-cover: ./images/cover.jpg      # 選填，相對路徑，會自動最佳化
-coverAlt: 封面圖說明
+cover: ../../assets/articles/my-first-post/cover.jpg  # 選填，自訂封面
+coverAlt: 封面圖說明            # 有 cover 時必填
+coverTitle: "第一行\n第二行"   # 選填，自動封面上的標題與換行
+coverMotif: chain              # 選填：chain／target／grid／stack／code／bars
 tldr: 一兩句結論，顯示在文章開頭，AI 最常擷取這段
 faq:                            # 選填，輸出 FAQPage 結構化資料
   - question: 問題？
@@ -87,6 +89,24 @@ description: 選填，沒填會自動擷取內文開頭
 mood: 開心                      # 選填
 ---
 ```
+
+## 封面與解說圖
+
+**自動封面**：沒有填 `cover` 的文章，build 時會自動產生 1200×630 的封面（`/og/articles/<slug>.png`），同時當作文章頂部的封面與社群分享圖。日誌只用在分享圖。
+
+- 版面：黑底白字、橘色底線、右側幾何符號，作者名在右下
+- 幾何符號沒指定時，會依 slug 固定挑選一個
+- 自動封面只重複標題文字，在頁面上以 `alt=""` 當作裝飾圖
+
+**解說圖**：放在 `src/assets/articles/<slug>/`，用 SVG 繪製，在 Markdown 中引用：
+
+```md
+![替代文字：完整描述圖裡傳達的資訊](../../assets/articles/my-first-post/flow.svg)
+```
+
+- 風格：扁平線條、3px 黑框、橘色偏移陰影，橘色只標示重點
+- SVG 內用 `@media (prefers-color-scheme: dark)` 自帶暗色模式
+- 替代文字要完整描述圖的重點，內文也要有對應的文字說明
 
 ## 作者與掛名
 

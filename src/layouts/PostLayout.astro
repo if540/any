@@ -10,6 +10,7 @@ import { formatDate } from '../utils/content';
 
 export interface Props {
   kind: 'articles' | 'journal';
+  slug: string;
   title: string;
   description: string;
   published: Date;
@@ -33,7 +34,11 @@ const section = p.kind === 'articles'
 
 const url = absoluteUrl(Astro.url.pathname, Astro.site);
 const home = absoluteUrl('/', Astro.site);
-const image = p.ogImage ?? p.cover?.src ?? SITE.defaultOgImage;
+// 分享圖優先順序：ogImage > cover > build 時自動產生的封面
+const autoCover = `/og/${p.kind}/${p.slug}.png`;
+const image = p.ogImage ?? p.cover?.src ?? autoCover;
+// 文章內頁顯示封面；日誌只用在分享圖
+const showAutoCover = p.kind === 'articles' && !p.cover;
 
 const jsonLd: Record<string, unknown>[] = [
   {
@@ -117,6 +122,10 @@ if (p.faq?.length) {
 
     {p.cover && (
       <Image class="cover" src={p.cover} alt={p.coverAlt ?? ''} widths={[640, 960, 1280]} sizes="(min-width: 68rem) 68rem, 100vw" loading="eager" />
+    )}
+    {showAutoCover && (
+      // 自動封面只重複標題文字，屬裝飾性，alt 留空避免重複報讀
+      <img class="cover" src={withBase(autoCover)} alt="" width="1200" height="630" loading="eager" decoding="async" />
     )}
 
     {p.tldr && (

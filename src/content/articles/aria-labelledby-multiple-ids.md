@@ -5,6 +5,8 @@ description: aria-labelledby 和 aria-describedby 的值是用空白分隔的 id
 pubDate: 2026-10-06
 tags: [無障礙, ARIA, HTML]
 draft: true
+coverTitle: "aria-labelledby\naria-describedby\n可以指定多個 id"
+coverMotif: chain
 tldr: aria-labelledby 與 aria-describedby 都能填多個 id，用空白分隔；瀏覽器會照你寫的順序把這些元素的文字串起來，當成元件的名稱或說明。
 faq:
   - question: 多個 id 要用逗號還是空白分隔？
@@ -38,6 +40,8 @@ faq:
 ```
 
 計算出的名稱是「**閱讀更多 春季料理的五種香草**」。
+
+![示意圖：aria-labelledby 的值「post-1-more post-1-title」依清單順序取出「閱讀更多」與「春季料理的五種香草」兩段文字，用空白串接成名稱「閱讀更多 春季料理的五種香草」。](../../assets/articles/aria-labelledby-multiple-ids/name-from-ids.svg)
 
 注意清單裡**包含連結自己的 id**。`aria-labelledby` 會完全取代元素原本的文字，如果沒有把自己放進去，名稱就只剩文章標題，畫面上看到的「閱讀更多」反而不見了。保留可見文字也符合 WCAG 2.5.3「名稱包含標籤」，語音控制的使用者說「點擊閱讀更多」時才能對應到這個連結。
 
@@ -102,6 +106,8 @@ faq:
   </a>
 </label>
 ```
+
+![比較圖：改寫前，焦點在核取框時 NVDA 讀出「我已經詳細閱讀會員條款另開新視窗，核取方塊，未核取」，其中「另開新視窗」是混進來的連結提示；改寫後用 aria-labelledby 引用兩段文字，只讀出「我已經詳細閱讀 會員條款，核取方塊，未核取」。](../../assets/articles/aria-labelledby-multiple-ids/checkbox-before-after.svg)
 
 - 核取框的名稱變成「**我已經詳細閱讀 會員條款**」，不再包含另開提示
 - 焦點移到連結時，仍然會讀出「會員條款（另開新視窗）」，提示只出現在真正需要的地方
