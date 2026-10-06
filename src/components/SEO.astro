@@ -1,0 +1,57 @@
+---
+import { SITE, AUTHOR } from '../consts';
+import { absoluteUrl } from '../utils/url';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;          // 站內路徑或完整網址
+  imageAlt?: string;
+  type?: 'website' | 'article';
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  tags?: string[];
+  canonical?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  image = SITE.defaultOgImage,
+  imageAlt = SITE.defaultOgImageAlt,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  tags = [],
+  canonical,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title}｜${SITE.title}` : `${SITE.title}｜${SITE.tagline}`;
+const canonicalUrl = canonical ?? absoluteUrl(Astro.url.pathname, Astro.site);
+const imageUrl = absoluteUrl(image, Astro.site);
+---
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<meta name="author" content={AUTHOR.name} />
+<link rel="canonical" href={canonicalUrl} />
+{noindex && <meta name="robots" content="noindex, follow" />}
+
+<meta property="og:site_name" content={SITE.title} />
+<meta property="og:locale" content={SITE.locale} />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title ?? SITE.title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:alt" content={imageAlt} />
+{publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
+{type === 'article' && tags.map((t) => <meta property="article:tag" content={t} />)}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title ?? SITE.title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+<meta name="twitter:image:alt" content={imageAlt} />

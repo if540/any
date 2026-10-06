@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles } from '../../utils/content';
+
+const articles = await getArticles();
+---
+<BaseLayout title="文章" description="主題式長文：技術筆記、教學與觀點整理。">
+  <h1>文章<span class="accent" aria-hidden="true">.</span></h1>
+  <p class="intro">主題式長文，把一件事寫清楚。共 {articles.length} 篇。</p>
+  <div class="list">
+    {articles.map((post, i) => <ArticleCard post={post} index={i} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .accent { color: var(--orange); }
+  .intro { color: var(--muted); margin: 0 0 1rem; }
+  .list { border-top: 3px solid var(--line); }
+</style>

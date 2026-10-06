@@ -1,0 +1,65 @@
+---
+import '../styles/global.css';
+import SEO, { type Props as SEOProps } from '../components/SEO.astro';
+import JsonLd from '../components/JsonLd.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, AUTHOR } from '../consts';
+import { absoluteUrl, withBase } from '../utils/url';
+
+export interface Props extends SEOProps {
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { jsonLd = [], ...seo } = Astro.props;
+const home = absoluteUrl('/', Astro.site);
+
+// 全站共用：WebSite + Person（作者可信度，GEO/AEO）
+const siteGraph = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${home}#website`,
+    url: home,
+    name: SITE.title,
+    description: SITE.description,
+    inLanguage: SITE.lang,
+    author: { '@id': `${home}#author` },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    '@id': `${home}#author`,
+    name: AUTHOR.name,
+    description: AUTHOR.bio,
+    url: absoluteUrl('/about/', Astro.site),
+    sameAs: AUTHOR.sameAs,
+  },
+];
+---
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={withBase('/rss.xml')} />
+    <SEO {...seo} />
+    <JsonLd data={[...siteGraph, ...jsonLd]} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要內容</a>
+    <Header />
+    <main id="main" class="container">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  main { padding-top: clamp(2rem, 6vw, 4rem); }
+</style>

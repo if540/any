@@ -1,0 +1,38 @@
+---
+import type { Journal } from '../utils/content';
+import { excerpt, formatDate } from '../utils/content';
+import { withBase } from '../utils/url';
+
+export interface Props { entry: Journal }
+const { entry } = Astro.props;
+const { title, date, mood, description } = entry.data;
+---
+<li class="item">
+  <time class="meta" datetime={date.toISOString()}>{formatDate(date)}</time>
+  <div class="body">
+    <h3><a href={withBase(`/journal/${entry.id}/`)}>{title}</a></h3>
+    <p>{description ?? excerpt(entry.body, 80)}</p>
+    {mood && <p class="meta">心情 {mood}</p>}
+  </div>
+</li>
+
+<style>
+  .item {
+    display: grid; grid-template-columns: 7.5rem 1fr; gap: 1.5rem;
+    position: relative; padding: 0 0 2rem;
+  }
+  .item time { padding-top: 0.3rem; text-align: right; }
+  .body { border-left: 3px solid var(--line); padding-left: 1.5rem; position: relative; }
+  .body::before {
+    content: ''; position: absolute; left: -0.6rem; top: 0.55rem;
+    width: 0.9rem; height: 0.9rem; background: var(--orange); border: 2px solid var(--line);
+  }
+  h3 { margin: 0 0 0.25rem; font-size: 1.15rem; }
+  h3 a { color: var(--fg); text-decoration: none; }
+  h3 a:hover { color: var(--link); text-decoration: underline; }
+  p { margin: 0 0 0.25rem; }
+  @media (max-width: 34rem) {
+    .item { grid-template-columns: 1fr; gap: 0.25rem; }
+    .item time { text-align: left; padding-left: 1.5rem; }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../utils/url';
+---
+<BaseLayout title="找不到頁面" description="這個頁面不存在或已經移除。" noindex>
+  <section class="nf">
+    <p class="code" aria-hidden="true">404<span>.</span></p>
+    <h1>找不到這個頁面</h1>
+    <p>網址可能打錯了，或頁面已經移除。</p>
+    <p><a href={withBase('/')}>← 回到首頁</a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf { padding: 2rem 0; }
+  .code { font-size: clamp(5rem, 20vw, 10rem); font-weight: 900; line-height: 1; margin: 0; letter-spacing: -0.05em; }
+  .code span { color: var(--orange); }
+  a { font-weight: 700; }
+</style>

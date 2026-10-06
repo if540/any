@@ -1,0 +1,43 @@
+---
+import { SITE, NAV } from '../consts';
+import { withBase } from '../utils/url';
+
+const current = Astro.url.pathname;
+const isActive = (href: string) => {
+  const full = withBase(href);
+  return href === '/' ? current === full : current.startsWith(full);
+};
+---
+<header class="site-header">
+  <div class="container bar">
+    <a class="logo" href={withBase('/')} aria-label={`${SITE.title} 首頁`}>
+      {SITE.title}<span class="dot" aria-hidden="true">.</span>
+    </a>
+    <nav aria-label="主要導覽">
+      <ul>
+        {NAV.map((item) => (
+          <li>
+            <a href={withBase(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header { background: var(--black); color: var(--white); border-bottom: 4px solid var(--orange); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4rem; flex-wrap: wrap; }
+  .logo { color: var(--white); font-weight: 900; font-size: 1.6rem; text-decoration: none; letter-spacing: -0.03em; }
+  .logo:hover { color: var(--white); }
+  .dot { color: var(--orange); }
+  ul { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
+  nav a {
+    display: block; padding: 0.4rem 0.75rem; color: var(--white);
+    text-decoration: none; font-weight: 700; font-size: 0.95rem;
+  }
+  nav a:hover { color: var(--orange); }
+  nav a[aria-current='page'] { background: var(--orange); color: var(--black); }
+</style>

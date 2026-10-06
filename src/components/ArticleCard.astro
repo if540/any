@@ -1,0 +1,36 @@
+---
+import type { Article } from '../utils/content';
+import { formatDate } from '../utils/content';
+import { withBase } from '../utils/url';
+
+export interface Props { post: Article; index?: number }
+const { post, index } = Astro.props;
+const { title, description, pubDate, tags } = post.data;
+---
+<article class="card">
+  {index !== undefined && <span class="idx" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>}
+  <div>
+    <h3><a href={withBase(`/articles/${post.id}/`)}>{title}</a></h3>
+    <p class="desc">{description}</p>
+    <p class="meta">
+      <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      {tags.length > 0 && <> · {tags.join(' / ')}</>}
+    </p>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative; display: grid; grid-template-columns: auto 1fr; gap: 1.25rem;
+    padding: 1.5rem 0; border-bottom: 2px solid var(--line);
+  }
+  .idx { font-family: var(--font-mono); font-weight: 700; color: var(--orange); font-size: 1.1rem; padding-top: 0.15rem; min-width: 2ch; }
+  h3 { margin: 0 0 0.4rem; font-size: 1.35rem; }
+  h3 a { color: var(--fg); text-decoration: none; }
+  /* 整張卡片可點，但只有標題是連結（螢幕閱讀器友善） */
+  h3 a::after { content: ''; position: absolute; inset: 0; }
+  .card:hover h3 a { color: var(--orange-ink); text-decoration: underline; text-decoration-color: var(--orange); }
+  @media (prefers-color-scheme: dark) { .card:hover h3 a { color: var(--orange); } }
+  .desc { margin: 0 0 0.5rem; }
+  .meta { margin: 0; }
+</style>

@@ -1,0 +1,30 @@
+---
+import { render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { getJournal, excerpt, type Journal } from '../../utils/content';
+
+export async function getStaticPaths() {
+  const entries = await getJournal();
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: Journal };
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<PostLayout
+  kind="journal"
+  title={d.title}
+  description={d.description ?? excerpt(entry.body, 140)}
+  published={d.date}
+  updated={d.updatedDate}
+  tags={d.tags}
+  cover={d.cover}
+  coverAlt={d.coverAlt}
+  tldr={d.tldr}
+  faq={d.faq}
+  mood={d.mood}
+  noindex={d.noindex}
+>
+  <Content />
+</PostLayout>

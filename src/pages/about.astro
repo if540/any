@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { AUTHOR, SITE } from '../consts';
+import { absoluteUrl } from '../utils/url';
+
+const url = absoluteUrl('/about/', Astro.site);
+const home = absoluteUrl('/', Astro.site);
+---
+<BaseLayout
+  title="關於"
+  description={`關於 ${AUTHOR.name} 與 ${SITE.title}：作者介紹、寫作主題與聯絡方式。`}
+  jsonLd={[{
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    url,
+    mainEntity: { '@id': `${home}#author` },
+  }]}
+>
+  <div class="prose">
+    <h1>關於<span class="accent" aria-hidden="true">.</span></h1>
+    <p class="lead">{AUTHOR.bio}</p>
+
+    <h2>這個網站寫什麼</h2>
+    <ul>
+      <li><strong>文章</strong>：主題式長文，技術筆記、教學與觀點整理。</li>
+      <li><strong>日誌</strong>：依日期記錄的短篇，進度、想法與日常。</li>
+    </ul>
+
+    <h2>聯絡與連結</h2>
+    <ul>
+      {AUTHOR.sameAs.map((link) => <li><a href={link} rel="me">{link.replace(/^https?:\/\//, '')}</a></li>)}
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .accent { color: var(--orange); }
+  .lead { font-size: 1.25rem; font-weight: 700; }
+</style>

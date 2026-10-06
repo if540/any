@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import JournalItem from '../../components/JournalItem.astro';
+import { getJournal } from '../../utils/content';
+
+const entries = await getJournal();
+---
+<BaseLayout title="日誌" description="依日期記錄的短篇日誌：每天的想法、進度與隨筆。">
+  <h1>日誌<span class="accent" aria-hidden="true">.</span></h1>
+  <p class="intro">依日期排列的短篇紀錄。共 {entries.length} 則。</p>
+  <ol class="timeline">
+    {entries.map((entry) => <JournalItem entry={entry} />)}
+  </ol>
+</BaseLayout>
+
+<style>
+  .accent { color: var(--orange); }
+  .intro { color: var(--muted); margin: 0 0 2.5rem; }
+  .timeline { list-style: none; padding: 0; margin: 0; }
+</style>

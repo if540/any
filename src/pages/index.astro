@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import JournalItem from '../components/JournalItem.astro';
+import { SITE } from '../consts';
+import { getArticles, getJournal } from '../utils/content';
+import { withBase } from '../utils/url';
+
+const articles = (await getArticles()).slice(0, 3);
+const journal = (await getJournal()).slice(0, 5);
+---
+<BaseLayout>
+  <section class="hero">
+    <p class="kicker meta">ARTICLES · JOURNAL</p>
+    <h1>{SITE.title}<span aria-hidden="true">.</span></h1>
+    <p class="lead">{SITE.tagline}。<br />長文寫清楚一件事，日誌記下每一天。</p>
+    <p class="cta">
+      <a class="btn" href={withBase('/articles/')}>讀文章</a>
+      <a class="btn ghost" href={withBase('/journal/')}>看日誌</a>
+    </p>
+  </section>
+
+  <section aria-labelledby="latest-articles">
+    <div class="section-head">
+      <h2 id="latest-articles"><span class="num">01</span>最新文章</h2>
+      <a href={withBase('/articles/')}>全部文章 →</a>
+    </div>
+    {articles.length ? articles.map((post, i) => <ArticleCard post={post} index={i} />) : <p>還沒有文章。</p>}
+  </section>
+
+  <section aria-labelledby="latest-journal">
+    <div class="section-head">
+      <h2 id="latest-journal"><span class="num">02</span>最新日誌</h2>
+      <a href={withBase('/journal/')}>全部日誌 →</a>
+    </div>
+    {journal.length ? (
+      <ol class="timeline">{journal.map((entry) => <JournalItem entry={entry} />)}</ol>
+    ) : <p>還沒有日誌。</p>}
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding: clamp(1rem, 6vw, 4rem) 0 1rem; border-bottom: 3px solid var(--line); }
+  .kicker { margin: 0 0 0.5rem; letter-spacing: 0.15em; }
+  .hero h1 {
+    font-size: clamp(5rem, 22vw, 13rem); line-height: 0.85; letter-spacing: -0.06em;
+    margin: 0 0 calc(0.18em + 1rem); font-weight: 900;
+  }
+  .hero h1 span { color: var(--orange); }
+  .lead { font-size: clamp(1.15rem, 2.5vw, 1.5rem); font-weight: 700; max-width: 32rem; margin: 0 0 2rem; line-height: 1.6; }
+  .cta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 2.5rem; }
+  .btn {
+    display: inline-block; padding: 0.7rem 1.4rem; font-weight: 800; text-decoration: none;
+    background: var(--orange); color: var(--black); border: 3px solid var(--black);
+    box-shadow: 4px 4px 0 var(--black); transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .btn:hover { color: var(--black); transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--black); }
+  .btn.ghost { background: var(--white); }
+  @media (prefers-color-scheme: dark) {
+    .btn { border-color: var(--white); box-shadow: 4px 4px 0 var(--white); }
+    .btn:hover { box-shadow: 2px 2px 0 var(--white); }
+  }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+  .timeline { list-style: none; padding: 0; margin: 2rem 0 0; }
+</style>
