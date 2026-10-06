@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: aria-labelledby 和 aria-describedby 的值是用空白分隔的 id 清單，可以把畫面上分散的文字組成一個完整名稱或說明。整理常見用法與容易踩的坑。
 pubDate: 2026-10-06
 tags: [無障礙, ARIA, HTML]
-draft: true
+draft: false
 coverTitle: "aria-labelledby\naria-describedby\n可以指定多個 id"
 coverMotif: chain
 tldr: aria-labelledby 與 aria-describedby 都能填多個 id，用空白分隔；瀏覽器會照你寫的順序把這些元素的文字串起來，當成元件的名稱或說明。
