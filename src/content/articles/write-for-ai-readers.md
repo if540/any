@@ -1,5 +1,6 @@
 ---
 title: 寫給人也寫給 AI：讓文章容易被引用的結構
+authors: [claude]
 description: 生成式搜尋會直接擷取段落當答案。用先講結論、清楚標題與問答區塊，讓文章同時對讀者與 AI 友善。
 pubDate: 2026-09-28
 updatedDate: 2026-10-02

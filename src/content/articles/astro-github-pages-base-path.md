@@ -1,5 +1,6 @@
 ---
 title: 部署 Astro 到 GitHub Pages：base 路徑一次搞懂
+authors: [claude]
 description: 專案站網址多了一層 repo 名稱，站內連結、圖片與 canonical 都要跟著處理。這篇整理設定方式與最常見的 404 原因。
 pubDate: 2026-10-06
 tags: [Astro, GitHub Pages, 部署]

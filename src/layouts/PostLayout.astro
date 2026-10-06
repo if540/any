@@ -3,7 +3,8 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import BaseLayout from './BaseLayout.astro';
-import { SITE, AUTHOR } from '../consts';
+import { SITE, AUTHORS, OWNER, authorNames, type AuthorKey } from '../consts';
+import { personId, personLd, authorHref } from '../utils/authors';
 import { absoluteUrl, withBase } from '../utils/url';
 import { formatDate } from '../utils/content';
 
@@ -13,6 +14,7 @@ export interface Props {
   description: string;
   published: Date;
   updated?: Date;
+  authors: readonly AuthorKey[];
   tags?: string[];
   cover?: ImageMetadata;
   coverAlt?: string;
@@ -47,8 +49,8 @@ const jsonLd: Record<string, unknown>[] = [
     inLanguage: SITE.lang,
     image: absoluteUrl(image, Astro.site),
     keywords: p.tags?.join(', '),
-    author: { '@type': 'Person', '@id': `${home}#author`, name: AUTHOR.name },
-    publisher: { '@id': `${home}#author` },
+    author: p.authors.map((k) => ({ '@id': personId(k, home) })),
+    publisher: { '@id': personId(OWNER, home) },
     isPartOf: { '@id': `${home}#website` },
     ...(p.tldr ? { abstract: p.tldr } : {}),
   },
@@ -61,6 +63,8 @@ const jsonLd: Record<string, unknown>[] = [
       { '@type': 'ListItem', position: 3, name: p.title, item: url },
     ],
   },
+  // 站長的 Person 已由 BaseLayout 輸出，這裡補其他作者
+  ...p.authors.filter((k) => k !== OWNER).map((k) => personLd(k, home)),
 ];
 
 if (p.faq?.length) {
@@ -86,6 +90,7 @@ if (p.faq?.length) {
   tags={p.tags}
   canonical={p.canonical}
   noindex={p.noindex}
+  authorNames={authorNames(p.authors)}
   jsonLd={jsonLd}
 >
   <article class="post">
@@ -101,7 +106,9 @@ if (p.faq?.length) {
           <> · <time datetime={p.updated.toISOString()}>更新 {formatDate(p.updated)}</time></>
         )}
         {p.mood && <> · 心情 {p.mood}</>}
-        {' · '}作者 <a href={withBase('/about/')} rel="author">{AUTHOR.name}</a>
+        {' · '}作者 {p.authors.map((k, i) => (
+          <>{i > 0 && '、'}<a href={authorHref(k)} rel="author">{AUTHORS[k].name}</a></>
+        ))}
       </p>
       {p.tags && p.tags.length > 0 && (
         <p class="tags">{p.tags.map((t) => <span class="tag">{t}</span>)}</p>
@@ -145,6 +152,7 @@ if (p.faq?.length) {
   .post-head { max-width: var(--measure); margin-bottom: 2rem; }
   .post-head h1 { margin-bottom: 0.75rem; }
   .post-head .meta { margin: 0 0 0.5rem; }
+  .post-head .meta a[rel='author'] { white-space: nowrap; }
   .tags { margin: 0; }
   .cover { width: 100%; margin-bottom: 2.5rem; border: 3px solid var(--line); }
   .tldr {

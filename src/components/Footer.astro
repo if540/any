@@ -1,11 +1,11 @@
 ---
-import { SITE, AUTHOR } from '../consts';
+import { SITE, AUTHORS, OWNER } from '../consts';
 import { withBase } from '../utils/url';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container inner">
-    <p>© {year} {AUTHOR.name} · <span class="brand">{SITE.title}<span aria-hidden="true">.</span></span></p>
+    <p>© {year} {AUTHORS[OWNER].name} · <span class="brand">{SITE.title}<span aria-hidden="true">.</span></span></p>
     <ul>
       <li><a href={withBase('/rss.xml')}>RSS</a></li>
       <li><a href={withBase('/sitemap-index.xml')}>Sitemap</a></li>

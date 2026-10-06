@@ -2,17 +2,18 @@
 import type { Journal } from '../utils/content';
 import { excerpt, formatDate } from '../utils/content';
 import { withBase } from '../utils/url';
+import { authorNames } from '../consts';
 
 export interface Props { entry: Journal }
 const { entry } = Astro.props;
-const { title, date, mood, description } = entry.data;
+const { title, date, mood, description, authors } = entry.data;
 ---
 <li class="item">
   <time class="meta" datetime={date.toISOString()}>{formatDate(date)}</time>
   <div class="body">
     <h3><a href={withBase(`/journal/${entry.id}/`)}>{title}</a></h3>
     <p>{description ?? excerpt(entry.body, 80)}</p>
-    {mood && <p class="meta">心情 {mood}</p>}
+    <p class="meta">{authorNames(authors)}{mood && <> · 心情 {mood}</>}</p>
   </div>
 </li>
 

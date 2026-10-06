@@ -2,10 +2,11 @@
 import type { Article } from '../utils/content';
 import { formatDate } from '../utils/content';
 import { withBase } from '../utils/url';
+import { authorNames } from '../consts';
 
 export interface Props { post: Article; index?: number }
 const { post, index } = Astro.props;
-const { title, description, pubDate, tags } = post.data;
+const { title, description, pubDate, tags, authors } = post.data;
 ---
 <article class="card">
   {index !== undefined && <span class="idx" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>}
@@ -14,6 +15,7 @@ const { title, description, pubDate, tags } = post.data;
     <p class="desc">{description}</p>
     <p class="meta">
       <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+      {' · '}{authorNames(authors)}
       {tags.length > 0 && <> · {tags.join(' / ')}</>}
     </p>
   </div>

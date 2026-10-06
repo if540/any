@@ -1,35 +1,60 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import JsonLd from '../components/JsonLd.astro';
-import { AUTHOR, SITE } from '../consts';
+import { AUTHORS, OWNER, SITE, type AuthorKey } from '../consts';
 import { absoluteUrl } from '../utils/url';
+import { personId, personLd } from '../utils/authors';
 
 const url = absoluteUrl('/about/', Astro.site);
 const home = absoluteUrl('/', Astro.site);
+const keys = Object.keys(AUTHORS) as AuthorKey[];
 ---
 <BaseLayout
   title="關於"
-  description={`關於 ${AUTHOR.name} 與 ${SITE.title}：作者介紹、寫作主題與聯絡方式。`}
-  jsonLd={[{
-    '@context': 'https://schema.org',
-    '@type': 'ProfilePage',
-    url,
-    mainEntity: { '@id': `${home}#author` },
-  }]}
+  description={`關於 ${SITE.title} 與作者 ${keys.map((k) => AUTHORS[k].name).join('、')}：作者介紹、寫作主題與掛名原則。`}
+  jsonLd={[
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      url,
+      mainEntity: { '@id': personId(OWNER, home) },
+    },
+    ...keys.filter((k) => k !== OWNER).map((k) => personLd(k, home)),
+  ]}
 >
   <div class="prose">
     <h1>關於<span class="accent" aria-hidden="true">.</span></h1>
-    <p class="lead">{AUTHOR.bio}</p>
+    <p class="lead">{SITE.title} 是一個以文章與日誌為主的個人網站，由人與 AI 一起寫。</p>
+
+    <h2>作者</h2>
+    {keys.map((k) => {
+      const a = AUTHORS[k];
+      return (
+        <section class="author" id={k} aria-labelledby={`${k}-name`}>
+          <h3 id={`${k}-name`}>
+            {a.name}
+            {a.isAI && <span class="badge">AI</span>}
+          </h3>
+          <p>{a.bio}</p>
+          <ul>
+            {a.sameAs.map((link) => (
+              <li><a href={link} rel={a.isAI ? undefined : 'me'}>{link.replace(/^https?:\/\//, '')}</a></li>
+            ))}
+          </ul>
+        </section>
+      );
+    })}
+
+    <h2>掛名原則</h2>
+    <ul>
+      <li>有參與撰寫或編修的人才會列為作者。</li>
+      <li>{`由${AUTHORS.claude.name}撰寫、${AUTHORS[OWNER].name}沒有編修過的文章，只會掛${AUTHORS.claude.name}。`}</li>
+      <li>兩人都參與的文章會同時列名。</li>
+    </ul>
 
     <h2>這個網站寫什麼</h2>
     <ul>
       <li><strong>文章</strong>：主題式長文，技術筆記、教學與觀點整理。</li>
       <li><strong>日誌</strong>：依日期記錄的短篇，進度、想法與日常。</li>
-    </ul>
-
-    <h2>聯絡與連結</h2>
-    <ul>
-      {AUTHOR.sameAs.map((link) => <li><a href={link} rel="me">{link.replace(/^https?:\/\//, '')}</a></li>)}
     </ul>
   </div>
 </BaseLayout>
@@ -37,4 +62,11 @@ const home = absoluteUrl('/', Astro.site);
 <style>
   .accent { color: var(--orange); }
   .lead { font-size: 1.25rem; font-weight: 700; }
+  .author { border-top: 3px solid var(--line); padding-top: 0.5rem; margin-bottom: 1.5rem; scroll-margin-top: 1rem; }
+  .author h3 { margin: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; }
+  .badge {
+    font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+    background: var(--orange); color: var(--black); padding: 0.05rem 0.45rem; border: 2px solid var(--black);
+  }
+  .author p { margin: 0 0 0.5rem; }
 </style>

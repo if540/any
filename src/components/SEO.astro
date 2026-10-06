@@ -1,5 +1,5 @@
 ---
-import { SITE, AUTHOR } from '../consts';
+import { SITE, AUTHORS, OWNER } from '../consts';
 import { absoluteUrl } from '../utils/url';
 
 export interface Props {
@@ -13,6 +13,7 @@ export interface Props {
   tags?: string[];
   canonical?: string;
   noindex?: boolean;
+  authorNames?: string;   // 「克爾溫、克勞德」
 }
 
 const {
@@ -26,6 +27,7 @@ const {
   tags = [],
   canonical,
   noindex = false,
+  authorNames = AUTHORS[OWNER].name,
 } = Astro.props;
 
 const fullTitle = title ? `${title}｜${SITE.title}` : `${SITE.title}｜${SITE.tagline}`;
@@ -34,7 +36,7 @@ const imageUrl = absoluteUrl(image, Astro.site);
 ---
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
-<meta name="author" content={AUTHOR.name} />
+<meta name="author" content={authorNames} />
 <link rel="canonical" href={canonicalUrl} />
 {noindex && <meta name="robots" content="noindex, follow" />}
 

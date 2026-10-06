@@ -1,6 +1,6 @@
 // llms.txt：給 AI 讀的網站索引（https://llmstxt.org 提案格式）
 import type { APIContext } from 'astro';
-import { SITE, AUTHOR } from '../consts';
+import { SITE, AUTHORS, authorNames } from '../consts';
 import { getArticles, getJournal, excerpt } from '../utils/content';
 import { absoluteUrl } from '../utils/url';
 
@@ -13,16 +13,18 @@ export async function GET(context: APIContext) {
     '',
     `> ${SITE.description}`,
     '',
-    `作者：${AUTHOR.name}。${AUTHOR.bio}`,
+    '作者：',
+    ...Object.values(AUTHORS).map((a) => `- ${a.name}：${a.bio}`),
+    '',
     `全文版本：${url('/llms-full.txt')}`,
     '',
     '## 文章',
     '',
-    ...articles.map((p) => `- [${p.data.title}](${url(`/articles/${p.id}/`)}): ${p.data.tldr ?? p.data.description}`),
+    ...articles.map((p) => `- [${p.data.title}](${url(`/articles/${p.id}/`)}): ${p.data.tldr ?? p.data.description}（作者：${authorNames(p.data.authors)}）`),
     '',
     '## 日誌',
     '',
-    ...journal.map((j) => `- [${j.data.title}](${url(`/journal/${j.id}/`)}): ${j.data.description ?? excerpt(j.body, 80)}`),
+    ...journal.map((j) => `- [${j.data.title}](${url(`/journal/${j.id}/`)}): ${j.data.description ?? excerpt(j.body, 80)}（作者：${authorNames(j.data.authors)}）`),
     '',
     '## Optional',
     '',

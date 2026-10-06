@@ -1,6 +1,6 @@
 // llms-full.txt：全站文章與日誌的 Markdown 全文，方便 AI 一次讀完
 import type { APIContext } from 'astro';
-import { SITE } from '../consts';
+import { SITE, authorNames } from '../consts';
 import { getArticles, getJournal } from '../utils/content';
 import { absoluteUrl } from '../utils/url';
 
@@ -14,7 +14,7 @@ export async function GET(context: APIContext) {
     ...articles.map((p) =>
       [
         `## ${p.data.title}`,
-        `來源：${url(`/articles/${p.id}/`)}｜發布：${iso(p.data.pubDate)}${p.data.updatedDate ? `｜更新：${iso(p.data.updatedDate)}` : ''}`,
+        `來源：${url(`/articles/${p.id}/`)}｜作者：${authorNames(p.data.authors)}｜發布：${iso(p.data.pubDate)}${p.data.updatedDate ? `｜更新：${iso(p.data.updatedDate)}` : ''}`,
         p.data.tldr ? `重點：${p.data.tldr}` : '',
         p.body ?? '',
       ].filter(Boolean).join('\n\n'),
@@ -22,7 +22,7 @@ export async function GET(context: APIContext) {
     ...journal.map((j) =>
       [
         `## ${j.data.title}（日誌）`,
-        `來源：${url(`/journal/${j.id}/`)}｜日期：${iso(j.data.date)}`,
+        `來源：${url(`/journal/${j.id}/`)}｜作者：${authorNames(j.data.authors)}｜日期：${iso(j.data.date)}`,
         j.body ?? '',
       ].join('\n\n'),
     ),

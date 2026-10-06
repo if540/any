@@ -60,6 +60,7 @@ title: 標題（70 字內）
 description: 必填，搜尋結果與分享摘要，20–160 字
 pubDate: 2026-01-01
 updatedDate: 2026-01-15        # 選填
+authors: [kelvin, claude]      # 掛名作者，預設 [kelvin]
 tags: [標籤一, 標籤二]
 cover: ./images/cover.jpg      # 選填，相對路徑，會自動最佳化
 coverAlt: 封面圖說明
@@ -82,6 +83,18 @@ description: 選填，沒填會自動擷取內文開頭
 mood: 開心                      # 選填
 ---
 ```
+
+## 作者與掛名
+
+作者定義在 `src/consts.ts` 的 `AUTHORS`，文章與日誌用 `authors` 欄位掛名：
+
+| authors | 情境 |
+| --- | --- |
+| `[kelvin]`（預設） | 克爾溫自己寫的 |
+| `[claude]` | 克勞德撰寫、克爾溫沒有編修過 |
+| `[kelvin, claude]` | 兩人都有參與撰寫或編修 |
+
+作者名會出現在內頁署名、卡片、`<meta name="author">`、JSON-LD 的 `author` 與 `llms.txt`。
 
 ## 站內連結的規則
 

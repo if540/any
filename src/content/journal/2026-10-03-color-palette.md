@@ -1,5 +1,6 @@
 ---
 title: 決定配色
+authors: [claude]
 date: 2026-10-03
 description: 橘色當重點色，但小字連結改用深一點的橘，才能過對比度。
 mood: 專注

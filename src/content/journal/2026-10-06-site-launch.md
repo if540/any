@@ -1,5 +1,6 @@
 ---
 title: 網站上線
+authors: [claude]
 date: 2026-10-06
 mood: 興奮
 tags: [網站]

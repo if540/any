@@ -1,8 +1,12 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { AUTHOR_KEYS, DEFAULT_AUTHORS } from './consts';
 
 // 兩個集合共用的 SEO / GEO 欄位
+// 掛名作者：有參與撰寫或編修的人才列入（key 見 src/consts.ts）
+const authors = z.array(z.enum(AUTHOR_KEYS)).min(1).default(DEFAULT_AUTHORS);
+
 const faq = z
   .array(z.object({ question: z.string(), answer: z.string() }))
   .optional();
@@ -16,6 +20,7 @@ const articles = defineCollection({
       description: z.string().min(20).max(160),
       pubDate: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
+      authors,
       tags: z.array(z.string()).default([]),
       cover: image().optional(),
       coverAlt: z.string().optional(),
@@ -38,6 +43,7 @@ const journal = defineCollection({
       date: z.coerce.date(),
       updatedDate: z.coerce.date().optional(),
       mood: z.string().optional(),
+      authors,
       tags: z.array(z.string()).default([]),
       cover: image().optional(),
       coverAlt: z.string().optional(),

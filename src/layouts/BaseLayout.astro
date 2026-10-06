@@ -4,7 +4,8 @@ import SEO, { type Props as SEOProps } from '../components/SEO.astro';
 import JsonLd from '../components/JsonLd.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE, AUTHOR } from '../consts';
+import { SITE, OWNER } from '../consts';
+import { personLd, personId } from '../utils/authors';
 import { absoluteUrl, withBase } from '../utils/url';
 
 export interface Props extends SEOProps {
@@ -14,7 +15,7 @@ export interface Props extends SEOProps {
 const { jsonLd = [], ...seo } = Astro.props;
 const home = absoluteUrl('/', Astro.site);
 
-// 全站共用：WebSite + Person（作者可信度，GEO/AEO）
+// 全站共用：WebSite + 站長 Person（作者可信度，GEO/AEO）
 const siteGraph = [
   {
     '@context': 'https://schema.org',
@@ -24,17 +25,10 @@ const siteGraph = [
     name: SITE.title,
     description: SITE.description,
     inLanguage: SITE.lang,
-    author: { '@id': `${home}#author` },
+    author: { '@id': personId(OWNER, home) },
+    publisher: { '@id': personId(OWNER, home) },
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    '@id': `${home}#author`,
-    name: AUTHOR.name,
-    description: AUTHOR.bio,
-    url: absoluteUrl('/about/', Astro.site),
-    sameAs: AUTHOR.sameAs,
-  },
+  personLd(OWNER, home),
 ];
 ---
 <!doctype html>
