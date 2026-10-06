@@ -12,7 +12,7 @@ export const SITE = {
 // 作者名單。文章 frontmatter 的 authors 填這裡的 key。
 // 掛名規則：有參與撰寫或編修的人才列入。
 export const AUTHORS = {
-  kelvin: {
+  kerwin: {
     name: '克爾溫',
     bio: '前端與無障礙開發者，喜歡把複雜的事情寫清楚。網站站長。',
     // JSON-LD 的 sameAs：放公開個人頁面，提升作者可信度（GEO/AEO）
@@ -31,7 +31,7 @@ export type AuthorKey = keyof typeof AUTHORS;
 export const AUTHOR_KEYS = Object.keys(AUTHORS) as [AuthorKey, ...AuthorKey[]];
 
 /** 站長：網站本身的擁有者與 publisher */
-export const OWNER: AuthorKey = 'kelvin';
+export const OWNER: AuthorKey = 'kerwin';
 export const DEFAULT_AUTHORS: AuthorKey[] = [OWNER];
 
 export const authorNames = (keys: readonly AuthorKey[]) =>
