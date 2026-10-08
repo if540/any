@@ -1,20 +1,20 @@
 ---
 title: role、aria-live 與 aria-atomic：status、alert、log 三大組合
-authors: [claude]
-description: live region 由 role、aria-live、aria-atomic 三個屬性組成。整理 status、alert、log 三種最常用的組合，以及搜尋結果換頁時最容易犯的誤用。
+authors: [kerwin, claude]
+description: live region 由 role、aria-live、aria-atomic 三個屬性組成。整理 status、alert、log 三種最常用的組合、適用場景，以及換頁與不換頁並存時的做法。
 pubDate: 2026-10-08
 tags: [無障礙, ARIA, WCAG]
 draft: true
 coverTitle: "role × aria-live\n× aria-atomic\n三大組合"
 coverMotif: target
-tldr: 一般狀態用 role="status"（客氣、整段讀），緊急錯誤用 role="alert"（插話、整段讀），持續增加的紀錄用 role="log"（客氣、只讀新的）。搜尋結果清單本身不是狀態訊息，只有「共 N 筆」這句才是。
+tldr: 一般狀態用 role="status"（客氣、整段讀），緊急錯誤用 role="alert"（插話、整段讀），持續增加的紀錄用 role="log"（客氣、只讀新的）。live region 只包住要通知的那一句話。
 faq:
   - question: role="status" 還需要再加 aria-live="polite" 嗎？
     answer: 規格上不用，role="status" 本身就隱含 aria-live="polite" 和 aria-atomic="true"。有些團隊為了相容舊版輔助科技會兩個都寫，效果一樣，不會衝突。
   - question: 為什麼我更新了文字，螢幕閱讀器卻沒有念？
     answer: 最常見的原因是 live region 和內容同時被插入頁面。多數螢幕閱讀器只監聽「已經存在」的 live region，請在頁面載入時先放好空的容器，之後只更新裡面的文字。
-  - question: 換頁的搜尋結果要不要加 aria-live？
-    answer: 不要把整份結果清單設成 live region。整頁重新載入時，用頁面標題和標題標籤說明目前頁數；不重新載入時，把焦點移到結果標題，或只用一個 status 區塊念出「第 2 頁，共 120 筆」。
+  - question: 搜尋結果要不要整份設成 live region？
+    answer: 不要。結果清單本身不是狀態訊息，只有「共 N 筆」這句才是。整頁重新載入時用頁面標題和標題說明目前頁數；不重新載入時，只用一個 status 區塊念出筆數，或把焦點移到結果標題。
 ---
 
 ## 什麼是 live region
@@ -96,6 +96,87 @@ live region 的行為由三個屬性決定：
 
 如果把聊天室錯用成 `role="status"`，每來一則新訊息，螢幕閱讀器就會把整個對話從頭念一次。
 
+## 適用場景
+
+| 場景 | 建議組合 | 念出的內容範例 |
+| --- | --- | --- |
+| 加入購物車、收藏 | `status` | 「已加入購物車，目前共 3 件」 |
+| 自動儲存草稿 | `status` | 「草稿已於 14:32 儲存」 |
+| 篩選、排序後結果更新 | `status` | 「共 36 筆結果」 |
+| 「載入更多」追加資料 | `status` | 「已載入第 21 到 30 筆，共 120 筆」 |
+| 上傳、匯出進度 | `status` | 「上傳完成 50%」（只在關鍵節點更新，不要每 1% 念一次） |
+| 表單送出後的錯誤摘要 | `alert` | 「有 2 個欄位需要修正」 |
+| 登入即將逾時 | `alert` | 「登入將在 60 秒後逾時」 |
+| 付款、送出失敗 | `alert` | 「付款失敗，請重新確認卡片資料」 |
+| 客服對話、聊天室 | `log` | 只念新進來的那一則 |
+| 系統通知、操作紀錄 | `log` | 只念新增的那一筆紀錄 |
+
+> 錯誤摘要如果會把焦點直接移過去，就不需要 `alert`，螢幕閱讀器會自己念出焦點所在的內容。兩個一起用反而會念兩次。
+
+### 場景詳解：搜尋結果的換頁與不換頁
+
+搜尋結果頁很常把兩種行為混在一起：
+
+- **換頁**：送出關鍵字、點頁碼，整個頁面重新載入
+- **不換頁**：勾選篩選條件、切換排序，只用 JavaScript 更新結果
+
+兩種情況要讓使用者知道的事一樣（共幾筆、第幾頁），但通知的方式不同：
+
+| 操作 | 頁面行為 | 怎麼讓使用者知道 | 焦點 |
+| --- | --- | --- | --- |
+| 送出搜尋、點頁碼 | 整頁重新載入 | `<title>` 與結果標題帶上筆數和頁數，目前頁碼加 `aria-current="page"` | 回到頁面頂端，由使用者自己導覽 |
+| 勾選篩選、切換排序 | 不換頁，就地更新 | `role="status"` 念出「共 36 筆結果」 | **留在篩選控制項**，方便繼續調整條件 |
+| 載入更多 | 不換頁，追加在後面 | `role="status"` 念出「已載入第 21 到 30 筆」 | 留在按鈕上，或移到新載入的第一筆 |
+
+先分清楚一件事：**搜尋結果清單本身不是狀態訊息**，簡短的「共 36 筆結果」才是。W3C 在 4.1.3 的說明裡就是拿搜尋當例子；而整頁重新載入屬於換頁，也不在 4.1.3 的範圍內。
+
+兩種行為可以共用同一個結構。伺服器輸出頁面時，就把筆數寫進標題和 status 容器；JavaScript 更新時，改的也是同一組元素：
+
+```html
+<title>搜尋：無障礙（第 2 頁，共 12 頁）｜網站名稱</title>
+
+<!-- 篩選：不換頁 -->
+<fieldset>
+  <legend>篩選</legend>
+  <label><input type="checkbox" name="type" value="article"> 文章</label>
+  <label><input type="checkbox" name="type" value="video"> 影片</label>
+</fieldset>
+
+<!-- 頁面載入時就存在。整頁載入時不會被念出，只有之後的變化才會 -->
+<p id="search-status" role="status">共 120 筆結果，第 2 頁</p>
+
+<h2 id="results-title">搜尋結果</h2>
+<ol id="results">…</ol>
+
+<!-- 分頁：換頁，用一般連結 -->
+<nav aria-label="分頁">
+  <a href="?q=無障礙&page=1">1</a>
+  <a href="?q=無障礙&page=2" aria-current="page">2</a>
+  <a href="?q=無障礙&page=3">3</a>
+</nav>
+```
+
+```js
+// 篩選改變時：不換頁，就地更新
+filters.addEventListener('change', async () => {
+  const { total, html } = await fetchResults(currentQuery());
+  results.innerHTML = html;                      // 清單本身不是 live region
+  status.textContent = `共 ${total} 筆結果`;      // 只念這一句
+  document.title = `搜尋：無障礙（共 ${total} 筆）｜網站名稱`;
+  // 焦點留在剛剛勾選的核取框，使用者可以繼續調整
+});
+```
+
+這個組合的好處：
+
+- **換頁時**不依賴 live region，靠 `<title>` 和標題就能知道在第幾頁，沒有 JavaScript 也正常運作
+- **不換頁時**只念一句話，不會把整份清單念出來，焦點也不會被搶走
+- 筆數和頁數的文字只維護一份，換頁或不換頁都更新同樣的元素
+
+如果分頁也改成不換頁（用 JavaScript 載入下一頁），使用者按「下一頁」通常就是想看結果，這時更適合**把焦點移到結果標題**（`tabindex="-1"` 再呼叫 `focus()`），讓他從第一筆往下讀，status 只負責補充「第 3 頁，共 120 筆」。
+
+![比較圖：錯誤做法把整份結果清單設成 live region，更新後 NVDA 把 10 筆結果和分頁連結全部念完；正確做法只有清單外的一句狀態訊息，NVDA 念出「第 2 頁，共 120 筆」，焦點移到結果標題，使用者自己決定要不要往下讀。](../../assets/articles/aria-live-status-alert-log/pagination-before-after.svg)
+
 ## 常見陷阱
 
 | 陷阱 | 說明 |
@@ -103,67 +184,9 @@ live region 的行為由三個屬性決定：
 | 容器和內容一起插入 | 多數螢幕閱讀器只監聽已經存在的 live region。先放好空的容器，之後只改文字 |
 | 用 `display: none` 隱藏容器 | 隱藏的區塊不會被念。只想給螢幕閱讀器聽，就用視覺隱藏（visually-hidden）的 CSS |
 | 同樣的文字再設一次 | 內容沒有改變就不會觸發。連按兩次「加入購物車」時，可以先清空再設定，或讓文字帶上數量 |
-| 把大區塊整個設成 live | 整篇文章、整份清單都會被念出來。只包住那一句訊息 |
+| 把一大塊內容設成 live | 例如把整份搜尋結果、整個表單區塊包進 live region。區塊裡任何地方一變動就會觸發朗讀，加上 `status` 預設整段念，使用者會聽到整份清單從頭念到尾，中途很難打斷。live region 只包住「要通知的那一句話」，例如「共 36 筆」，其他內容放在外面 |
 | 焦點已經移過去了還加 live | 4.1.3 只處理**沒有取得焦點**的變化。焦點移到新內容時，螢幕閱讀器本來就會念 |
 | 所有訊息都用 alert | 使用者會一直被打斷，真正緊急的訊息反而被淹沒 |
-
-## 番外篇：換頁搜尋結果的誤用
-
-<!-- TODO(kerwin)：補上 MODA 檢測碼 AR2410302E 的原文說明，以及實際報告中被指出的狀況 -->
-
-MODA 無障礙檢測中，對應 WCAG 4.1.3 狀態訊息的檢測碼 **AR2410302E**，常被套用到**換頁的搜尋結果**上。常見的修法是把整份結果清單包進 live region：
-
-```html
-<!-- ✗ 誤用：整份結果清單變成 live region -->
-<section aria-live="polite">
-  <h2>搜尋結果</h2>
-  <ol>
-    <li>…第 11 筆…</li>
-    <li>…第 12 筆…</li>
-    <!-- 一共 10 筆 -->
-  </ol>
-  <nav aria-label="分頁">…</nav>
-</section>
-```
-
-使用者按下「下一頁」後，螢幕閱讀器會一口氣把 10 筆結果、連同分頁連結全部念完，中間沒辦法跳過或停下來挑選。這比沒有通知還糟。
-
-### 搜尋結果清單不是狀態訊息
-
-W3C 對 4.1.3 的說明裡，剛好就拿搜尋舉例：**搜尋結果清單本身不算狀態訊息**，簡短的「找到 5 筆結果」才是。另外，取得焦點或重新載入頁面的變化，也不在 4.1.3 的範圍內。
-
-所以要先分清楚換頁是哪一種：
-
-**情況一：換頁會重新載入整個頁面**
-
-這是一個新頁面，不是狀態訊息，live region 也派不上用場（頁面載入時就存在的內容不會被當成「變化」念出來）。該做的是：
-
-- `<title>` 帶上頁數：「搜尋：無障礙（第 2 頁，共 12 頁）｜網站名稱」
-- 結果區的標題寫清楚：「搜尋結果：共 120 筆，第 2 頁」
-- 分頁導覽中目前的頁碼加上 `aria-current="page"`
-
-**情況二：不重新載入，用 JavaScript 換掉結果**
-
-這時才需要處理狀態通知，而且只通知「那一句話」：
-
-```html
-<!-- ✓ 只有這一句是狀態訊息，放在清單外面 -->
-<p id="search-status" role="status">找到 120 筆，第 1 頁</p>
-
-<h2 id="results-title" tabindex="-1">搜尋結果</h2>
-<ol>…</ol>
-<nav aria-label="分頁">…</nav>
-```
-
-```js
-// 換頁後：更新狀態文字，並把焦點移到結果標題
-status.textContent = '第 2 頁，共 120 筆';
-resultsTitle.focus();
-```
-
-使用者按「下一頁」，通常就是想看下一頁的結果，所以**把焦點移到結果標題**最直接，他可以從第一筆開始往下讀。如果介面的設計讓焦點留在分頁按鈕上比較好（例如需要連續翻頁），就只靠 `role="status"` 念出「第 2 頁，共 120 筆」。
-
-![比較圖：誤用時整份結果清單是 live region，按下一頁後 NVDA 把 10 筆結果和分頁連結全部念完；改寫後只有清單外的一句狀態訊息，NVDA 念出「第 2 頁，共 120 筆」，焦點移到結果標題，使用者自己決定要不要往下讀。](../../assets/articles/aria-live-status-alert-log/pagination-before-after.svg)
 
 ## 怎麼驗證
 
@@ -172,4 +195,4 @@ resultsTitle.focus();
 3. 一邊用方向鍵閱讀別的內容，一邊觸發變化，確認 `polite` 會排隊、`alert` 會插話
 4. 換頁、篩選這類操作，檢查焦點落在哪裡，以及有沒有多念不必要的內容
 
-> 一句話記住：status 告知、alert 示警、log 紀錄。只把「那一句訊息」設成 live，其他內容交給焦點和標題。
+> 一句話記住：status 告知、alert 示警、log 紀錄。只把「那一句話」設成 live，其他內容交給焦點和標題。
