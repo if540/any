@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: live region 由 role、aria-live、aria-atomic 三個屬性組成。整理 status、alert、log 三種最常用的組合、適用場景，以及換頁與不換頁並存時的做法。
 pubDate: 2026-10-08
 tags: [無障礙, ARIA, WCAG]
-draft: true
+draft: false
 coverTitle: "role × aria-live\n× aria-atomic\n三大組合"
 coverMotif: target
 tldr: 一般狀態用 role="status"（客氣、整段讀），緊急錯誤用 role="alert"（插話、整段讀），持續增加的紀錄用 role="log"（客氣、只讀新的）。live region 只包住要通知的那一句話。
