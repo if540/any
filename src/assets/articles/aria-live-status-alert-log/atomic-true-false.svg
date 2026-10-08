@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 470" width="720" height="470" role="img" aria-labelledby="t">
+  <title id="t">aria-atomic 為 true 與 false 時，螢幕閱讀器念出內容的差別</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}.o{fill:#ff6b1a}.ostroke{stroke:#ff6b1a}
+    .tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10z" class="fg"/>
+    </marker>
+  </defs>
+
+  <rect width="720" height="470" class="bg"/>
+
+  <!-- 畫面上的區塊 -->
+  <text x="20" y="34" font-size="22" font-weight="700" class="mut">畫面上的區塊：只有數字從 2 變成 3</text>
+  <rect x="28" y="58" width="680" height="96" class="o"/>
+  <rect x="20" y="50" width="680" height="96" class="card stroke" stroke-width="3"/>
+  <text x="44" y="112" font-size="34" font-weight="900" class="fg">購物車：</text>
+  <rect x="180" y="72" width="54" height="56" class="o"/>
+  <text x="207" y="112" font-size="34" font-weight="900" text-anchor="middle" class="onO">3</text>
+  <text x="246" y="112" font-size="34" font-weight="900" class="fg">件</text>
+  <text x="680" y="108" font-size="22" font-weight="700" text-anchor="end" class="mut">2 → 3</text>
+
+  <path d="M190 146v56" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M530 146v56" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 左：true -->
+  <rect x="20" y="214" width="330" height="44" class="tag"/>
+  <text x="36" y="244" font-size="21" class="mono tagtext">aria-atomic="true"</text>
+  <rect x="20" y="258" width="330" height="190" class="card stroke" stroke-width="3"/>
+  <text x="40" y="294" font-size="20" font-weight="700" class="mut">螢幕閱讀器念出：</text>
+  <text x="40" y="352" font-size="32" font-weight="900" class="fg">「購物車：3 件」</text>
+  <text x="40" y="420" font-size="20" font-weight="700" class="ink">✓ 整句重念，意思完整</text>
+
+  <!-- 右：false -->
+  <rect x="370" y="214" width="330" height="44" class="tag"/>
+  <text x="386" y="244" font-size="21" class="mono tagtext">aria-atomic="false"</text>
+  <rect x="370" y="258" width="330" height="190" class="card stroke" stroke-width="3"/>
+  <text x="390" y="294" font-size="20" font-weight="700" class="mut">螢幕閱讀器念出：</text>
+  <text x="390" y="352" font-size="32" font-weight="900" class="fg">「3」</text>
+  <text x="390" y="420" font-size="20" font-weight="700" class="ink">✗ 只念變動的部分</text>
+</svg>
