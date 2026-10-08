@@ -124,7 +124,7 @@ live region 的行為由三個屬性決定：
 
 | 操作 | 頁面行為 | 怎麼讓使用者知道 | 焦點 |
 | --- | --- | --- | --- |
-| 送出搜尋、點頁碼 | 整頁重新載入 | `<title>` 與結果標題帶上筆數和頁數，目前頁碼加 `aria-current="page"` | 回到頁面頂端，由使用者自己導覽 |
+| 送出搜尋、點頁碼 | 整頁重新載入 | `<title>` 與結果標題帶上筆數和頁數，目前頁碼加 `aria-current="page"`；不想改標題時，改用載入後的 `status` + `assertive` | 回到頁面頂端，由使用者自己導覽 |
 | 勾選篩選、切換排序 | 不換頁，就地更新 | `role="status"` 念出「共 36 筆結果」 | **留在篩選控制項**，方便繼續調整條件 |
 | 載入更多 | 不換頁，追加在後面 | `role="status"` 念出「已載入第 21 到 30 筆」 | 留在按鈕上，或移到新載入的第一筆 |
 
@@ -169,13 +169,45 @@ filters.addEventListener('change', async () => {
 
 這個組合的好處：
 
-- **換頁時**不依賴 live region，靠 `<title>` 和標題就能知道在第幾頁，沒有 JavaScript 也正常運作
+- **換頁時**不依賴 live region，靠 `<title>` 和標題就能知道在第幾頁，沒有 JavaScript 也正常運作（不想改標題時，見下方的特殊用法）
 - **不換頁時**只念一句話，不會把整份清單念出來，焦點也不會被搶走
 - 筆數和頁數的文字只維護一份，換頁或不換頁都更新同樣的元素
 
 如果分頁也改成不換頁（用 JavaScript 載入下一頁），使用者按「下一頁」通常就是想看結果，這時更適合**把焦點移到結果標題**（`tabindex="-1"` 再呼叫 `focus()`），讓他從第一筆往下讀，status 只負責補充「第 3 頁，共 120 筆」。
 
 ![比較圖：錯誤做法把整份結果清單設成 live region，更新後 NVDA 把 10 筆結果和分頁連結全部念完；正確做法只有清單外的一句狀態訊息，NVDA 念出「第 2 頁，共 120 筆」，焦點移到結果標題，使用者自己決定要不要往下讀。](../../assets/articles/aria-live-status-alert-log/pagination-before-after.svg)
+
+### 特殊用法：換頁重新載入，但不把頁數寫進標題
+
+有時候 `<title>` 和結果標題要維持固定（例如設計規範或 SEO 的考量），不能加上「第 2 頁」。這時可以用 `role="status"` 搭配 `aria-live="assertive"`，在頁面載入後主動念出頁數：
+
+```html
+<!-- 先放空的容器，伺服器把要念的文字放在 data 屬性 -->
+<p id="page-status" class="visually-hidden"
+   role="status" aria-live="assertive"
+   data-message="搜尋結果第 2 頁，共 120 筆"></p>
+```
+
+```js
+// 頁面載入完成後才填入文字，這樣才算「變化」而被念出
+window.addEventListener('load', () => {
+  const el = document.querySelector('#page-status');
+  setTimeout(() => { el.textContent = el.dataset.message; }, 500);
+});
+```
+
+為什麼這樣組合：
+
+- **`role="status"`**：語意上它仍然是狀態訊息，不是錯誤或警告，所以不用 `alert`
+- **`aria-live="assertive"`**：明確寫出的 `aria-live` 會蓋過 `status` 隱含的 `polite`。頁面重新載入時，螢幕閱讀器通常會開始自動朗讀頁面內容，用 `polite` 的話，訊息可能排在後面很久才念、甚至被略過；改成 `assertive` 才能在一開始就讓使用者知道「已經換到第 2 頁」
+- **載入後才填文字**：頁面載入時就已經存在的內容不會被當成變化。容器要先保持空白，等頁面載入完成再填入，稍微延遲一下也能避開螢幕閱讀器剛開始讀頁面的那一刻
+- **視覺隱藏**：畫面上已經有頁碼和 `aria-current="page"`，這句話只給螢幕閱讀器使用者
+
+需要注意：
+
+- 只在**從分頁連結過來**時才放 `data-message`，第一次進入搜尋頁就不需要念
+- `assertive` 會打斷正在念的內容，訊息要短，一句話就好
+- 不同螢幕閱讀器在頁面載入時的行為不一樣，上線前請用 NVDA、JAWS、VoiceOver 實際測過，必要時調整延遲時間
 
 ## 常見陷阱
 
