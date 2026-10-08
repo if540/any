@@ -177,52 +177,11 @@ filters.addEventListener('change', async () => {
 
 ![比較圖：錯誤做法把整份結果清單設成 live region，更新後 NVDA 把 10 筆結果和分頁連結全部念完；正確做法只有清單外的一句狀態訊息，NVDA 念出「第 2 頁，共 120 筆」，焦點移到結果標題，使用者自己決定要不要往下讀。](../../assets/articles/aria-live-status-alert-log/pagination-before-after.svg)
 
-### 特殊用法：換頁重新載入，資料再由 API 回填
+### 特殊用法：換頁重載後由 API 回填
 
-在 .NET 這類後端框架的專案裡，很常見這種混合做法：
+在 .NET 這類後端框架的專案裡，常見「點頁碼整頁重新載入，結果再由 API 回填」的混合做法。伺服器輸出頁面時還不知道總筆數，`<title>` 和標題寫不進「共 120 筆」，這時可以改用 `role="status"` 搭配 `aria-live="assertive"`，等 API 回來再念出頁數。
 
-1. 點頁碼後，**整頁重新載入**（例如 `/search?q=無障礙&page=2`）
-2. 伺服器只輸出頁面框架，結果清單是空的
-3. 頁面載入後，JavaScript 再呼叫 API 取得資料，**回填**到清單裡
-
-這時伺服器輸出頁面時還不知道總筆數，`<title>` 和結果標題自然也寫不進「共 120 筆」。等 API 回來才知道的資訊，就交給 `role="status"` 搭配 `aria-live="assertive"` 念出來：
-
-```html
-<!-- 伺服器輸出：狀態容器和清單都是空的 -->
-<p id="search-status" class="visually-hidden"
-   role="status" aria-live="assertive"></p>
-
-<h2>搜尋結果</h2>
-<ol id="results" aria-busy="true"></ol>
-```
-
-```js
-// 頁面載入後呼叫 API，回填清單，最後才更新狀態文字
-const page = new URLSearchParams(location.search).get('page') ?? '1';
-
-fetch(`/api/search?q=${encodeURIComponent(keyword)}&page=${page}`)
-  .then((res) => res.json())
-  .then(({ items, total }) => {
-    results.innerHTML = items.map(renderItem).join('');
-    results.removeAttribute('aria-busy');
-    status.textContent = `搜尋結果第 ${page} 頁，共 ${total} 筆`;
-  });
-```
-
-為什麼這樣組合：
-
-- **`role="status"`**：語意上它仍然是狀態訊息，不是錯誤或警告，所以不用 `alert`
-- **`aria-live="assertive"`**：明確寫出的 `aria-live` 會蓋過 `status` 隱含的 `polite`。頁面重新載入後，螢幕閱讀器通常已經開始朗讀頁面，API 回來的時間點剛好落在朗讀途中；用 `polite` 的話，訊息可能排在後面很久才念、甚至被略過
-- **天生就是「變化」**：容器在頁面載入時是空的，文字是 API 回來之後才填入，螢幕閱讀器會把它當成內容變化念出來，不需要額外用 `setTimeout` 延遲
-- **`aria-busy`**：資料回填期間標記清單正在更新，回填完成再移除
-- **視覺隱藏**：畫面上已經有頁碼和 `aria-current="page"`，這句話只給螢幕閱讀器使用者
-
-需要注意：
-
-- 先回填清單、最後才更新狀態文字，避免使用者聽到「第 2 頁」時清單還是空的
-- API 失敗時，用另一個 `role="alert"` 的容器念出「搜尋結果載入失敗，請重新整理」，不要讓使用者停在一片空白
-- `assertive` 會打斷正在念的內容，訊息要短，一句話就好
-- 不同螢幕閱讀器在頁面載入期間的行為不一樣，上線前請用 NVDA、JAWS、VoiceOver 實際測過
+完整的程式範例、為什麼這樣組合，以及這為什麼不算 `assertive` 的誤用，整理在番外篇：[換頁重載後由 API 回填資料，怎麼念出頁數](/any/articles/aria-live-api-backfill-pagination/)。
 
 ## 常見陷阱
 
