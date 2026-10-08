@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 點頁碼整頁重新載入，結果再由 API 回填時，標題寫不進筆數。用 role="status" 搭配 aria-live="assertive"，在資料回來後念出目前頁數。
 pubDate: 2026-10-08
 tags: [無障礙, ARIA, WCAG, .NET]
-draft: true
+draft: false
 coverTitle: "番外篇\n換頁重載\n× API 回填"
 coverMotif: stack
 tldr: 整頁重新載入、資料再由 API 回填時，用一個載入時是空的 role="status" 容器，明確加上 aria-live="assertive"，在 API 回來後填入「第 2 頁，共 120 筆」。這是使用者需要立即知道的方位資訊，不算 assertive 的誤用。
