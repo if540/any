@@ -174,3 +174,19 @@
 @media (prefers-color-scheme: dark) {
   .skills-page { --lit: #2b2b2b; }
 }
+
+/* ===== 等級篩選：淡化但保留位置 ===== */
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 2rem; margin: 0 0 1.25rem; }
+.controls .view-switch { margin: 0; }
+.level-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.lf-label { font-weight: 700; margin-right: 0.25rem; }
+.level-filter button {
+  display: inline-flex; align-items: center; gap: 0.4rem; font: inherit; font-size: 0.95rem; font-weight: 700;
+  border: 3px solid var(--line); padding: 0.35rem 0.8rem; background: var(--bg); color: var(--fg); cursor: pointer;
+}
+.level-filter button::before { content: '✓'; color: var(--fg); }
+.level-filter button[aria-pressed='false'] { border-style: dashed; color: var(--muted); }
+.level-filter button[aria-pressed='false']::before { content: '—'; color: var(--muted); }
+.level-filter button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.sk[inert] { opacity: 0.22; filter: grayscale(1); box-shadow: none; }
+@media (prefers-reduced-motion: no-preference) { .sk { transition: opacity 0.15s, box-shadow 0.12s; } }

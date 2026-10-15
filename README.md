@@ -117,6 +117,8 @@ mood: 開心                      # 選填
 - 星級：以文章數最多的準則為 5 星，`round(5 × log(1+n) / log(1+最多篇數))`，已解鎖至少 1 星
 - 三種顯示方式（四欄、分支樹、技能盤），預設四欄，讀者的選擇會記在瀏覽器裡
 - 每項準則都有個別頁 `/skills/4-1-3/`，沒有 JavaScript 時節點直接連過去
+- 等級篩選：關掉的等級會淡化並設為 `inert`（保留位置、不能操作、螢幕閱讀器略過），結果用 `role="status"` 念出
+- 個別頁附 WCAG 2.1 規範條文、Understanding、How to Meet 連結；WCAG 2.2 的更名、移除與新增準則另外補充。對照資料 `src/data/wcag-refs.json` 由 `scripts/build-wcag-refs.py` 從 w3c/wcag repo 產生
 - 規範資料在 `src/data/a11y-guide.json`，由規範 PDF 轉出：
 
 ```bash

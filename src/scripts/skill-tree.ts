@@ -9,6 +9,9 @@ interface SkillData {
 interface Payload { skills: Record<string, SkillData>; guidelines: Record<string, string>; base: string }
 
 const STORE_KEY = 'any:skill-view';
+const LEVEL_KEY = 'any:skill-levels';
+const LEVELS = ['A', 'AA', 'AAA'] as const;
+const LEVEL_NAME: Record<string, string> = { A: 'A 級', AA: 'AA 級', AAA: 'AAA 級' };
 const VIEWS = ['a', 'b', 'c'] as const;
 type View = (typeof VIEWS)[number];
 
@@ -19,6 +22,15 @@ const readView = (): View => {
   } catch { return 'a'; }
 };
 const saveView = (v: View) => { try { localStorage.setItem(STORE_KEY, v); } catch { /* 私密模式等情況，略過 */ } };
+
+const readLevels = (): Set<string> => {
+  try {
+    const v = JSON.parse(localStorage.getItem(LEVEL_KEY) ?? 'null');
+    if (Array.isArray(v)) return new Set(v.filter((x) => (LEVELS as readonly string[]).includes(x)));
+  } catch { /* 略過 */ }
+  return new Set(LEVELS);
+};
+const saveLevels = (s: Set<string>) => { try { localStorage.setItem(LEVEL_KEY, JSON.stringify([...s])); } catch { /* 略過 */ } };
 
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, props: Partial<HTMLElementTagNameMap[K]> = {}, ...kids: (Node | string)[]) => {
   const n = Object.assign(document.createElement(tag), props);
@@ -56,6 +68,35 @@ export function initSkillTree() {
     });
   }
   apply(current);
+
+  // ----- 等級篩選：關掉的等級淡化並設為 inert（看得到、但不能操作，也不會被念出） -----
+  const filter = document.querySelector<HTMLElement>('.level-filter');
+  const levelStatus = document.getElementById('level-status');
+  const toggles = [...document.querySelectorAll<HTMLButtonElement>('[data-level-toggle]')];
+  const nodes = [...document.querySelectorAll<HTMLElement>('.sk[data-level]')];
+  let shown = readLevels();
+  const applyLevels = (announce: boolean) => {
+    toggles.forEach((b) => b.setAttribute('aria-pressed', String(shown.has(b.dataset.levelToggle!))));
+    nodes.forEach((n) => { n.inert = !shown.has(n.dataset.level!); });
+    if (!announce || !levelStatus) return;
+    const on = LEVELS.filter((l) => shown.has(l));
+    const off = LEVELS.filter((l) => !shown.has(l));
+    // 每個版面都有一份 78 項，用其中一個版面計數
+    const count = document.querySelectorAll('[data-view="a"] .sk[data-level]:not([inert])').length;
+    levelStatus.textContent = on.length === 0
+      ? '已淡化全部等級的技能'
+      : `目前顯示 ${on.map((l) => LEVEL_NAME[l]).join('、')}技能，共 ${count} 項` + (off.length ? `；${off.map((l) => LEVEL_NAME[l]).join('、')}已淡化` : '');
+  };
+  if (filter) {
+    filter.hidden = false;
+    toggles.forEach((b) => b.addEventListener('click', () => {
+      const lv = b.dataset.levelToggle!;
+      if (shown.has(lv)) shown.delete(lv); else shown.add(lv);
+      saveLevels(shown);
+      applyLevels(true);
+    }));
+    applyLevels(false);
+  }
 
   // ----- B：原則分頁（WAI-ARIA tabs，自動啟用） -----
   const tabs = [...document.querySelectorAll<HTMLButtonElement>('.view-b [role="tab"]')];

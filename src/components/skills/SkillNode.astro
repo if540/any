@@ -12,6 +12,7 @@ const on = s.stars > 0;
   href={withBase(`/skills/${s.slug}/`)}
   class:list={['sk', `sk-${variant}`, { on }]}
   data-sc={s.id}
+  data-level={s.level}
 >
   <span class="sk-id">{s.id}</span>{' '}
   <span class="sk-name">{s.name}</span>

@@ -58,12 +58,23 @@ const skillsBase = withBase('/skills/');
       </ul>
     </section>
 
-    <fieldset class="view-switch" hidden>
-      <legend>顯示方式</legend>
-      <label><input type="radio" name="skill-view" value="a" checked /> 四欄</label>
-      <label><input type="radio" name="skill-view" value="b" /> 分支樹</label>
-      <label><input type="radio" name="skill-view" value="c" /> 技能盤</label>
-    </fieldset>
+    <div class="controls">
+      <fieldset class="view-switch" hidden>
+        <legend>顯示方式</legend>
+        <label><input type="radio" name="skill-view" value="a" checked /> 四欄</label>
+        <label><input type="radio" name="skill-view" value="b" /> 分支樹</label>
+        <label><input type="radio" name="skill-view" value="c" /> 技能盤</label>
+      </fieldset>
+      <div class="level-filter" role="group" aria-labelledby="level-filter-label" hidden>
+        <span id="level-filter-label" class="lf-label">等級</span>
+        {(['A', 'AA', 'AAA'] as const).map((lv) => (
+          <button type="button" aria-pressed="true" data-level-toggle={lv}>
+            <span class:list={['lv', `lv-${lv}`]} aria-hidden="true">{lv}</span>{LEVEL_LABEL[lv]}
+          </button>
+        ))}
+        <p class="visually-hidden" role="status" id="level-status"></p>
+      </div>
+    </div>
 
     <div class="skills-layout">
       <div class="views">
