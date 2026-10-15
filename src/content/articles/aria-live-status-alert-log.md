@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: live region 由 role、aria-live、aria-atomic 三個屬性組成。整理 status、alert、log 三種最常用的組合、適用場景，以及換頁與不換頁並存時的做法。
 pubDate: 2026-10-08
 tags: [無障礙, ARIA, WCAG]
-wcag: ['4.1.3']
+wcag: ['3.3.1', '4.1.3']
 draft: false
 coverTitle: "role × aria-live\n× aria-atomic\n三大組合"
 coverMotif: target
