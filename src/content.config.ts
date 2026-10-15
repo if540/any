@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { AUTHOR_KEYS, DEFAULT_AUTHORS, MOTIF_NAMES } from './consts';
+import guide from './data/a11y-guide.json';
 
 // 兩個集合共用的 SEO / GEO 欄位
 // 掛名作者：有參與撰寫或編修的人才列入（key 見 src/consts.ts）
@@ -14,6 +15,10 @@ const coverMotif = z.enum(MOTIF_NAMES).optional();
 // 有放封面圖就必須寫替代文字
 const requireCoverAlt = (d: { cover?: unknown; coverAlt?: string }) => !d.cover || !!d.coverAlt?.trim();
 const coverAltMsg = { message: '有 cover 時必須填寫 coverAlt 替代文字', path: ['coverAlt'] };
+
+// 對應的成功準則編號（例：['4.1.3']），用來點亮無障礙技能樹
+const SC_IDS = guide.criteria.map((c) => c.id) as [string, ...string[]];
+const wcag = z.array(z.enum(SC_IDS)).default([]);
 
 const faq = z
   .array(z.object({ question: z.string(), answer: z.string() }))
@@ -30,6 +35,7 @@ const articles = defineCollection({
       updatedDate: z.coerce.date().optional(),
       authors,
       tags: z.array(z.string()).default([]),
+      wcag,
       cover: image().optional(),
       coverAlt: z.string().optional(),
       ogImage: z.string().optional(), // public/ 下的路徑，蓋過 cover

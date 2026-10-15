@@ -1,0 +1,25 @@
+---
+// 技能節點：連到準則個別頁；有 JavaScript 時改成在詳情面板開啟
+import Stars from './Stars.astro';
+import { LEVEL_LABEL, type Skill } from '../../utils/skills';
+import { withBase } from '../../utils/url';
+
+export interface Props { skill: Skill; variant?: 'row' | 'tile' }
+const { skill: s, variant = 'row' } = Astro.props;
+const on = s.stars > 0;
+---
+<a
+  href={withBase(`/skills/${s.slug}/`)}
+  class:list={['sk', `sk-${variant}`, { on }]}
+  data-sc={s.id}
+>
+  <span class="sk-id">{s.id}</span>{' '}
+  <span class="sk-name">{s.name}</span>
+  <span class="sk-meta">
+    {on && <Stars value={s.stars} />}
+    <span class:list={['lv', `lv-${s.level}`]} aria-hidden="true">{s.level}</span>
+  </span>
+  <span class="visually-hidden">
+    {`，${s.level} ${LEVEL_LABEL[s.level]}技能，` + (on ? `已解鎖，${s.stars} 顆星，${s.articles.length} 篇文章` : '尚未解鎖')}
+  </span>
+</a>

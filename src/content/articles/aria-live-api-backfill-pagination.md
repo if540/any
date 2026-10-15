@@ -4,6 +4,7 @@ authors: [kerwin, claude]
 description: 點頁碼整頁重新載入，結果再由 API 回填時，標題寫不進筆數。用 role="status" 搭配 aria-live="assertive"，在資料回來後念出目前頁數。
 pubDate: 2026-10-08
 tags: [無障礙, ARIA, WCAG, .NET]
+wcag: ['4.1.3']
 draft: false
 coverTitle: "番外篇\n換頁重載\n× API 回填"
 coverMotif: stack

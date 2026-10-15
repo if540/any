@@ -1,0 +1,109 @@
+---
+// 成功準則個別頁：/skills/4-1-3/
+import '../../styles/skills.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Stars from '../../components/skills/Stars.astro';
+import { getSkillTree, LEVEL_LABEL, GUIDE_SOURCE, type Skill } from '../../utils/skills';
+import { withBase, absoluteUrl } from '../../utils/url';
+
+export async function getStaticPaths() {
+  const tree = await getSkillTree();
+  const guidelines = tree.principles.flatMap((p) => p.guidelines.map((g) => ({ ...g, principle: p })));
+  return tree.skills.map((skill, i) => {
+    const g = guidelines.find((x) => x.id === skill.guideline)!;
+    return {
+      params: { id: skill.slug },
+      props: {
+        skill,
+        guideline: { id: g.id, name: g.name, summary: g.summary },
+        principle: { id: g.principle.id, name: g.principle.name },
+        prev: tree.skills[i - 1] ?? null,
+        next: tree.skills[i + 1] ?? null,
+      },
+    };
+  });
+}
+
+interface Props {
+  skill: Skill;
+  guideline: { id: string; name: string; summary: string };
+  principle: { id: string; name: string };
+  prev: Skill | null;
+  next: Skill | null;
+}
+const { skill: s, guideline: g, principle: p, prev, next } = Astro.props;
+const on = s.stars > 0;
+const desc = s.text.replace(/\s+/g, '').slice(0, 110) + (s.text.length > 110 ? '…' : '');
+const home = absoluteUrl('/', Astro.site);
+---
+<BaseLayout
+  title={`${s.id} ${s.name}（${s.level}）｜無障礙技能樹`}
+  description={desc}
+  jsonLd={[{
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首頁', item: home },
+      { '@type': 'ListItem', position: 2, name: '無障礙技能樹', item: absoluteUrl('/skills/', Astro.site) },
+      { '@type': 'ListItem', position: 3, name: `${s.id} ${s.name}`, item: absoluteUrl(`/skills/${s.slug}/`, Astro.site) },
+    ],
+  }]}
+>
+  <article class="skills-page sc-page">
+    <nav class="crumbs meta" aria-label="麵包屑">
+      <a href={withBase('/skills/')}>無障礙技能樹</a> / 原則 {p.id} {p.name} / 指引 {g.id} {g.name}
+    </nav>
+
+    <header>
+      <p class="sc-kicker"><span class:list={['lv', `lv-${s.level}`]}>{s.level}</span> {LEVEL_LABEL[s.level]}技能</p>
+      <h1><span class="sc-num">{s.id}</span> {s.name}</h1>
+      <p class:list={['sc-status', { off: !on }]}>
+        {on ? (
+          <><Stars value={s.stars} size="md" /> <span>已解鎖 · {s.stars} 顆星 · {s.articles.length} 篇文章</span></>
+        ) : '尚未解鎖：還沒有文章談到這項準則'}
+      </p>
+    </header>
+
+    <section aria-labelledby="sc-text">
+      <h2 id="sc-text">規範原文</h2>
+      <blockquote class="sc-quote">
+        <p>{s.text}</p>
+        <footer>— {GUIDE_SOURCE}，成功準則 {s.id}</footer>
+      </blockquote>
+      <p class="sc-guide"><b>指引 {g.id} {g.name}：</b>{g.summary}</p>
+    </section>
+
+    <section aria-labelledby="sc-articles">
+      <h2 id="sc-articles">相關文章</h2>
+      {on ? (
+        <ul class="sc-articles">
+          {s.articles.map((a) => <li><a href={withBase(`/articles/${a.id}/`)}>{a.title}</a></li>)}
+        </ul>
+      ) : <p>目前還沒有文章，這項技能等待點亮。</p>}
+    </section>
+
+    <nav class="sc-pager" aria-label="上一項與下一項準則">
+      {prev ? <a href={withBase(`/skills/${prev.slug}/`)} rel="prev">← {prev.id} {prev.name}</a> : <span></span>}
+      {next ? <a href={withBase(`/skills/${next.slug}/`)} rel="next">{next.id} {next.name} →</a> : <span></span>}
+    </nav>
+    <p><a href={withBase('/skills/')}>← 回到技能樹</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .sc-page { max-width: var(--measure); }
+  .crumbs a { color: var(--muted); }
+  .sc-kicker { margin: 1rem 0 0.25rem; font-weight: 700; }
+  h1 { margin-bottom: 0.5rem; }
+  .sc-num { font-family: var(--font-mono); color: var(--link); }
+  .sc-status { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-weight: 700;
+    background: #111; color: #fafaf7; padding: 0.5rem 0.8rem; box-shadow: 4px 4px 0 var(--orange); width: fit-content; }
+  .sc-status :global(.st.full) { color: var(--orange); }
+  @media (prefers-color-scheme: dark) { .sc-status { background: #2b2b2b; } }
+  .sc-status.off { background: transparent; color: var(--muted); border: 2px dashed var(--muted); box-shadow: none; }
+  .sc-quote { margin: 0; padding: 1rem 1.25rem; border-left: 5px solid var(--orange); background: var(--surface); }
+  .sc-quote p { white-space: pre-line; margin: 0 0 0.75rem; }
+  .sc-quote footer { font-size: 0.85rem; color: var(--muted); }
+  .sc-guide { font-size: 0.9rem; color: var(--muted); }
+  .sc-pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 3px solid var(--line); padding-top: 1rem; margin-top: 3rem; font-weight: 700; }
+</style>

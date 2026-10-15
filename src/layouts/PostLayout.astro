@@ -7,6 +7,7 @@ import { SITE, AUTHORS, OWNER, authorNames, type AuthorKey } from '../consts';
 import { personId, personLd, authorHref } from '../utils/authors';
 import { absoluteUrl, withBase } from '../utils/url';
 import { formatDate } from '../utils/content';
+import guide from '../data/a11y-guide.json';
 
 export interface Props {
   kind: 'articles' | 'journal';
@@ -16,6 +17,7 @@ export interface Props {
   published: Date;
   updated?: Date;
   authors: readonly AuthorKey[];
+  wcag?: string[];
   tags?: string[];
   cover?: ImageMetadata;
   coverAlt?: string;
@@ -118,6 +120,15 @@ if (p.faq?.length) {
       {p.tags && p.tags.length > 0 && (
         <p class="tags">{p.tags.map((t) => <span class="tag">{t}</span>)}</p>
       )}
+      {p.wcag && p.wcag.length > 0 && (
+        <p class="wcag">
+          <span class="wcag-label">相關成功準則</span>
+          {p.wcag.map((id) => {
+            const c = guide.criteria.find((x) => x.id === id)!;
+            return <a class="wcag-chip" href={withBase(`/skills/${id.replaceAll('.', '-')}/`)}>{id} {c.name}<span class="wcag-lv">{c.level}</span></a>;
+          })}
+        </p>
+      )}
     </header>
 
     {p.cover && (
@@ -163,6 +174,12 @@ if (p.faq?.length) {
   .post-head .meta { margin: 0 0 0.5rem; }
   .post-head .meta a[rel='author'] { white-space: nowrap; }
   .tags { margin: 0; }
+  .wcag { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.6rem 0 0; font-size: 0.85rem; }
+  .wcag-label { font-weight: 700; margin-right: 0.2rem; }
+  .wcag-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.1rem 0.5rem; background: #111; color: #fafaf7; text-decoration: none; box-shadow: 2px 2px 0 var(--orange); }
+  .wcag-chip:hover { color: #fafaf7; text-decoration: underline; }
+  @media (prefers-color-scheme: dark) { .wcag-chip { background: #2b2b2b; } }
+  .wcag-lv { font: 700 0.7rem var(--font-mono); color: var(--orange); }
   .cover { width: 100%; margin-bottom: 2.5rem; border: 3px solid var(--line); }
   .tldr {
     max-width: var(--measure); margin: 0 0 2.5rem; padding: 1rem 1.25rem;

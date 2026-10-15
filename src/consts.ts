@@ -45,5 +45,6 @@ export const NAV = [
   { href: '/', label: '首頁' },
   { href: '/articles/', label: '文章' },
   { href: '/journal/', label: '日誌' },
+  { href: '/skills/', label: '技能樹' },
   { href: '/about/', label: '關於' },
 ];

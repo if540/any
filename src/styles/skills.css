@@ -1,0 +1,176 @@
+/* ===== 無障礙技能樹 ===== */
+.skills-page [hidden] { display: none !important; }
+.skills-page { --dash: var(--muted); --lit: #111111; --lit-fg: #fafaf7; }
+
+/* 等級徽章 */
+.lv {
+  display: inline-block; font: 700 0.7rem/1 var(--font-mono); padding: 0.2rem 0.3rem;
+  border: 2px solid var(--fg); color: var(--fg); background: var(--bg); white-space: nowrap;
+}
+.lv-AA { border-color: var(--orange); color: var(--link); }
+.lv-AAA { background: var(--orange); border-color: var(--fg); color: #111; }
+
+/* 星星 */
+.stars { display: inline-flex; gap: 1px; line-height: 1; letter-spacing: 0; }
+.stars.sm { font-size: 0.75rem; }
+.stars.md { font-size: 1.1rem; }
+.st.full { color: var(--link); }
+.st.half { background: linear-gradient(90deg, var(--link) 50%, var(--dash) 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.st.empty { color: var(--dash); opacity: 0.45; }
+
+/* 技能節點 */
+.sk {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; width: 100%;
+  padding: 0.45rem 0.55rem; font-size: 0.9rem; line-height: 1.35;
+  border: 2px dashed var(--dash); background: var(--bg); color: var(--muted);
+  text-decoration: none;
+}
+.sk:hover { border-style: solid; color: var(--fg); }
+.sk .sk-id { font: 700 0.75rem var(--font-mono); min-width: 3.1em; }
+.sk .sk-name { flex: 1 1 6em; min-width: 0; }
+.sk .sk-meta { display: inline-flex; align-items: center; gap: 0.35rem; margin-left: auto; }
+.sk.on { border: 2px solid var(--lit); background: var(--lit); color: var(--lit-fg); box-shadow: 3px 3px 0 var(--orange); }
+.sk.on:hover { color: var(--lit-fg); box-shadow: 5px 5px 0 var(--orange); }
+.sk.on .st.full { color: var(--orange); }
+.sk.on .st.empty { color: #8a8a8a; }
+.sk.on .lv-A { background: var(--lit); color: var(--lit-fg); border-color: var(--lit-fg); }
+.sk.on .lv-AA { background: var(--lit); color: var(--orange); }
+.sk.is-selected { outline: 3px solid var(--orange); outline-offset: 3px; }
+@media (prefers-color-scheme: dark) { .sk.on { border-color: var(--lit-fg); } }
+
+/* 技能盤方塊 */
+.tiles > li { width: 7.5rem; }
+.sk-tile { flex-direction: column; align-items: stretch; gap: 0.2rem; height: 100%; min-height: 6rem; padding: 0.45rem; }
+.sk-tile .sk-name { font-size: 0.78rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sk-tile .sk-meta { justify-content: space-between; margin-top: auto; }
+
+/* ===== 總覽 ===== */
+.hud {
+  display: grid; grid-template-columns: auto 1fr; gap: 1rem 2rem; align-items: center;
+  border: 3px solid var(--line); background: var(--surface); box-shadow: 6px 6px 0 var(--orange);
+  padding: 1.1rem 1.4rem; margin: 1.5rem 0 2rem;
+}
+.hud-score { font-size: 3rem; font-weight: 900; line-height: 1; }
+.hud-score small { display: block; font-size: 0.95rem; font-weight: 700; color: var(--muted); margin-top: 0.4rem; }
+.hud-bars { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; }
+.hud-bars b { display: block; font-size: 0.9rem; }
+.hud-bars .num { font: 700 0.8rem var(--font-mono); color: var(--muted); display: flex; justify-content: space-between; gap: 0.5rem; }
+.track { display: block; height: 0.75rem; border: 2px solid var(--line); background: var(--bg); margin-top: 0.25rem; }
+.track > span { display: block; height: 100%; background: var(--orange); }
+.legend { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; font-size: 0.85rem; border-top: 2px solid var(--line); padding-top: 0.8rem; margin: 0; list-style: none; padding-left: 0; }
+.legend li { display: inline-flex; align-items: center; gap: 0.4rem; }
+.legend .chip { display: inline-block; width: 1.4rem; height: 1rem; border: 2px dashed var(--dash); }
+.legend .chip.on { border: 2px solid var(--lit); background: var(--lit); box-shadow: 2px 2px 0 var(--orange); }
+
+/* ===== 顯示方式切換 ===== */
+.view-switch { border: 0; padding: 0; margin: 0 0 1.25rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.view-switch legend { float: left; font-weight: 700; margin-right: 0.5rem; padding: 0; }
+.view-switch label {
+  display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer;
+  border: 3px solid var(--line); padding: 0.35rem 0.8rem; font-weight: 700; font-size: 0.95rem; background: var(--bg);
+}
+.view-switch input { accent-color: var(--orange); width: 1rem; height: 1rem; margin: 0; }
+.view-switch label:has(input:checked) { background: var(--orange); color: #111; }
+.view-switch label:has(input:focus-visible) { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+/* ===== 主區塊 + 詳情 ===== */
+.skills-layout { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 1.5rem; align-items: start; }
+.detail {
+  position: sticky; top: 1rem; border: 3px solid var(--line); background: var(--surface);
+  box-shadow: 6px 6px 0 var(--line); padding: 1.1rem; max-height: calc(100vh - 2rem); overflow: auto;
+}
+.detail h2 { font-size: 1.35rem; margin: 0.25rem 0 0.5rem; }
+.detail h2:focus { outline: none; }
+.detail h3 { font-size: 0.95rem; margin: 1rem 0 0.4rem; padding-top: 0.6rem; border-top: 2px solid var(--line); }
+.detail .d-id { font: 700 0.85rem var(--font-mono); color: var(--link); }
+.detail .d-text { white-space: pre-line; font-size: 0.9rem; line-height: 1.7; margin: 0; }
+.detail ul { margin: 0; padding-left: 1.2rem; font-size: 0.9rem; }
+.detail .d-status { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.1rem 0.5rem; background: var(--lit); color: var(--lit-fg); }
+.detail .d-status.off { background: transparent; color: var(--muted); border: 2px dashed var(--dash); }
+.detail .d-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.detail .d-actions a, .detail .d-actions button {
+  font: inherit; font-size: 0.85rem; font-weight: 700; padding: 0.35rem 0.7rem; border: 2px solid var(--line);
+  background: var(--bg); color: var(--fg); cursor: pointer; text-decoration: none;
+}
+.detail .d-actions a { background: var(--orange); color: #111; }
+.detail .d-hint { color: var(--muted); font-size: 0.9rem; margin: 0; }
+
+/* ===== A：四欄 ===== */
+.view-a { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.pcol > h2 { margin: 0 0 0.75rem; padding: 0.5rem 0.7rem; background: var(--lit); color: var(--lit-fg); font-size: 1.05rem; display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.pcol > h2 .num { font: 700 0.8rem var(--font-mono); color: var(--orange); }
+.gsec { margin-bottom: 1.1rem; }
+.gsec h3 { font-size: 0.9rem; margin: 0 0 0.4rem; display: flex; justify-content: space-between; gap: 0.5rem; border-bottom: 2px solid var(--line); }
+.gsec h3 .num { font: 700 0.75rem var(--font-mono); color: var(--muted); white-space: nowrap; }
+.sk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+
+/* ===== B：分支樹 ===== */
+.tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.5rem; }
+.tabs [role='tab'] { font: inherit; font-weight: 700; padding: 0.45rem 1rem; border: 3px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+.tabs [role='tab'][aria-selected='true'] { background: var(--orange); color: #111; }
+.tabs [role='tab']:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.tree-root { display: flex; justify-content: center; }
+.tree-root > div { border: 3px solid var(--lit); background: var(--lit); color: var(--lit-fg); padding: 0.6rem 1.6rem; font-weight: 900; font-size: 1.2rem; box-shadow: 5px 5px 0 var(--orange); text-align: center; }
+.tree-root small { display: block; font: 700 0.75rem var(--font-mono); color: var(--orange); }
+.trunk { width: 3px; height: 1.5rem; background: var(--line); margin: 0 auto; }
+.branches { display: grid; gap: 0.9rem; border-top: 3px solid var(--line); list-style: none; margin: 0; padding: 0; }
+.branch { position: relative; padding-top: 1.5rem; }
+.branch::before { content: ''; position: absolute; top: 0; left: 50%; width: 3px; height: 1.5rem; background: var(--line); }
+.gnode { border: 3px solid var(--line); background: var(--surface); padding: 0.45rem 0.6rem; text-align: center; font-weight: 900; margin: 0; font-size: 1rem; }
+.gnode small { display: block; font: 700 0.72rem var(--font-mono); color: var(--muted); }
+.chain { list-style: none; margin: 0; padding: 0 0 0 1.1rem; position: relative; }
+.chain::before { content: ''; position: absolute; left: 0.45rem; top: 0; bottom: 1.2rem; width: 3px; background: var(--line); }
+.chain li { position: relative; padding-top: 0.45rem; }
+.chain li::before { content: ''; position: absolute; left: -0.65rem; top: 1.4rem; width: 0.65rem; height: 3px; background: var(--line); }
+
+/* ===== C：技能盤 ===== */
+.board { border: 3px solid var(--line); background: var(--surface); }
+.board-p { margin: 0; padding: 0.4rem 0.8rem; background: var(--lit); color: var(--lit-fg); font-size: 1rem; display: flex; gap: 0.6rem; align-items: baseline; }
+.board-p .num { font: 700 0.8rem var(--font-mono); color: var(--orange); }
+.board-row { display: grid; grid-template-columns: 11rem 1fr; border-bottom: 2px solid var(--line); }
+.board-row:last-child { border-bottom: 0; }
+.board-row h3 { margin: 0; padding: 0.6rem 0.75rem; border-right: 2px solid var(--line); font-size: 0.9rem; }
+.board-row h3 small { display: block; font: 700 0.75rem var(--font-mono); color: var(--muted); }
+.tiles { list-style: none; margin: 0; padding: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* ===== 成就 ===== */
+.achv { margin-top: 3.5rem; }
+.achv h2 { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid var(--line); padding-bottom: 0.4rem; }
+.achv h2 .num { font: 700 1rem var(--font-mono); color: var(--link); }
+.achv h3 { font-size: 1rem; margin: 1.4rem 0 0.6rem; }
+.badges { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 0.7rem; }
+.badges.compact { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+.badge { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.6rem 0.7rem; border: 2px dashed var(--dash); color: var(--muted); }
+.badge .ic { flex: none; width: 2rem; height: 2rem; display: grid; place-items: center; font-weight: 900; border: 2px dashed var(--dash); }
+.badge b { display: block; font-size: 0.9rem; }
+.badge span.cond { font-size: 0.78rem; }
+.badge.got { border: 2px solid var(--line); background: var(--orange); color: #111; box-shadow: 3px 3px 0 var(--line); }
+.badge.got .ic { border: 2px solid #111; background: #111; color: var(--orange); }
+
+/* ===== 手機 ===== */
+@media (max-width: 60rem) {
+  .skills-layout { grid-template-columns: 1fr; }
+  .detail { position: static; max-height: none; }
+  .view-a { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hud-bars { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 40rem) {
+  .hud { grid-template-columns: 1fr; }
+  .view-a { grid-template-columns: 1fr; }
+  .branches { grid-template-columns: 1fr !important; border-top: 0; }
+  .branch::before { display: none; }
+  .board-row { grid-template-columns: 1fr; }
+  .board-row h3 { border-right: 0; border-bottom: 2px dashed var(--dash); }
+  .tiles > li { width: calc(50% - 0.25rem); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sk { transition: box-shadow 0.12s; }
+}
+
+/* 詳情面板還沒啟用（沒有 JavaScript）時，主區塊佔滿 */
+.skills-layout:has(> .detail[hidden]) { grid-template-columns: 1fr; }
+
+/* 暗色模式：點亮的區塊改用深灰，和頁面背景區隔 */
+@media (prefers-color-scheme: dark) {
+  .skills-page { --lit: #2b2b2b; }
+}

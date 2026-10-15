@@ -1,0 +1,185 @@
+---
+import '../../styles/skills.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SkillNode from '../../components/skills/SkillNode.astro';
+import Stars from '../../components/skills/Stars.astro';
+import { getSkillTree, GUIDE_SOURCE, LEVEL_LABEL } from '../../utils/skills';
+import { withBase } from '../../utils/url';
+
+const tree = await getSkillTree();
+const { principles, stat, achievements } = tree;
+const earned = achievements.filter((a) => a.earned).length;
+const milestones = achievements.filter((a) => a.group === 'milestone');
+const principleBadges = achievements.filter((a) => a.group === 'principle');
+const guidelineBadges = achievements.filter((a) => a.group === 'guideline');
+
+// 給前端詳情面板用的資料（不含 HTML）
+const clientData = Object.fromEntries(
+  tree.skills.map((s) => [s.id, {
+    name: s.name, level: s.level, levelLabel: LEVEL_LABEL[s.level], guideline: s.guideline,
+    text: s.text, stars: s.stars, slug: s.slug,
+    articles: s.articles.map((a) => ({ title: a.title, href: withBase(`/articles/${a.id}/`) })),
+  }]),
+);
+const guidelineNames = Object.fromEntries(principles.flatMap((p) => p.guidelines).map((g) => [g.id, g.name]));
+const skillsBase = withBase('/skills/');
+---
+<BaseLayout
+  title="無障礙技能樹"
+  description={`以網站無障礙規範的 4 原則、13 指引、78 成功準則為技能樹，依本站文章點亮技能，目前已解鎖 ${stat.unlocked} 項。`}
+>
+  <div class="skills-page">
+    <h1>無障礙技能樹<span class="accent" aria-hidden="true">.</span></h1>
+    <p class="intro">
+      以{GUIDE_SOURCE}的 4 項原則、13 項指引、78 項成功準則為技能樹。本站有文章談到的成功準則就會點亮，文章越多星級越高。
+    </p>
+
+    <section class="hud" aria-labelledby="hud-title">
+      <h2 id="hud-title" class="visually-hidden">技能總覽</h2>
+      <p class="hud-score">{stat.unlocked}<span class="visually-hidden"> 項技能</span> / 78
+        <small>已解鎖 · 平均 ★ {stat.avgStars} · 成就 {earned}/{achievements.length}</small>
+      </p>
+      <ul class="hud-bars">
+        {principles.map((p) => (
+          <li>
+            <b>{p.id} {p.name}</b>
+            <span class="num"><span>{p.stat.unlocked}/{p.stat.total}</span><span>★ {p.stat.avgStars}</span></span>
+            <span class="track" aria-hidden="true"><span style={`width:${(p.stat.unlocked / p.stat.total) * 100}%`}></span></span>
+          </li>
+        ))}
+      </ul>
+      <ul class="legend" aria-label="圖例">
+        <li><span class="lv lv-A" aria-hidden="true">A</span>基礎技能</li>
+        <li><span class="lv lv-AA" aria-hidden="true">AA</span>進階技能</li>
+        <li><span class="lv lv-AAA" aria-hidden="true">AAA</span>傳說技能</li>
+        <li><span class="chip on" aria-hidden="true"></span>已解鎖（有文章）</li>
+        <li><span class="chip" aria-hidden="true"></span>尚未解鎖</li>
+        <li><Stars value={5} />依文章數歸一，最多 5 顆星</li>
+      </ul>
+    </section>
+
+    <fieldset class="view-switch" hidden>
+      <legend>顯示方式</legend>
+      <label><input type="radio" name="skill-view" value="a" checked /> 四欄</label>
+      <label><input type="radio" name="skill-view" value="b" /> 分支樹</label>
+      <label><input type="radio" name="skill-view" value="c" /> 技能盤</label>
+    </fieldset>
+
+    <div class="skills-layout">
+      <div class="views">
+        <!-- A：四欄（預設，沒有 JavaScript 時也會顯示） -->
+        <div class="view-a" data-view="a">
+          {principles.map((p) => (
+            <section class="pcol" aria-labelledby={`a-p${p.id}`}>
+              <h2 id={`a-p${p.id}`}>{p.id} {p.name}<span class="num">{p.stat.unlocked}/{p.stat.total}</span></h2>
+              {p.guidelines.map((g) => (
+                <div class="gsec">
+                  <h3>{g.id} {g.name}<span class="num">{g.stat.unlocked}/{g.stat.total} · ★{g.stat.avgStars}</span></h3>
+                  <ul class="sk-list">
+                    {g.skills.map((s) => <li><SkillNode skill={s} /></li>)}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          ))}
+        </div>
+
+        <!-- B：分支樹（依原則分頁） -->
+        <div class="view-b" data-view="b" hidden>
+          <div class="tabs" role="tablist" aria-label="原則">
+            {principles.map((p, i) => (
+              <button type="button" role="tab" id={`b-tab-${p.id}`} aria-controls={`b-panel-${p.id}`}
+                aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+                {p.id} {p.name}
+              </button>
+            ))}
+          </div>
+          {principles.map((p, i) => (
+            <div role="tabpanel" id={`b-panel-${p.id}`} aria-labelledby={`b-tab-${p.id}`} hidden={i !== 0}>
+              <div class="tree-root"><div><small>{p.stat.unlocked}/{p.stat.total} · ★{p.stat.avgStars}</small>{p.name}</div></div>
+              <div class="trunk" aria-hidden="true"></div>
+              <ul class="branches" style={`grid-template-columns:repeat(${p.guidelines.length},minmax(0,1fr))`}>
+                {p.guidelines.map((g) => (
+                  <li class="branch">
+                    <h3 class="gnode"><small>{g.id} · {g.stat.unlocked}/{g.stat.total}</small>{g.name}</h3>
+                    <ul class="chain">
+                      {g.skills.map((s) => <li><SkillNode skill={s} /></li>)}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <!-- C：技能盤 -->
+        <div class="view-c board" data-view="c" hidden>
+          {principles.map((p) => (
+            <section aria-labelledby={`c-p${p.id}`}>
+              <h2 class="board-p" id={`c-p${p.id}`}>{p.id} {p.name}<span class="num">{p.stat.unlocked}/{p.stat.total}</span></h2>
+              {p.guidelines.map((g) => (
+                <div class="board-row">
+                  <h3><small>{g.id} · {g.stat.unlocked}/{g.stat.total}</small>{g.name}</h3>
+                  <ul class="tiles">
+                    {g.skills.map((s) => <li><SkillNode skill={s} variant="tile" /></li>)}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          ))}
+        </div>
+      </div>
+
+      <aside class="detail" aria-labelledby="detail-title" hidden>
+        <h2 id="detail-title" tabindex="-1">技能詳情</h2>
+        <div id="detail-body"><p class="d-hint">選一個技能，這裡會顯示規範原文與相關文章。</p></div>
+      </aside>
+    </div>
+
+    <section class="achv" aria-labelledby="achv-title">
+      <h2 id="achv-title">成就<span class="num">{earned} / {achievements.length}</span></h2>
+      <h3>里程碑</h3>
+      <ul class="badges">
+        {milestones.map((a) => (
+          <li class:list={['badge', { got: a.earned }]}>
+            <span class="ic" aria-hidden="true">{a.earned ? '✓' : '?'}</span>
+            <span><b>{a.name}</b><span class="cond">{a.condition}</span><span class="visually-hidden">，{a.earned ? '已達成' : '未達成'}</span></span>
+          </li>
+        ))}
+      </ul>
+      <h3>原則守護者</h3>
+      <ul class="badges compact">
+        {principleBadges.map((a) => (
+          <li class:list={['badge', { got: a.earned }]}>
+            <span class="ic" aria-hidden="true">{a.earned ? '✓' : '?'}</span>
+            <span><b>{a.name}</b><span class="cond">{a.condition}</span><span class="visually-hidden">，{a.earned ? '已達成' : '未達成'}</span></span>
+          </li>
+        ))}
+      </ul>
+      <h3>指引全解鎖</h3>
+      <ul class="badges compact">
+        {guidelineBadges.map((a) => (
+          <li class:list={['badge', { got: a.earned }]}>
+            <span class="ic" aria-hidden="true">{a.earned ? '✓' : '?'}</span>
+            <span><b>{a.name}</b><span class="cond">{a.condition}</span><span class="visually-hidden">，{a.earned ? '已達成' : '未達成'}</span></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <p class="source">資料來源：{GUIDE_SOURCE}。星級以文章數最多的成功準則為 5 星，依對數比例換算。</p>
+  </div>
+
+  <script type="application/json" id="skill-data" set:html={JSON.stringify({ skills: clientData, guidelines: guidelineNames, base: skillsBase }).replace(/</g, '\\u003c')}></script>
+</BaseLayout>
+
+<script>
+  import { initSkillTree } from '../../scripts/skill-tree';
+  initSkillTree();
+</script>
+
+<style>
+  .accent { color: var(--orange); }
+  .intro { max-width: var(--measure); color: var(--muted); margin: 0; }
+  .source { margin-top: 3rem; font-size: 0.85rem; color: var(--muted); }
+</style>

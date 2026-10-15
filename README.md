@@ -65,6 +65,7 @@ description: 必填，搜尋結果與分享摘要，20–160 字
 pubDate: 2026-01-01
 updatedDate: 2026-01-15        # 選填
 authors: [kerwin, claude]      # 掛名作者，預設 [kerwin]
+wcag: ['4.1.3']                # 選填，對應的成功準則，會點亮技能樹
 tags: [標籤一, 標籤二]
 cover: ../../assets/articles/my-first-post/cover.jpg  # 選填，自訂封面
 coverAlt: 封面圖說明            # 有 cover 時必填
@@ -107,6 +108,21 @@ mood: 開心                      # 選填
 - 風格：扁平線條、3px 黑框、橘色偏移陰影，橘色只標示重點
 - SVG 內用 `@media (prefers-color-scheme: dark)` 自帶暗色模式
 - 替代文字要完整描述圖的重點，內文也要有對應的文字說明
+
+## 無障礙技能樹
+
+`/skills/` 以網站無障礙規範（110 年 3 月）的 4 原則、13 指引、78 成功準則為技能樹。
+
+- 文章的 `wcag` 欄位填成功準則編號，對應的技能就會點亮；編號會在 build 時檢查是否存在
+- 星級：以文章數最多的準則為 5 星，`round(5 × log(1+n) / log(1+最多篇數))`，已解鎖至少 1 星
+- 三種顯示方式（四欄、分支樹、技能盤），預設四欄，讀者的選擇會記在瀏覽器裡
+- 每項準則都有個別頁 `/skills/4-1-3/`，沒有 JavaScript 時節點直接連過去
+- 規範資料在 `src/data/a11y-guide.json`，由規範 PDF 轉出：
+
+```bash
+pdftotext -layout 規範.pdf guide.txt
+python3 scripts/parse-a11y-guide.py guide.txt src/data/a11y-guide.json
+```
 
 ## 作者與掛名
 

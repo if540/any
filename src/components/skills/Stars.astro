@@ -1,0 +1,13 @@
+---
+// 星級圖示（純視覺，文字版由呼叫端提供）
+import { MAX_STARS } from '../../utils/skills';
+export interface Props { value: number; size?: 'sm' | 'md' }
+const { value, size = 'sm' } = Astro.props;
+const full = Math.floor(value);
+const half = value - full >= 0.5;
+---
+<span class:list={['stars', size]} aria-hidden="true">
+  {Array.from({ length: MAX_STARS }, (_, i) => (
+    <span class:list={['st', i < full ? 'full' : i === full && half ? 'half' : 'empty']}>★</span>
+  ))}
+</span>
