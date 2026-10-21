@@ -45,6 +45,7 @@ const articles = defineCollection({
       faq,
       canonical: z.string().url().optional(), // 只在轉載自其他平台時填
       noindex: z.boolean().default(false),
+      toc: z.boolean().optional(), // 目錄：文章預設 3 個以上 h2／h3 才顯示，日誌預設不顯示
       draft: z.boolean().default(false),
     }).refine(requireCoverAlt, coverAltMsg),
 });
@@ -68,6 +69,7 @@ const journal = defineCollection({
       tldr: z.string().optional(),
       faq,
       noindex: z.boolean().default(false),
+      toc: z.boolean().optional(), // 目錄：文章預設 3 個以上 h2／h3 才顯示，日誌預設不顯示
       draft: z.boolean().default(false),
     }).refine(requireCoverAlt, coverAltMsg),
 });

@@ -1,0 +1,65 @@
+---
+// 文章目錄：寬螢幕在右側固定，窄螢幕在內文上方、預設收合
+// 沒有 JavaScript 時一律展開，連結照常可用；目前段落標示由 src/scripts/post.ts 處理
+export interface TocHeading { depth: number; slug: string; text: string }
+export interface Props { headings: TocHeading[] }
+
+interface Node { h: TocHeading; children: TocHeading[] }
+const tree: Node[] = [];
+for (const h of Astro.props.headings) {
+  const parent = tree.at(-1);
+  // h3 掛在前一個 h2 底下；文章開頭就出現的 h3 當作第一層
+  if (h.depth === 3 && parent) parent.children.push(h);
+  else tree.push({ h, children: [] });
+}
+---
+<nav class="toc" aria-labelledby="toc-title" data-toc>
+  <details class="toc-box" id="toc-details" open>
+    <summary id="toc-title">本文目錄</summary>
+    <ol>
+      {tree.map(({ h, children }) => (
+        <li>
+          <a href={`#${h.slug}`}>{h.text}</a>
+          {children.length > 0 && (
+            <ol>
+              {children.map((c) => <li><a href={`#${c.slug}`}>{c.text}</a></li>)}
+            </ol>
+          )}
+        </li>
+      ))}
+    </ol>
+  </details>
+  {/* 窄螢幕在繪製前就收合，避免先展開再收起造成版面跳動 */}
+  <script is:inline>
+    if (!matchMedia('(min-width: 64rem)').matches) document.getElementById('toc-details').open = false;
+  </script>
+</nav>
+
+<style>
+  /* 側線用 inset 陰影畫：側欄有 overflow 捲動時，負邊距的橘線才不會被裁掉 */
+  .toc { max-width: var(--measure); margin: 0 0 2.5rem; box-shadow: inset 3px 0 0 var(--line); font-size: 0.9rem; line-height: 1.5; }
+  summary {
+    cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem;
+    padding: 0.35rem 0 0.35rem 0.9rem; font: 700 0.8rem var(--font-mono); letter-spacing: 0.08em;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; color: var(--orange); font-weight: 900; font-size: 1.2rem; line-height: 1; }
+  details[open] summary::after { content: '−'; }
+  ol { list-style: none; margin: 0; padding: 0; }
+  details > ol { padding-bottom: 0.4rem; }
+  a {
+    display: block; padding: 0.3rem 0 0.3rem calc(0.9rem - 3px);
+    border-left: 3px solid transparent; color: var(--fg); text-decoration: none;
+  }
+  ol ol a { padding-left: calc(1.8rem - 3px); color: var(--muted); font-size: 0.85rem; }
+  a:hover { color: var(--link); text-decoration: underline; }
+  /* 目前段落：橘色側線 + 粗體 + 連結色，不只靠顏色區分 */
+  .toc a[aria-current='true'] { border-left-color: var(--orange); color: var(--link); font-weight: 700; }
+
+  @media (min-width: 64rem) {
+    .toc {
+      position: sticky; top: 1.5rem; align-self: start; margin: 0;
+      max-height: calc(100vh - 3rem); overflow-y: auto; overscroll-behavior: contain;
+    }
+  }
+</style>

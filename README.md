@@ -76,6 +76,7 @@ faq:                            # 選填，輸出 FAQPage 結構化資料
   - question: 問題？
     answer: 答案。
 noindex: false                 # true = 不讓搜尋引擎收錄
+toc: false                     # 選填，關掉目錄（日誌可填 true 開啟）
 draft: false                   # true = 只在 dev 顯示
 ---
 ```
@@ -90,6 +91,17 @@ description: 選填，沒填會自動擷取內文開頭
 mood: 開心                      # 選填
 ---
 ```
+
+## 文章目錄（TOC）
+
+文章有 3 個以上 h2／h3 時，自動產生「本文目錄」，資料來自 Astro `render()` 回傳的 `headings`，不需要外掛。
+
+- 寬螢幕（64rem 以上）放在右側固定側欄；窄螢幕放在內文上方、預設收合（`<details>`）
+- 有 FAQ 時，目錄最後補一項「常見問題」
+- 捲動時以 `aria-current="true"` 標示目前段落（橘色側線 + 粗體）
+- 標題旁有「#」段落連結（滑鼠移過或鍵盤聚焦時出現），點了會複製該段網址，結果用 `role="status"` 念出
+- 日誌預設不顯示，`toc: true` 可開啟；文章可用 `toc: false` 關閉
+- 互動程式在 `src/scripts/post.ts`，沒有 JavaScript 時目錄一律展開、連結照常可用
 
 ## 封面與解說圖
 

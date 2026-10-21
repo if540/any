@@ -3,6 +3,7 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import BaseLayout from './BaseLayout.astro';
+import Toc, { type TocHeading } from '../components/Toc.astro';
 import { SITE, AUTHORS, OWNER, authorNames, type AuthorKey } from '../consts';
 import { personId, personLd, authorHref } from '../utils/authors';
 import { absoluteUrl, withBase } from '../utils/url';
@@ -27,6 +28,9 @@ export interface Props {
   mood?: string;
   canonical?: string;
   noindex?: boolean;
+  headings?: TocHeading[];
+  /** 未指定時：文章有 3 個以上 h2／h3 就顯示，日誌不顯示 */
+  toc?: boolean;
 }
 
 const p = Astro.props;
@@ -41,6 +45,15 @@ const autoCover = `/og/${p.kind}/${p.slug}.png`;
 const image = p.ogImage ?? p.cover?.src ?? autoCover;
 // 文章內頁顯示封面；日誌只用在分享圖
 const showAutoCover = p.kind === 'articles' && !p.cover;
+
+// 目錄：收 h2、h3；有 FAQ 時最後補一項「常見問題」
+const tocHeadings = (p.headings ?? []).filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = p.toc === true ? tocHeadings.length > 0
+  : p.toc === false ? false
+  : p.kind === 'articles' && tocHeadings.length >= 3;
+const tocItems = showToc && p.faq?.length
+  ? [...tocHeadings, { depth: 2, slug: 'faq-title', text: '常見問題' }]
+  : tocHeadings;
 
 const jsonLd: Record<string, unknown>[] = [
   {
@@ -146,25 +159,35 @@ if (p.faq?.length) {
       </aside>
     )}
 
-    <div class="prose">
-      <slot />
+    <div class:list={['post-body', { 'has-toc': showToc }]}>
+      {showToc && <Toc headings={tocItems} />}
+
+      <div class="prose">
+        <slot />
+      </div>
+
+      {p.faq && p.faq.length > 0 && (
+        <section class="faq prose" aria-labelledby="faq-title">
+          <h2 id="faq-title">常見問題</h2>
+          {p.faq.map((f) => (
+            <details>
+              <summary>{f.question}</summary>
+              <p>{f.answer}</p>
+            </details>
+          ))}
+        </section>
+      )}
     </div>
 
-    {p.faq && p.faq.length > 0 && (
-      <section class="faq prose" aria-labelledby="faq-title">
-        <h2 id="faq-title">常見問題</h2>
-        {p.faq.map((f) => (
-          <details>
-            <summary>{f.question}</summary>
-            <p>{f.answer}</p>
-          </details>
-        ))}
-      </section>
-    )}
-
     <p class="back"><a href={withBase(section.href)}>← 回到{section.label}列表</a></p>
+    <p id="copy-status" class="copy-toast" role="status"></p>
   </article>
 </BaseLayout>
+
+<script>
+  import { initPost } from '../scripts/post';
+  initPost();
+</script>
 
 <style>
   .crumbs { margin-bottom: 1rem; }
@@ -198,4 +221,36 @@ if (p.faq?.length) {
   summary::-webkit-details-marker { display: none; }
   details p { margin: 0.75rem 0 0; }
   .back { margin-top: 4rem; font-weight: 700; }
+
+  /* 目錄：寬螢幕在右側欄，內文維持原本的行寬 */
+  @media (min-width: 64rem) {
+    .post-body.has-toc {
+      display: grid; grid-template-columns: minmax(0, var(--measure)) minmax(12rem, 1fr);
+      column-gap: 3rem; align-items: start;
+    }
+    .post-body.has-toc > :global(*) { grid-column: 1; }
+    .post-body.has-toc > :global(.toc) { grid-column: 2; grid-row: 1 / span 2; }
+  }
+
+  /* 標題旁的段落連結（由 src/scripts/post.ts 加上） */
+  .prose :global(.h-wrap) { display: flex; align-items: baseline; gap: 0.5rem; }
+  .prose :global(.h-wrap > :is(h2, h3)) { margin: 0; }
+  .prose :global(.h-wrap-h2) { margin: 3rem 0 0.9rem; }
+  .prose :global(.h-wrap-h3) { margin: 2.4rem 0 0.72rem; }
+  .prose :global(.h-anchor) {
+    flex: none; font: 700 1.1rem var(--font-mono); color: var(--muted); text-decoration: none;
+    padding: 0 0.25rem;
+  }
+  .prose :global(.h-anchor:hover) { color: var(--link); }
+  @media (hover: hover) {
+    .prose :global(.h-anchor) { opacity: 0; transition: opacity 0.15s; }
+    .prose :global(.h-wrap:hover .h-anchor), .prose :global(.h-anchor:focus-visible) { opacity: 1; }
+  }
+
+  .copy-toast {
+    position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 20; margin: 0;
+    padding: 0.5rem 1rem; background: var(--fg); color: var(--bg); font-weight: 700; font-size: 0.9rem;
+    box-shadow: 4px 4px 0 var(--orange);
+  }
+  .copy-toast:empty { display: none; }
 </style>
