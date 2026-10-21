@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 三個指令都能把程式「變回去」，但一個新增 commit、一個移動分支、一個只複製檔案。整理差異、選擇時機與最容易踩的坑。
 pubDate: 2026-10-21
 tags: [Git]
-draft: true
+draft: false
 coverTitle: "git revert\nreset、restore\n差在哪"
 coverMotif: code
 tldr: revert 新增一個 commit 抵銷某個 commit 的異動，歷史保留；reset 把分支指標移回某個 commit，之後的 commit 從分支上消失；restore 只把某個來源的檔案內容複製到工作目錄或暫存區，不動分支也不產生 commit。
