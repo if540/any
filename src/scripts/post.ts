@@ -98,7 +98,29 @@ function initHeadingLinks() {
   });
 }
 
+// 表格外層只有真的需要橫向捲動時，才保留 Tab 停駐點與 region 名稱
+function initTableRegions() {
+  const wraps = [...document.querySelectorAll<HTMLElement>('.prose .table-wrap')];
+  if (!wraps.length) return;
+  const labels = new Map(wraps.map((w) => [w, w.getAttribute('aria-label') ?? '表格']));
+  const sync = (w: HTMLElement) => {
+    const scrollable = w.scrollWidth > w.clientWidth + 1;
+    if (scrollable) {
+      w.tabIndex = 0;
+      w.setAttribute('role', 'region');
+      w.setAttribute('aria-label', `${labels.get(w)}（可左右捲動）`);
+    } else {
+      w.removeAttribute('tabindex');
+      w.removeAttribute('role');
+      w.removeAttribute('aria-label');
+    }
+  };
+  const ro = new ResizeObserver((entries) => entries.forEach((e) => sync(e.target as HTMLElement)));
+  wraps.forEach((w) => { sync(w); ro.observe(w); });
+}
+
 export function initPost() {
+  initTableRegions();
   initHeadingLinks();
   initToc();
 }

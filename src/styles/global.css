@@ -101,7 +101,13 @@ h3 { font-size: 1.2rem; font-weight: 700; }
 .prose code { font-family: var(--font-mono); font-size: 0.9em; background: var(--surface); padding: 0.1em 0.35em; border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent); }
 .prose pre { padding: 1rem; overflow-x: auto; border: 2px solid var(--line); font-size: 0.9rem; line-height: 1.6; }
 .prose pre code { background: none; border: 0; padding: 0; }
-.prose table { width: 100%; border-collapse: collapse; margin: 1.5em 0; font-size: 0.95rem; display: block; overflow-x: auto; }
+.prose table { width: 100%; border-collapse: collapse; margin: 1.5em 0; font-size: 0.95rem; }
+/* 表格外層負責橫向捲動（src/markdown/table-region.mjs），表格本身維持 table 語意 */
+.prose .table-wrap { overflow-x: auto; margin: 1.5em 0; }
+.prose .table-wrap > table { margin: 0; }
+/* 窄螢幕不把欄位擠成一兩個字寬，寧可橫向捲動 */
+.prose th, .prose td { min-width: 6.5em; }
+.prose .table-wrap:focus-visible { outline-offset: 2px; }
 .prose th, .prose td { border: 1.5px solid var(--line); padding: 0.5rem 0.75rem; text-align: left; }
 .prose th { background: var(--fg); color: var(--bg); }
 .prose hr { border: 0; border-top: 3px solid var(--line); margin: 3rem 0; }

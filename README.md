@@ -185,3 +185,5 @@ Markdown 內文的站內連結請寫完整路徑，例如 `[文章](/any/article
 - 小字連結用深橘 `#B8430A`（白底對比 5.2:1），亮橘只用於大字與色塊（亮橘白底僅 2.7:1）
 - 暗色模式改用亮橘（黑底對比 6.6:1）
 - 跳到主要內容連結、`aria-current` 導覽、明顯的 focus 外框、尊重 `prefers-reduced-motion`
+- Markdown 表格在 build 時包進 `.table-wrap`（`src/markdown/table-region.mjs`，satteri hast 外掛）。窄螢幕需要橫向捲動時，外層是可聚焦、有名稱的 `region`，鍵盤可用方向鍵捲動；不需要捲動時由 `src/scripts/post.ts` 移除 Tab 停駐點。表格本身維持 `display: table`，不破壞表格語意
+- 程式碼高亮用 github-dark，註解色在 `astro.config.mjs` 由 `#6A737D`（3.05:1）換成 `#959DA5`（5.34:1）
