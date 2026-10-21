@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 790" width="720" height="790" role="img" aria-labelledby="t">
+  <title id="t">從 A、B、C 三個 commit 出發，revert、reset、restore 各自造成的結果</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.inkstroke{stroke:#b8430a}.mut{fill:#5e5e5e}.mutstroke{stroke:#5e5e5e}
+    .o{fill:#ff6b1a}.ostroke{stroke:#ff6b1a}
+    .tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.inkstroke{stroke:#ff6b1a}.mut{fill:#a8a8a8}.mutstroke{stroke:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="790" class="bg"/>
+
+  <!-- ===== 起點 ===== -->
+  <text x="20" y="34" font-size="20" font-weight="700" class="mut">起點：main 指向 C</text>
+  <path d="M100 80h110M230 80h110" class="stroke" stroke-width="4"/>
+  <circle cx="80" cy="80" r="22" class="card stroke" stroke-width="3"/><text x="80" y="88" font-size="22" font-weight="900" text-anchor="middle" class="fg">A</text>
+  <circle cx="220" cy="80" r="22" class="card stroke" stroke-width="3"/><text x="220" y="88" font-size="22" font-weight="900" text-anchor="middle" class="fg">B</text>
+  <circle cx="360" cy="80" r="22" class="card stroke" stroke-width="3"/><text x="360" y="88" font-size="22" font-weight="900" text-anchor="middle" class="fg">C</text>
+  <rect x="396" y="64" width="64" height="32" class="tag"/><text x="428" y="87" font-size="18" text-anchor="middle" class="mono tagtext">main</text>
+  <text x="490" y="74" font-size="16" class="mut">每個 commit 新增一個檔案</text>
+  <text x="490" y="98" font-size="16" class="mut">工作目錄：a、b、c</text>
+
+  <!-- ===== revert ===== -->
+  <rect x="20" y="130" width="680" height="200" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="130" width="250" height="40" class="o"/>
+  <text x="34" y="157" font-size="18" class="mono onO">git revert B</text>
+  <path d="M100 220h110M230 220h110M370 220h110" class="stroke" stroke-width="4"/>
+  <circle cx="80" cy="220" r="22" class="card stroke" stroke-width="3"/><text x="80" y="228" font-size="22" font-weight="900" text-anchor="middle" class="fg">A</text>
+  <circle cx="220" cy="220" r="22" class="card stroke" stroke-width="3"/><text x="220" y="228" font-size="22" font-weight="900" text-anchor="middle" class="fg">B</text>
+  <circle cx="360" cy="220" r="22" class="card stroke" stroke-width="3"/><text x="360" y="228" font-size="22" font-weight="900" text-anchor="middle" class="fg">C</text>
+  <circle cx="500" cy="220" r="24" class="o stroke" stroke-width="3"/><text x="500" y="228" font-size="22" font-weight="900" text-anchor="middle" class="onO">B′</text>
+  <rect x="536" y="204" width="64" height="32" class="tag"/><text x="568" y="227" font-size="18" text-anchor="middle" class="mono tagtext">main</text>
+  <text x="44" y="276" font-size="18" font-weight="700" class="ink">新增一個抵銷 B 的 commit（B′），A、B、C 都還在</text>
+  <text x="44" y="306" font-size="16" class="mut">工作目錄：a、c（只拿掉 B 帶進來的 b）</text>
+
+  <!-- ===== reset ===== -->
+  <rect x="20" y="350" width="680" height="200" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="350" width="250" height="40" class="o"/>
+  <text x="34" y="377" font-size="18" class="mono onO">git reset --hard B</text>
+  <path d="M100 440h110" class="stroke" stroke-width="4"/>
+  <path d="M240 440h100" class="mutstroke" stroke-width="3" stroke-dasharray="8 6"/>
+  <circle cx="80" cy="440" r="22" class="card stroke" stroke-width="3"/><text x="80" y="448" font-size="22" font-weight="900" text-anchor="middle" class="fg">A</text>
+  <circle cx="220" cy="440" r="22" class="card stroke" stroke-width="3"/><text x="220" y="448" font-size="22" font-weight="900" text-anchor="middle" class="fg">B</text>
+  <circle cx="360" cy="440" r="22" fill="none" class="mutstroke" stroke-width="3" stroke-dasharray="6 5"/><text x="360" y="448" font-size="22" font-weight="900" text-anchor="middle" class="mut">C</text>
+  <rect x="188" y="474" width="64" height="32" class="tag"/><text x="220" y="497" font-size="18" text-anchor="middle" class="mono tagtext">main</text>
+  <text x="392" y="436" font-size="16" class="mut">C 離開分支</text>
+  <text x="392" y="458" font-size="16" class="mut">（reflog 還找得到）</text>
+  <text x="44" y="530" font-size="18" font-weight="700" class="ink">分支指標移回 B，歷史被改寫；工作目錄：a、b</text>
+
+  <!-- ===== restore ===== -->
+  <rect x="20" y="570" width="680" height="200" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="570" width="330" height="40" class="o"/>
+  <text x="34" y="597" font-size="18" class="mono onO">git restore --source=A .</text>
+  <path d="M100 660h110M230 660h110" class="stroke" stroke-width="4"/>
+  <circle cx="80" cy="660" r="22" class="o stroke" stroke-width="3"/><text x="80" y="668" font-size="22" font-weight="900" text-anchor="middle" class="onO">A</text>
+  <circle cx="220" cy="660" r="22" class="card stroke" stroke-width="3"/><text x="220" y="668" font-size="22" font-weight="900" text-anchor="middle" class="fg">B</text>
+  <circle cx="360" cy="660" r="22" class="card stroke" stroke-width="3"/><text x="360" y="668" font-size="22" font-weight="900" text-anchor="middle" class="fg">C</text>
+  <rect x="396" y="644" width="64" height="32" class="tag"/><text x="428" y="667" font-size="18" text-anchor="middle" class="mono tagtext">main</text>
+  <text x="490" y="656" font-size="16" class="mut">分支不動</text>
+  <text x="490" y="678" font-size="16" class="mut">也不產生 commit</text>
+  <text x="44" y="726" font-size="18" font-weight="700" class="ink">把 A 的檔案複製到工作目錄：只剩 a</text>
+  <text x="44" y="754" font-size="16" class="mut">b、c 變成「已刪除」的未 commit 修改，要不要 commit 由你決定</text>
+</svg>
