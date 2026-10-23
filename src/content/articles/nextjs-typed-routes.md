@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 開啟 typedRoutes 後，Link、router.push、redirect 的路徑都會依 app 資料夾結構做型別檢查。整理設定方式、實測會擋下哪些錯，以及檢查不到的地方。
 pubDate: 2026-10-23
 tags: [Next.js, TypeScript]
-draft: true
+draft: false
 coverTitle: "Next.js typedRoutes\n路徑寫錯\n編譯時就擋下"
 coverMotif: grid
 tldr: "在 next.config.ts 設定 typedRoutes: true，Next.js 會依 app/ 的資料夾結構產生路由型別。Link 的 href 和 router.push、replace、prefetch、redirect 的路徑只要不存在或大小寫不符，TypeScript 就會報錯，next build 也會失敗。用 as Route 轉型或 { pathname } 物件寫法則不會被檢查。"
