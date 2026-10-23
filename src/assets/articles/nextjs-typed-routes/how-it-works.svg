@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 700" width="720" height="700" role="img" aria-labelledby="t">
+  <title id="t">typedRoutes 從 app 資料夾產生路由型別，再拿來檢查 Link 的 href</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .code{fill:#24292e}.codetext{fill:#e1e4e8}.codestr{fill:#9ecbff}.codecmt{fill:#959da5}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="700" class="bg"/>
+
+  <!-- ① 資料夾結構 -->
+  <rect x="20" y="20" width="44" height="36" class="o"/>
+  <text x="42" y="46" font-size="22" font-weight="900" text-anchor="middle" class="onO">1</text>
+  <text x="78" y="46" font-size="22" font-weight="700" class="fg">app/ 的資料夾結構</text>
+
+  <rect x="20" y="70" width="680" height="166" class="card stroke" stroke-width="3"/>
+  <text x="44" y="104" font-size="18" class="mono fg">app/about/page.tsx</text>
+  <text x="44" y="136" font-size="18" class="mono fg">app/blog/[slug]/page.tsx</text>
+  <text x="44" y="168" font-size="18" class="mono fg">app/(marketing)/pricing/page.tsx</text>
+  <text x="44" y="200" font-size="18" class="mono mut">app/_components/nav.tsx</text>
+  <text x="430" y="168" font-size="16" class="mut">( ) 群組不算進網址</text>
+  <text x="430" y="200" font-size="16" class="mut">_ 開頭是私有資料夾</text>
+
+  <!-- 箭頭：產生型別 -->
+  <path d="M360 236v52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="380" y="246" width="320" height="34" class="tag"/>
+  <text x="394" y="269" font-size="16" class="mono tagtext">next dev／build／typegen</text>
+
+  <!-- ② 產生的型別 -->
+  <rect x="20" y="300" width="44" height="36" class="o"/>
+  <text x="42" y="326" font-size="22" font-weight="900" text-anchor="middle" class="onO">2</text>
+  <text x="78" y="326" font-size="22" font-weight="700" class="fg">.next/types 裡的路由型別</text>
+
+  <rect x="20" y="350" width="680" height="118" class="code"/>
+  <text x="44" y="384" font-size="18" class="mono codetext">type Routes =</text>
+  <text x="64" y="414" font-size="18" class="mono codetext">| <tspan class="codestr">"/about"</tspan> | <tspan class="codestr">"/pricing"</tspan></text>
+  <text x="64" y="444" font-size="18" class="mono codetext">| <tspan class="codestr">`/blog/${slug}`</tspan>  <tspan class="codecmt">// 示意，實際更複雜</tspan></text>
+
+  <path d="M360 468v52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- ③ 檢查 href -->
+  <rect x="20" y="530" width="44" height="36" class="o"/>
+  <text x="42" y="556" font-size="22" font-weight="900" text-anchor="middle" class="onO">3</text>
+  <text x="78" y="556" font-size="22" font-weight="700" class="fg">TypeScript 比對 href</text>
+
+  <rect x="20" y="580" width="680" height="100" class="card stroke" stroke-width="3"/>
+  <text x="44" y="614" font-size="18" class="mono fg">href="/about"</text>
+  <text x="330" y="614" font-size="18" font-weight="700" class="fg">✓ 通過</text>
+  <text x="44" y="656" font-size="18" class="mono fg">href="/About"</text>
+  <rect x="318" y="634" width="370" height="32" class="o"/>
+  <text x="330" y="657" font-size="18" font-weight="700" class="onO">✗ 報錯：Did you mean "/about"?</text>
+</svg>
