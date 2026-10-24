@@ -50,7 +50,7 @@
   <!-- Q3 build 時完成 -->
   <rect x="20" y="352" width="430" height="108" class="card stroke" stroke-width="3"/>
   <text x="40" y="386" font-size="19" font-weight="700" class="fg">Suspense 的內容在 build 時就完成？</text>
-  <text x="40" y="416" font-size="16" class="mut">SSG 頁面、沒開 cacheComponents，</text>
+  <text x="40" y="416" font-size="16" class="mut">正式版的 SSG／ISR 頁面、沒開 cacheComponents，</text>
   <text x="40" y="440" font-size="16" class="mut">或資料有 'use cache'</text>
   <path d="M450 406h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
   <text x="470" y="396" font-size="17" font-weight="700" class="fg">是</text>

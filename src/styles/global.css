@@ -112,4 +112,9 @@ h3 { font-size: 1.2rem; font-weight: 700; }
 .prose th { background: var(--fg); color: var(--bg); }
 /* 表頭是反白底色，行內程式碼改成透明底、沿用表頭文字色 */
 .prose th code { background: transparent; color: inherit; border-color: color-mix(in srgb, var(--bg) 45%, transparent); }
+/* 重點提示框：黑字、橘色粗框，比 blockquote 醒目（Markdown 內用 <div class="callout" role="note">） */
+.prose .callout { margin: 1.5em 0; padding: 0.9rem 1.1rem; background: var(--surface); color: var(--fg); border: 3px solid var(--orange); box-shadow: 5px 5px 0 var(--orange); }
+.prose .callout p { margin: 0; }
+.prose .callout p + p { margin-top: 0.4em; }
+.prose .callout-label { font: 700 0.85rem var(--font-mono); letter-spacing: 0.08em; color: var(--link); }
 .prose hr { border: 0; border-top: 3px solid var(--line); margin: 3rem 0; }

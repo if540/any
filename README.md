@@ -121,6 +121,17 @@ mood: 開心                      # 選填
 - SVG 內用 `@media (prefers-color-scheme: dark)` 自帶暗色模式
 - 替代文字要完整描述圖的重點，內文也要有對應的文字說明
 
+**重點提示框**：需要特別強調的段落，在 Markdown 裡直接寫 HTML（框內的程式碼要用 `<code>`）：
+
+```html
+<div class="callout" role="note">
+  <p class="callout-label"><span aria-hidden="true">⚠</span> 重點</p>
+  <p><strong>要強調的一句話</strong>，後面接說明。</p>
+</div>
+```
+
+**粗體與中文標點**：粗體的結尾 `**` 前面如果是標點、後面緊接中文字（例如 `**重點。**後文`），不會變成粗體。標點請放在粗體外面：`**重點**。後文`。
+
 ## 無障礙技能樹
 
 `/skills/` 以網站無障礙規範（110 年 3 月）的 4 原則、13 指引、78 成功準則為技能樹。

@@ -15,7 +15,7 @@ faq:
   - question: 把 H1 放進 Suspense 的 fallback 可以嗎？
     answer: 可以通過 FreeGo，因為 fallback 會直接出現在初始 HTML。但不執行 JS 的環境仍然只看得到「載入中」，內容本身還是缺。H1 的文字如果不依賴非同步資料，直接移到 Suspense 外面更好。
   - question: 為什麼 SSG 頁面用了 Suspense 卻沒問題？
-    answer: SSG 頁面在 build 時就把 Suspense 裡的內容算完，直接寫進 HTML，不需要串流。例外是開啟 cacheComponents 後沒有快取的資料，以及用了 useSearchParams 的元件，這兩種在靜態頁裡一樣拿不到 H1。
+    answer: 正式版（next build 加 next start）的 SSG 和 ISR 頁面，在產生時就把 Suspense 裡的內容算完，直接寫進 HTML，不需要串流。但在開發模式（next dev）每次請求都即時渲染，一樣會被藏起來，所以檢查一定要用正式版。另外開了 cacheComponents 卻沒快取的資料、用了 useSearchParams 的元件，以及其實已經變成動態的頁面，正式版也讀不到。
 ---
 
 用 FreeGo 檢測 Next.js 網站時，遇到一個怪現象：畫面上明明有 H1，FreeGo 卻判定「缺少 H1」，機器檢測過不了。
@@ -27,7 +27,9 @@ faq:
 | 情況 | FreeGo 讀到的 H1 |
 | --- | --- |
 | SSG 頁面 | ✓ |
-| SSG 頁面 + Suspense | ✓ |
+| SSG 頁面 + Suspense | ✓（只限正式版） |
+| ISR 頁面（`revalidate`）+ Suspense | ✓（只限正式版） |
+| **開發模式（`next dev`）的 SSG／ISR 頁面 + Suspense** | **✗ 藏在 `<div hidden>`** |
 | SSR 頁面，沒有 Suspense | ✓ |
 | 一般的 Client Component（`'use client'`）裡的 H1 | ✓ |
 | SSR 頁面，H1 在 Suspense 裡 | **✗ 藏在 `<div hidden>`** |
@@ -38,7 +40,12 @@ faq:
 | SSR 頁面，H1 在 Suspense 的 fallback | ✓ |
 | SSR 頁面，H1 在 Suspense 外面 | ✓ |
 
-> 以上以 Next.js 16.4.2、React 19.3.1 建專案實測：`next build` 加 `next start`，再用關閉 JavaScript 的瀏覽器讀取，模擬 FreeGo 看到的內容。
+> 以上以 Next.js 16.4.2、React 19.3.1 建專案實測：除了標明開發模式的那一列，都是 `next build` 加 `next start` 的正式版，再用關閉 JavaScript 的瀏覽器讀取，模擬 FreeGo 看到的內容。
+
+<div class="callout" role="note">
+  <p class="callout-label"><span aria-hidden="true">⚠</span> 重點</p>
+  <p><strong>檢查一定要用正式版</strong>（<code>next build</code> 加 <code>next start</code>）。開發模式（<code>next dev</code>）不會預先產生頁面，SSG、ISR 頁面的 Suspense 也會被串流，結果和正式上線不一樣。</p>
+</div>
 
 ## FreeGo 看到的是哪一份 HTML
 
@@ -106,16 +113,59 @@ export default function Layout({ children }) {
 
 檢查時要往上看：**H1 所在的元件，和它上層的 `loading.tsx`、layout**，任何一層有 Suspense 都算。
 
-### 為什麼 SSG + Suspense 沒問題
+### SSG、ISR + Suspense：正式版讀得到
 
-SSG 頁面在 build 時就等所有資料準備好，Suspense 裡的內容直接寫進 HTML，沒有 fallback、也沒有 `<div hidden>`。實測 SSG 頁面用了 Suspense，H1 照樣讀得到。
+SSG 頁面在 build 時就等所有資料準備好，Suspense 裡的內容直接寫進 HTML，沒有 fallback、也沒有 `<div hidden>`。設了 `revalidate` 的 ISR 頁面也一樣，實測過期後在背景重新產生，H1 仍然直接寫在 HTML 裡。
 
-例外是開啟 Next.js 16 的 `cacheComponents`：
+build 出來的 HTML：
+
+```html
+<main><!--$--><section><h1>最新消息</h1>…</section><!--/$--></main>
+```
+
+對照情況一開頭的串流 HTML，差別在 Suspense 的標記：
+
+| 標記 | 意思 | H1 |
+| --- | --- | --- |
+| `<!--$-->` | 內容已經完成，直接寫在這裡 | 讀得到 |
+| `<!--$?-->` | 還在等，先放 fallback，內容晚點用 `<div hidden>` 補 | 被藏起來 |
+
+### 開發模式會騙人
+
+**同一個 SSG 頁面，在 `next dev` 底下 H1 會被藏起來**。開發模式不會預先產生頁面，每次請求都即時渲染，Suspense 一律走串流：
+
+| 頁面 | `next dev`（開發模式） | `next build` 加 `next start`（正式版） |
+| --- | --- | --- |
+| SSG + Suspense | **✗ 藏在 `<div hidden>`** | ✓ |
+| ISR + Suspense | **✗ 藏在 `<div hidden>`** | ✓ |
+| SSG，沒有 Suspense | ✓ | ✓ |
+
+在開發機上關掉 JS 檢查，很容易得出「SSG 用 Suspense 也不行」的錯誤結論，反過來也可能讓以為修好的問題，在正式環境重新出現。
+
+### 正式版也讀不到的情況
+
+就算用正式版，以下三種情況的 SSG 頁面，Suspense 裡的 H1 一樣讀不到：
+
+**1. 開了 `cacheComponents`，資料沒有快取**
 
 | `cacheComponents` 開啟後 | 結果 |
 | --- | --- |
-| Suspense 裡的資料**沒有**快取 | 頁面變成「靜態外殼 + 請求時串流」，H1 一樣被藏起來 |
+| Suspense 裡的資料**沒有**快取 | 頁面變成「靜態外殼 + 請求時串流」，H1 被藏起來 |
 | Suspense 裡的資料加了 `'use cache'` | 內容在 build 時寫進 HTML，H1 讀得到 |
+
+**2. Suspense 裡的元件用了 `useSearchParams`**
+
+build 時不知道查詢參數，HTML 裡只會有 fallback，詳見下方「情況二」。
+
+**3. 頁面其實不是 SSG**
+
+用了 `cookies()`、`headers()`、頁面的 `searchParams` 參數、`connection()`，或不快取的 `fetch`，頁面就會變成請求時才渲染。看 `next build` 最後印出的路由表就知道：
+
+| 符號 | 意思 | Suspense 裡的 H1 |
+| --- | --- | --- |
+| `○` | 靜態（SSG），後面有時間的是 ISR | ✓ |
+| `ƒ` | 動態，每次請求才渲染 | ✗ 被藏起來 |
+| `◐` | 靜態外殼 + 請求時串流（`cacheComponents`） | 外殼內的 ✓，串流的 ✗ |
 
 ## 情況二：H1 根本沒進 HTML
 
@@ -215,7 +265,12 @@ Next.js 有一個 `htmlLimitedBots` 設定，用來指定「不能執行 JS 的 
 
 ## 怎麼自己檢查
 
-不用每次都跑 FreeGo，用 Chrome 就能看到 FreeGo 的視角：
+不用每次都跑 FreeGo，用 Chrome 就能看到 FreeGo 的視角。
+
+<div class="callout" role="note">
+  <p class="callout-label"><span aria-hidden="true">⚠</span> 重點</p>
+  <p><strong>先 <code>next build</code> 再 <code>next start</code>，用正式版檢查。</strong>開發模式（<code>next dev</code>）會把 SSG、ISR 頁面的 Suspense 也串流，結果和上線後不同，見上方「開發模式會騙人」。</p>
+</div>
 
 1. 打開 DevTools，按 `Ctrl`＋`Shift`＋`P`（Mac 是 `Cmd`＋`Shift`＋`P`），輸入「Disable JavaScript」執行
 2. 重新整理頁面，看畫面上還有沒有標題
@@ -227,18 +282,16 @@ Next.js 有一個 `htmlLimitedBots` 設定，用來指定「不能執行 JS 的 
 
 結果是空陣列，代表 HTML 裡根本沒有 H1（情況二）；出現「被藏起來」，就是情況一。
 
-檢查要用 `next build` 加 `next start` 的正式版本。開發模式（`next dev`）的渲染方式不同，結果不一定一樣。
-
 ## 判斷流程
 
-![流程圖，三個問題。第一，H1 是否只在瀏覽器才渲染（next/dynamic 設 ssr false，或靜態頁裡用了 useSearchParams 的元件），是的話 HTML 裡沒有 H1。否的話問第二，H1 在 Suspense 裡面嗎（loading.tsx、layout 裡包住 children 的 Suspense 都算），否就讀得到。是的話問第三，Suspense 的內容在 build 時就完成嗎（SSG 頁面、沒開 cacheComponents，或資料有 use cache），是就讀得到；否則請求時才串流，H1 在 div hidden 裡，要把 H1 移出 Suspense 或放進 fallback。](../../assets/articles/nextjs-freego-h1-title/decision.svg)
+![流程圖，三個問題。第一，H1 是否只在瀏覽器才渲染（next/dynamic 設 ssr false，或靜態頁裡用了 useSearchParams 的元件），是的話 HTML 裡沒有 H1。否的話問第二，H1 在 Suspense 裡面嗎（loading.tsx、layout 裡包住 children 的 Suspense 都算），否就讀得到。是的話問第三，Suspense 的內容在 build 時就完成嗎（正式版的 SSG／ISR 頁面、沒開 cacheComponents，或資料有 use cache），是就讀得到；否則請求時才串流，H1 在 div hidden 裡，要把 H1 移出 Suspense 或放進 fallback。](../../assets/articles/nextjs-freego-h1-title/decision.svg)
 
 ## 這算真的無障礙問題嗎
 
 要分兩層看：
 
-- **對多數使用者影響不大。**螢幕閱讀器使用者用的瀏覽器會執行 JavaScript，看到的是補完後的頁面，H1 在
-- **對不執行 JS 的環境是真的缺。**檢測工具、部分爬蟲、社群分享預覽，以及關閉 JS 的使用者，只拿得到原始 HTML。以 Suspense 為例，他們連內容本身都看不到，不只是少一個 H1
+- **對多數使用者影響不大**。螢幕閱讀器使用者用的瀏覽器會執行 JavaScript，看到的是補完後的頁面，H1 在
+- **對不執行 JS 的環境是真的缺**。檢測工具、部分爬蟲、社群分享預覽，以及關閉 JS 的使用者，只拿得到原始 HTML。以 Suspense 為例，他們連內容本身都看不到，不只是少一個 H1
 
 所以修的時候，目標不只是讓 FreeGo 通過：**頁面的主要內容和標題結構，最好不要依賴 JavaScript 才出現**。H1 移出 Suspense、主要內容能靜態就靜態，這兩件事同時解決了機器檢測和真實的使用情境；把 H1 塞進 fallback，則只解決了前者。
 
