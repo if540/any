@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 800" width="720" height="800" role="img" aria-labelledby="t">
-  <title id="t">判斷 FreeGo 讀不讀得到 H1 和網頁標題的流程</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" width="720" height="640" role="img" aria-labelledby="t">
+  <title id="t">判斷 FreeGo 讀不讀得到 H1 的流程</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M0 0L10 5L0 10z" class="fg"/>
@@ -8,7 +8,7 @@
   <style>
     .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
     .ink{fill:#b8430a}.mut{fill:#5e5e5e}
-    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
     text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
     @media (prefers-color-scheme: dark){
       .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
@@ -17,59 +17,51 @@
     }
   </style>
 
-  <rect width="720" height="800" class="bg"/>
+  <rect width="720" height="640" class="bg"/>
 
-  <!-- ===== H1 ===== -->
-  <rect x="20" y="20" width="92" height="40" class="tag"/>
-  <text x="66" y="48" font-size="22" font-weight="900" text-anchor="middle" class="tagtext">H1</text>
+  <!-- Q1 只在瀏覽器渲染 -->
+  <rect x="20" y="20" width="430" height="108" class="card stroke" stroke-width="3"/>
+  <text x="40" y="54" font-size="19" font-weight="700" class="fg">H1 只在瀏覽器才渲染？</text>
+  <text x="40" y="84" font-size="16" class="mut">next/dynamic 設 ssr: false，或靜態頁裡</text>
+  <text x="40" y="108" font-size="16" class="mut">用了 useSearchParams 的元件</text>
+  <path d="M450 74h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="470" y="64" font-size="17" font-weight="700" class="fg">是</text>
+  <rect x="554" y="50" width="146" height="56" class="o"/>
+  <rect x="546" y="42" width="146" height="56" class="card stroke" stroke-width="3"/>
+  <text x="619" y="68" font-size="17" font-weight="900" text-anchor="middle" class="ink">✗ HTML 裡</text>
+  <text x="619" y="90" font-size="17" font-weight="900" text-anchor="middle" class="ink">沒有 H1</text>
 
-  <rect x="20" y="80" width="430" height="80" class="card stroke" stroke-width="3"/>
-  <text x="40" y="114" font-size="19" font-weight="700" class="fg">H1 在 Suspense 裡面嗎？</text>
-  <text x="40" y="142" font-size="16" class="mut">loading.tsx 也算，它會把整頁包進 Suspense</text>
-  <path d="M450 120h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-  <text x="470" y="110" font-size="17" font-weight="700" class="fg">否</text>
-  <rect x="546" y="96" width="154" height="48" class="card stroke" stroke-width="3"/>
-  <text x="623" y="127" font-size="19" font-weight="900" text-anchor="middle" class="fg">✓ 讀得到</text>
+  <path d="M120 128v48" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="134" y="160" font-size="17" font-weight="700" class="fg">否</text>
 
-  <path d="M120 160v48" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-  <text x="134" y="192" font-size="17" font-weight="700" class="fg">是</text>
+  <!-- Q2 在 Suspense 裡 -->
+  <rect x="20" y="186" width="430" height="108" class="card stroke" stroke-width="3"/>
+  <text x="40" y="220" font-size="19" font-weight="700" class="fg">H1 在 Suspense 裡面嗎？</text>
+  <text x="40" y="250" font-size="16" class="mut">loading.tsx、layout 裡包住 children 的</text>
+  <text x="40" y="274" font-size="16" class="mut">Suspense 都算</text>
+  <path d="M450 240h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="470" y="230" font-size="17" font-weight="700" class="fg">否</text>
+  <rect x="546" y="216" width="154" height="48" class="card stroke" stroke-width="3"/>
+  <text x="623" y="247" font-size="19" font-weight="900" text-anchor="middle" class="fg">✓ 讀得到</text>
 
-  <rect x="20" y="218" width="430" height="108" class="card stroke" stroke-width="3"/>
-  <text x="40" y="252" font-size="19" font-weight="700" class="fg">Suspense 的內容在 build 時就完成？</text>
-  <text x="40" y="282" font-size="16" class="mut">SSG 頁面、沒開 cacheComponents，</text>
-  <text x="40" y="306" font-size="16" class="mut">或資料有 'use cache'</text>
-  <path d="M450 272h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-  <text x="470" y="262" font-size="17" font-weight="700" class="fg">是</text>
-  <rect x="546" y="248" width="154" height="48" class="card stroke" stroke-width="3"/>
-  <text x="623" y="279" font-size="19" font-weight="900" text-anchor="middle" class="fg">✓ 讀得到</text>
+  <path d="M120 294v48" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="134" y="326" font-size="17" font-weight="700" class="fg">是</text>
 
-  <path d="M120 326v48" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-  <text x="134" y="358" font-size="17" font-weight="700" class="fg">否（請求時才串流）</text>
+  <!-- Q3 build 時完成 -->
+  <rect x="20" y="352" width="430" height="108" class="card stroke" stroke-width="3"/>
+  <text x="40" y="386" font-size="19" font-weight="700" class="fg">Suspense 的內容在 build 時就完成？</text>
+  <text x="40" y="416" font-size="16" class="mut">SSG 頁面、沒開 cacheComponents，</text>
+  <text x="40" y="440" font-size="16" class="mut">或資料有 'use cache'</text>
+  <path d="M450 406h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="470" y="396" font-size="17" font-weight="700" class="fg">是</text>
+  <rect x="546" y="382" width="154" height="48" class="card stroke" stroke-width="3"/>
+  <text x="623" y="413" font-size="19" font-weight="900" text-anchor="middle" class="fg">✓ 讀得到</text>
 
-  <rect x="28" y="392" width="672" height="56" class="o"/>
-  <rect x="20" y="384" width="672" height="56" class="card stroke" stroke-width="3"/>
-  <text x="40" y="420" font-size="19" font-weight="900" class="ink">✗ H1 在 &lt;div hidden&gt; 裡 → 改把 H1 移出 Suspense</text>
+  <path d="M120 460v48" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="134" y="492" font-size="17" font-weight="700" class="fg">否（請求時才串流）</text>
 
-  <!-- 分隔 -->
-  <path d="M20 486h680" class="stroke" stroke-width="3" stroke-dasharray="10 8"/>
-
-  <!-- ===== title ===== -->
-  <rect x="20" y="514" width="120" height="40" class="tag"/>
-  <text x="80" y="542" font-size="22" font-weight="900" text-anchor="middle" class="tagtext">title</text>
-
-  <rect x="20" y="574" width="430" height="108" class="card stroke" stroke-width="3"/>
-  <text x="40" y="608" font-size="19" font-weight="700" class="fg">generateMetadata 在請求時才算，</text>
-  <text x="40" y="636" font-size="19" font-weight="700" class="fg">而且比頁面開頭慢？</text>
-  <text x="40" y="664" font-size="16" class="mut">靜態 metadata 物件、SSG 頁面都不會</text>
-  <path d="M450 628h86" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-  <text x="470" y="618" font-size="17" font-weight="700" class="fg">否</text>
-  <rect x="546" y="604" width="154" height="48" class="card stroke" stroke-width="3"/>
-  <text x="623" y="635" font-size="19" font-weight="900" text-anchor="middle" class="fg">✓ 在 head</text>
-
-  <path d="M120 682v40" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-  <text x="134" y="708" font-size="17" font-weight="700" class="fg">是</text>
-
-  <rect x="28" y="738" width="672" height="56" class="o"/>
-  <rect x="20" y="730" width="672" height="56" class="card stroke" stroke-width="3"/>
-  <text x="40" y="766" font-size="19" font-weight="900" class="ink">✗ title 跑到 body → 改用靜態 metadata 或 htmlLimitedBots</text>
+  <rect x="28" y="526" width="672" height="96" class="o"/>
+  <rect x="20" y="518" width="672" height="96" class="card stroke" stroke-width="3"/>
+  <text x="40" y="556" font-size="19" font-weight="900" class="ink">✗ H1 在 &lt;div hidden&gt; 裡</text>
+  <text x="40" y="592" font-size="18" class="fg">把 H1 移出 Suspense，或放進 fallback</text>
 </svg>
