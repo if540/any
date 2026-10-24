@@ -110,4 +110,6 @@ h3 { font-size: 1.2rem; font-weight: 700; }
 .prose .table-wrap:focus-visible { outline-offset: 2px; }
 .prose th, .prose td { border: 1.5px solid var(--line); padding: 0.5rem 0.75rem; text-align: left; }
 .prose th { background: var(--fg); color: var(--bg); }
+/* 表頭是反白底色，行內程式碼改成透明底、沿用表頭文字色 */
+.prose th code { background: transparent; color: inherit; border-color: color-mix(in srgb, var(--bg) 45%, transparent); }
 .prose hr { border: 0; border-top: 3px solid var(--line); margin: 3rem 0; }
