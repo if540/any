@@ -5,7 +5,7 @@ description: 畫面上明明有 H1，FreeGo 卻判定缺少。原因是 Next.js 
 pubDate: 2026-10-24
 tags: [Next.js, 無障礙, FreeGo]
 wcag: ['1.3.1', '2.4.2']
-draft: true
+draft: false
 coverTitle: "FreeGo × Next.js\n明明有 H1\n為什麼缺少"
 coverMotif: stack
 tldr: FreeGo 只讀伺服器回傳的原始 HTML，不執行 JavaScript。Next.js 在請求時串流的 Suspense 內容會先放在 <div hidden> 裡，要靠 JS 才會換到畫面上，所以包在 Suspense（含 loading.tsx、layout 的 Suspense）裡的 H1 會被判定缺失；用 ssr false 或靜態頁裡的 useSearchParams，H1 甚至不會出現在 HTML。最根本的修法是把 H1 移出 Suspense，htmlLimitedBots 修不好 H1。
