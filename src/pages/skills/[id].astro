@@ -34,11 +34,8 @@ interface Props {
 }
 const { skill: s, guideline: g, principle: p, prev, next } = Astro.props;
 const on = s.stars > 0;
-// W3C 對照：網站無障礙規範以 WCAG 2.1 為基礎，主要連到 2.1；2.2 的異動另外補充
-const ref = (wcagRefs.criteria as Record<string, { en: string; slug21: string; slug22: string; obsolete22: boolean }>)[s.id];
-const added22 = (wcagRefs.added22 as Record<string, { id: string; en: string; level: string; slug: string }[]>)[g.id] ?? [];
-const renamed22 = ref.slug21 !== ref.slug22;
-const has22 = ref.obsolete22 || renamed22 || added22.length > 0;
+// W3C 對照：網站無障礙規範（115 年 5 月版）以 WCAG 2.2 為基礎
+const ref = (wcagRefs.criteria as Record<string, { en: string; slug: string; new22: boolean; obsolete: boolean }>)[s.id];
 const desc = s.text.replace(/\s+/g, '').slice(0, 110) + (s.text.length > 110 ? '…' : '');
 const home = absoluteUrl('/', Astro.site);
 ---
@@ -81,34 +78,12 @@ const home = absoluteUrl('/', Astro.site);
 
     <section aria-labelledby="sc-wcag">
       <h2 id="sc-wcag">WCAG 對照</h2>
-      <p class="sc-en">WCAG 2.1 成功準則 {s.id}：<span lang="en">{ref.en}</span></p>
+      <p class="sc-en">WCAG 2.2 成功準則 {s.id}：<span lang="en">{ref.en}</span>{ref.new22 && <span class="sc-new">WCAG 2.2 新增</span>}</p>
       <ul class="sc-links">
-        <li><a href={`https://www.w3.org/TR/WCAG21/#${ref.slug21}`}>WCAG 2.1 規範條文：<span lang="en">{ref.en}</span></a></li>
-        <li><a href={`https://www.w3.org/WAI/WCAG21/Understanding/${ref.slug21}`}>理解文件（<span lang="en">Understanding {s.id}</span>）</a></li>
-        <li><a href={`https://www.w3.org/WAI/WCAG22/quickref/#${ref.slug22}`}>實作技術與失敗案例（<span lang="en">How to Meet {s.id}</span>）</a></li>
+        <li><a href={`https://www.w3.org/TR/WCAG22/#${ref.slug}`}>WCAG 2.2 規範條文：<span lang="en">{ref.en}</span></a></li>
+        <li><a href={`https://www.w3.org/WAI/WCAG22/Understanding/${ref.slug}`}>理解文件（<span lang="en">Understanding {s.id}</span>）</a></li>
+        <li><a href={`https://www.w3.org/WAI/WCAG22/quickref/#${ref.slug}`}>實作技術與失敗案例（<span lang="en">How to Meet {s.id}</span>）</a></li>
       </ul>
-
-      {has22 && (
-        <div class="sc-22">
-          <h3>WCAG 2.2 補充</h3>
-          {ref.obsolete22 && (
-            <p>WCAG 2.2 已將 {s.id} 標為過時並移除：輔助科技已不需要自行剖析 HTML，原本的問題已由其他準則涵蓋。網站無障礙規範（110 年版）仍列有這一項。</p>
-          )}
-          {renamed22 && (
-            <p>WCAG 2.2 將 {s.id} 更名為 <a href={`https://www.w3.org/WAI/WCAG22/Understanding/${ref.slug22}`} lang="en">Target Size (Enhanced)</a>，內容不變。</p>
-          )}
-          {added22.length > 0 && (
-            <>
-              <p>WCAG 2.2 在指引 {g.id} 新增了以下成功準則，網站無障礙規範（110 年版）尚未納入：</p>
-              <ul class="sc-links">
-                {added22.map((a) => (
-                  <li><a href={`https://www.w3.org/WAI/WCAG22/Understanding/${a.slug}`}>{a.id} <span lang="en">{a.en}</span></a>（{a.level}）</li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-      )}
     </section>
 
     <section aria-labelledby="sc-articles">
@@ -146,8 +121,6 @@ const home = absoluteUrl('/', Astro.site);
   .sc-en { margin: 0 0 0.5rem; }
   .sc-links { margin: 0 0 1rem; padding-left: 1.2rem; }
   .sc-links li + li { margin-top: 0.3rem; }
-  .sc-22 { border: 2px dashed var(--muted); padding: 0.75rem 1rem; margin-top: 1rem; }
-  .sc-22 h3 { margin: 0 0 0.5rem; font-size: 1rem; }
-  .sc-22 p { margin: 0 0 0.5rem; font-size: 0.95rem; }
+  .sc-new { display: inline-block; margin-left: 0.5rem; padding: 0 0.4rem; border: 2px solid currentColor; font-size: 0.8rem; font-weight: 700; }
   .sc-pager { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 3px solid var(--line); padding-top: 1rem; margin-top: 3rem; font-weight: 700; }
 </style>

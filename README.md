@@ -134,20 +134,22 @@ mood: 開心                      # 選填
 
 ## 無障礙技能樹
 
-`/skills/` 以網站無障礙規範（110 年 3 月）的 4 原則、13 指引、78 成功準則為技能樹。
+`/skills/` 以網站無障礙規範（115 年 5 月版，以 WCAG 2.2 為基礎）的 4 原則、13 指引、86 項成功準則為技能樹。規範列有 87 項編號，其中 4.1.1 語法分析已因過時而刪除，資料裡標為 `obsolete`，不列入技能，文章的 `wcag` 欄位也不能填。
 
 - 文章的 `wcag` 欄位填成功準則編號，對應的技能就會點亮；編號會在 build 時檢查是否存在
 - 星級：以文章數最多的準則為 5 星，`round(5 × log(1+n) / log(1+最多篇數))`，已解鎖至少 1 星
 - 三種顯示方式（四欄、分支樹、技能盤），預設四欄，讀者的選擇會記在瀏覽器裡
 - 每項準則都有個別頁 `/skills/4-1-3/`，沒有 JavaScript 時節點直接連過去
 - 等級篩選：關掉的等級會淡化並設為 `inert`（保留位置、不能操作、螢幕閱讀器略過），結果用 `role="status"` 念出
-- 個別頁附 WCAG 2.1 規範條文、Understanding、How to Meet 連結；WCAG 2.2 的更名、移除與新增準則另外補充。對照資料 `src/data/wcag-refs.json` 由 `scripts/build-wcag-refs.py` 從 w3c/wcag repo 產生
+- 個別頁附 WCAG 2.2 規範條文、Understanding、How to Meet 連結，WCAG 2.2 新增的 9 項準則另有標記。對照資料 `src/data/wcag-refs.json` 由 `scripts/build-wcag-refs.py` 從 w3c/wcag repo 產生
 - 規範資料在 `src/data/a11y-guide.json`，由規範 PDF 轉出：
 
 ```bash
 pdftotext -layout 規範.pdf guide.txt
 python3 scripts/parse-a11y-guide.py guide.txt src/data/a11y-guide.json
 ```
+
+規範改版後，`src/data/wcag-refs.json` 也要重新產生（指令見 `scripts/build-wcag-refs.py` 開頭），程式會檢查規範與 WCAG 的編號、等級是否一致。
 
 ## 作者與掛名
 

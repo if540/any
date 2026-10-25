@@ -81,7 +81,7 @@ export function initSkillTree() {
     if (!announce || !levelStatus) return;
     const on = LEVELS.filter((l) => shown.has(l));
     const off = LEVELS.filter((l) => !shown.has(l));
-    // 每個版面都有一份 78 項，用其中一個版面計數
+    // 每個版面都有一份完整的技能，用其中一個版面計數
     const count = document.querySelectorAll('[data-view="a"] .sk[data-level]:not([inert])').length;
     levelStatus.textContent = on.length === 0
       ? '已淡化全部等級的技能'

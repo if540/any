@@ -17,7 +17,8 @@ const requireCoverAlt = (d: { cover?: unknown; coverAlt?: string }) => !d.cover 
 const coverAltMsg = { message: '有 cover 時必須填寫 coverAlt 替代文字', path: ['coverAlt'] };
 
 // 對應的成功準則編號（例：['4.1.3']），用來點亮無障礙技能樹
-const SC_IDS = guide.criteria.map((c) => c.id) as [string, ...string[]];
+// 已因過時而刪除的準則（4.1.1）沒有技能頁，不能填
+const SC_IDS = (guide.criteria as { id: string; obsolete?: boolean }[]).filter((c) => !c.obsolete).map((c) => c.id) as [string, ...string[]];
 const wcag = z.array(z.enum(SC_IDS)).default([]);
 
 const faq = z

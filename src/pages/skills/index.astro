@@ -3,7 +3,7 @@ import '../../styles/skills.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SkillNode from '../../components/skills/SkillNode.astro';
 import Stars from '../../components/skills/Stars.astro';
-import { getSkillTree, GUIDE_SOURCE, LEVEL_LABEL } from '../../utils/skills';
+import { getSkillTree, GUIDE_SOURCE, GUIDE_TOTAL, OBSOLETE_CRITERIA, LEVEL_LABEL } from '../../utils/skills';
 import { withBase } from '../../utils/url';
 
 const tree = await getSkillTree();
@@ -23,20 +23,23 @@ const clientData = Object.fromEntries(
 );
 const guidelineNames = Object.fromEntries(principles.flatMap((p) => p.guidelines).map((g) => [g.id, g.name]));
 const skillsBase = withBase('/skills/');
+const gCount = principles.reduce((t, p) => t + p.guidelines.length, 0);
+const obsoleteNote = OBSOLETE_CRITERIA.map((c) => `${c.id} ${c.name}`).join('、');
 ---
 <BaseLayout
   title="無障礙技能樹"
-  description={`以網站無障礙規範的 4 原則、13 指引、78 成功準則為技能樹，依本站文章點亮技能，目前已解鎖 ${stat.unlocked} 項。`}
+  description={`以網站無障礙規範的 ${principles.length} 原則、${gCount} 指引、${stat.total} 項成功準則為技能樹，依本站文章點亮技能，目前已解鎖 ${stat.unlocked} 項。`}
 >
   <div class="skills-page">
     <h1>無障礙技能樹<span class="accent" aria-hidden="true">.</span></h1>
     <p class="intro">
-      以{GUIDE_SOURCE}的 4 項原則、13 項指引、78 項成功準則為技能樹。本站有文章談到的成功準則就會點亮，文章越多星級越高。
+      以{GUIDE_SOURCE}的 {principles.length} 項原則、{gCount} 項指引、{stat.total} 項成功準則為技能樹。本站有文章談到的成功準則就會點亮，文章越多星級越高。
+      {OBSOLETE_CRITERIA.length > 0 && <>規範共列 {GUIDE_TOTAL} 項編號，其中 {obsoleteNote}已因過時而刪除，不列入技能。</>}
     </p>
 
     <section class="hud" aria-labelledby="hud-title">
       <h2 id="hud-title" class="visually-hidden">技能總覽</h2>
-      <p class="hud-score">{stat.unlocked}<span class="visually-hidden"> 項技能</span> / 78
+      <p class="hud-score">{stat.unlocked}<span class="visually-hidden"> 項技能</span> / {stat.total}
         <small>已解鎖 · 平均 ★ {stat.avgStars} · 成就 {earned}/{achievements.length}</small>
       </p>
       <ul class="hud-bars">

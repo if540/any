@@ -2,535 +2,525 @@
   "criteria": {
     "1.1.1": {
       "en": "Non-text Content",
-      "slug21": "non-text-content",
-      "slug22": "non-text-content",
-      "obsolete22": false
+      "slug": "non-text-content",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.1": {
       "en": "Audio-only and Video-only (Prerecorded)",
-      "slug21": "audio-only-and-video-only-prerecorded",
-      "slug22": "audio-only-and-video-only-prerecorded",
-      "obsolete22": false
+      "slug": "audio-only-and-video-only-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.2": {
       "en": "Captions (Prerecorded)",
-      "slug21": "captions-prerecorded",
-      "slug22": "captions-prerecorded",
-      "obsolete22": false
+      "slug": "captions-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.3": {
       "en": "Audio Description or Media Alternative (Prerecorded)",
-      "slug21": "audio-description-or-media-alternative-prerecorded",
-      "slug22": "audio-description-or-media-alternative-prerecorded",
-      "obsolete22": false
+      "slug": "audio-description-or-media-alternative-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.4": {
       "en": "Captions (Live)",
-      "slug21": "captions-live",
-      "slug22": "captions-live",
-      "obsolete22": false
+      "slug": "captions-live",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.5": {
       "en": "Audio Description (Prerecorded)",
-      "slug21": "audio-description-prerecorded",
-      "slug22": "audio-description-prerecorded",
-      "obsolete22": false
+      "slug": "audio-description-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.6": {
       "en": "Sign Language (Prerecorded)",
-      "slug21": "sign-language-prerecorded",
-      "slug22": "sign-language-prerecorded",
-      "obsolete22": false
+      "slug": "sign-language-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.7": {
       "en": "Extended Audio Description (Prerecorded)",
-      "slug21": "extended-audio-description-prerecorded",
-      "slug22": "extended-audio-description-prerecorded",
-      "obsolete22": false
+      "slug": "extended-audio-description-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.8": {
       "en": "Media Alternative (Prerecorded)",
-      "slug21": "media-alternative-prerecorded",
-      "slug22": "media-alternative-prerecorded",
-      "obsolete22": false
+      "slug": "media-alternative-prerecorded",
+      "new22": false,
+      "obsolete": false
     },
     "1.2.9": {
       "en": "Audio-only (Live)",
-      "slug21": "audio-only-live",
-      "slug22": "audio-only-live",
-      "obsolete22": false
+      "slug": "audio-only-live",
+      "new22": false,
+      "obsolete": false
     },
     "1.3.1": {
       "en": "Info and Relationships",
-      "slug21": "info-and-relationships",
-      "slug22": "info-and-relationships",
-      "obsolete22": false
+      "slug": "info-and-relationships",
+      "new22": false,
+      "obsolete": false
     },
     "1.3.2": {
       "en": "Meaningful Sequence",
-      "slug21": "meaningful-sequence",
-      "slug22": "meaningful-sequence",
-      "obsolete22": false
+      "slug": "meaningful-sequence",
+      "new22": false,
+      "obsolete": false
     },
     "1.3.3": {
       "en": "Sensory Characteristics",
-      "slug21": "sensory-characteristics",
-      "slug22": "sensory-characteristics",
-      "obsolete22": false
+      "slug": "sensory-characteristics",
+      "new22": false,
+      "obsolete": false
     },
     "1.3.4": {
       "en": "Orientation",
-      "slug21": "orientation",
-      "slug22": "orientation",
-      "obsolete22": false
+      "slug": "orientation",
+      "new22": false,
+      "obsolete": false
     },
     "1.3.5": {
       "en": "Identify Input Purpose",
-      "slug21": "identify-input-purpose",
-      "slug22": "identify-input-purpose",
-      "obsolete22": false
+      "slug": "identify-input-purpose",
+      "new22": false,
+      "obsolete": false
     },
     "1.3.6": {
       "en": "Identify Purpose",
-      "slug21": "identify-purpose",
-      "slug22": "identify-purpose",
-      "obsolete22": false
+      "slug": "identify-purpose",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.1": {
       "en": "Use of Color",
-      "slug21": "use-of-color",
-      "slug22": "use-of-color",
-      "obsolete22": false
+      "slug": "use-of-color",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.2": {
       "en": "Audio Control",
-      "slug21": "audio-control",
-      "slug22": "audio-control",
-      "obsolete22": false
+      "slug": "audio-control",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.3": {
       "en": "Contrast (Minimum)",
-      "slug21": "contrast-minimum",
-      "slug22": "contrast-minimum",
-      "obsolete22": false
+      "slug": "contrast-minimum",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.4": {
       "en": "Resize Text",
-      "slug21": "resize-text",
-      "slug22": "resize-text",
-      "obsolete22": false
+      "slug": "resize-text",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.5": {
       "en": "Images of Text",
-      "slug21": "images-of-text",
-      "slug22": "images-of-text",
-      "obsolete22": false
+      "slug": "images-of-text",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.6": {
       "en": "Contrast (Enhanced)",
-      "slug21": "contrast-enhanced",
-      "slug22": "contrast-enhanced",
-      "obsolete22": false
+      "slug": "contrast-enhanced",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.7": {
       "en": "Low or No Background Audio",
-      "slug21": "low-or-no-background-audio",
-      "slug22": "low-or-no-background-audio",
-      "obsolete22": false
+      "slug": "low-or-no-background-audio",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.8": {
       "en": "Visual Presentation",
-      "slug21": "visual-presentation",
-      "slug22": "visual-presentation",
-      "obsolete22": false
+      "slug": "visual-presentation",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.9": {
       "en": "Images of Text (No Exception)",
-      "slug21": "images-of-text-no-exception",
-      "slug22": "images-of-text-no-exception",
-      "obsolete22": false
+      "slug": "images-of-text-no-exception",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.10": {
       "en": "Reflow",
-      "slug21": "reflow",
-      "slug22": "reflow",
-      "obsolete22": false
+      "slug": "reflow",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.11": {
       "en": "Non-text Contrast",
-      "slug21": "non-text-contrast",
-      "slug22": "non-text-contrast",
-      "obsolete22": false
+      "slug": "non-text-contrast",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.12": {
       "en": "Text Spacing",
-      "slug21": "text-spacing",
-      "slug22": "text-spacing",
-      "obsolete22": false
+      "slug": "text-spacing",
+      "new22": false,
+      "obsolete": false
     },
     "1.4.13": {
       "en": "Content on Hover or Focus",
-      "slug21": "content-on-hover-or-focus",
-      "slug22": "content-on-hover-or-focus",
-      "obsolete22": false
+      "slug": "content-on-hover-or-focus",
+      "new22": false,
+      "obsolete": false
     },
     "2.1.1": {
       "en": "Keyboard",
-      "slug21": "keyboard",
-      "slug22": "keyboard",
-      "obsolete22": false
+      "slug": "keyboard",
+      "new22": false,
+      "obsolete": false
     },
     "2.1.2": {
       "en": "No Keyboard Trap",
-      "slug21": "no-keyboard-trap",
-      "slug22": "no-keyboard-trap",
-      "obsolete22": false
+      "slug": "no-keyboard-trap",
+      "new22": false,
+      "obsolete": false
     },
     "2.1.3": {
       "en": "Keyboard (No Exception)",
-      "slug21": "keyboard-no-exception",
-      "slug22": "keyboard-no-exception",
-      "obsolete22": false
+      "slug": "keyboard-no-exception",
+      "new22": false,
+      "obsolete": false
     },
     "2.1.4": {
       "en": "Character Key Shortcuts",
-      "slug21": "character-key-shortcuts",
-      "slug22": "character-key-shortcuts",
-      "obsolete22": false
+      "slug": "character-key-shortcuts",
+      "new22": false,
+      "obsolete": false
     },
     "2.2.1": {
       "en": "Timing Adjustable",
-      "slug21": "timing-adjustable",
-      "slug22": "timing-adjustable",
-      "obsolete22": false
+      "slug": "timing-adjustable",
+      "new22": false,
+      "obsolete": false
     },
     "2.2.2": {
       "en": "Pause, Stop, Hide",
-      "slug21": "pause-stop-hide",
-      "slug22": "pause-stop-hide",
-      "obsolete22": false
+      "slug": "pause-stop-hide",
+      "new22": false,
+      "obsolete": false
     },
     "2.2.3": {
       "en": "No Timing",
-      "slug21": "no-timing",
-      "slug22": "no-timing",
-      "obsolete22": false
+      "slug": "no-timing",
+      "new22": false,
+      "obsolete": false
     },
     "2.2.4": {
       "en": "Interruptions",
-      "slug21": "interruptions",
-      "slug22": "interruptions",
-      "obsolete22": false
+      "slug": "interruptions",
+      "new22": false,
+      "obsolete": false
     },
     "2.2.5": {
       "en": "Re-authenticating",
-      "slug21": "re-authenticating",
-      "slug22": "re-authenticating",
-      "obsolete22": false
+      "slug": "re-authenticating",
+      "new22": false,
+      "obsolete": false
     },
     "2.2.6": {
       "en": "Timeouts",
-      "slug21": "timeouts",
-      "slug22": "timeouts",
-      "obsolete22": false
+      "slug": "timeouts",
+      "new22": false,
+      "obsolete": false
     },
     "2.3.1": {
       "en": "Three Flashes or Below Threshold",
-      "slug21": "three-flashes-or-below-threshold",
-      "slug22": "three-flashes-or-below-threshold",
-      "obsolete22": false
+      "slug": "three-flashes-or-below-threshold",
+      "new22": false,
+      "obsolete": false
     },
     "2.3.2": {
       "en": "Three Flashes",
-      "slug21": "three-flashes",
-      "slug22": "three-flashes",
-      "obsolete22": false
+      "slug": "three-flashes",
+      "new22": false,
+      "obsolete": false
     },
     "2.3.3": {
       "en": "Animation from Interactions",
-      "slug21": "animation-from-interactions",
-      "slug22": "animation-from-interactions",
-      "obsolete22": false
+      "slug": "animation-from-interactions",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.1": {
       "en": "Bypass Blocks",
-      "slug21": "bypass-blocks",
-      "slug22": "bypass-blocks",
-      "obsolete22": false
+      "slug": "bypass-blocks",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.2": {
       "en": "Page Titled",
-      "slug21": "page-titled",
-      "slug22": "page-titled",
-      "obsolete22": false
+      "slug": "page-titled",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.3": {
       "en": "Focus Order",
-      "slug21": "focus-order",
-      "slug22": "focus-order",
-      "obsolete22": false
+      "slug": "focus-order",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.4": {
       "en": "Link Purpose (In Context)",
-      "slug21": "link-purpose-in-context",
-      "slug22": "link-purpose-in-context",
-      "obsolete22": false
+      "slug": "link-purpose-in-context",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.5": {
       "en": "Multiple Ways",
-      "slug21": "multiple-ways",
-      "slug22": "multiple-ways",
-      "obsolete22": false
+      "slug": "multiple-ways",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.6": {
       "en": "Headings and Labels",
-      "slug21": "headings-and-labels",
-      "slug22": "headings-and-labels",
-      "obsolete22": false
+      "slug": "headings-and-labels",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.7": {
       "en": "Focus Visible",
-      "slug21": "focus-visible",
-      "slug22": "focus-visible",
-      "obsolete22": false
+      "slug": "focus-visible",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.8": {
       "en": "Location",
-      "slug21": "location",
-      "slug22": "location",
-      "obsolete22": false
+      "slug": "location",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.9": {
       "en": "Link Purpose (Link Only)",
-      "slug21": "link-purpose-link-only",
-      "slug22": "link-purpose-link-only",
-      "obsolete22": false
+      "slug": "link-purpose-link-only",
+      "new22": false,
+      "obsolete": false
     },
     "2.4.10": {
       "en": "Section Headings",
-      "slug21": "section-headings",
-      "slug22": "section-headings",
-      "obsolete22": false
+      "slug": "section-headings",
+      "new22": false,
+      "obsolete": false
+    },
+    "2.4.11": {
+      "en": "Focus Not Obscured (Minimum)",
+      "slug": "focus-not-obscured-minimum",
+      "new22": true,
+      "obsolete": false
+    },
+    "2.4.12": {
+      "en": "Focus Not Obscured (Enhanced)",
+      "slug": "focus-not-obscured-enhanced",
+      "new22": true,
+      "obsolete": false
+    },
+    "2.4.13": {
+      "en": "Focus Appearance",
+      "slug": "focus-appearance",
+      "new22": true,
+      "obsolete": false
     },
     "2.5.1": {
       "en": "Pointer Gestures",
-      "slug21": "pointer-gestures",
-      "slug22": "pointer-gestures",
-      "obsolete22": false
+      "slug": "pointer-gestures",
+      "new22": false,
+      "obsolete": false
     },
     "2.5.2": {
       "en": "Pointer Cancellation",
-      "slug21": "pointer-cancellation",
-      "slug22": "pointer-cancellation",
-      "obsolete22": false
+      "slug": "pointer-cancellation",
+      "new22": false,
+      "obsolete": false
     },
     "2.5.3": {
       "en": "Label in Name",
-      "slug21": "label-in-name",
-      "slug22": "label-in-name",
-      "obsolete22": false
+      "slug": "label-in-name",
+      "new22": false,
+      "obsolete": false
     },
     "2.5.4": {
       "en": "Motion Actuation",
-      "slug21": "motion-actuation",
-      "slug22": "motion-actuation",
-      "obsolete22": false
+      "slug": "motion-actuation",
+      "new22": false,
+      "obsolete": false
     },
     "2.5.5": {
-      "en": "Target Size",
-      "slug21": "target-size",
-      "slug22": "target-size-enhanced",
-      "obsolete22": false
+      "en": "Target Size (Enhanced)",
+      "slug": "target-size-enhanced",
+      "new22": false,
+      "obsolete": false
     },
     "2.5.6": {
       "en": "Concurrent Input Mechanisms",
-      "slug21": "concurrent-input-mechanisms",
-      "slug22": "concurrent-input-mechanisms",
-      "obsolete22": false
+      "slug": "concurrent-input-mechanisms",
+      "new22": false,
+      "obsolete": false
+    },
+    "2.5.7": {
+      "en": "Dragging Movements",
+      "slug": "dragging-movements",
+      "new22": true,
+      "obsolete": false
+    },
+    "2.5.8": {
+      "en": "Target Size (Minimum)",
+      "slug": "target-size-minimum",
+      "new22": true,
+      "obsolete": false
     },
     "3.1.1": {
       "en": "Language of Page",
-      "slug21": "language-of-page",
-      "slug22": "language-of-page",
-      "obsolete22": false
+      "slug": "language-of-page",
+      "new22": false,
+      "obsolete": false
     },
     "3.1.2": {
       "en": "Language of Parts",
-      "slug21": "language-of-parts",
-      "slug22": "language-of-parts",
-      "obsolete22": false
+      "slug": "language-of-parts",
+      "new22": false,
+      "obsolete": false
     },
     "3.1.3": {
       "en": "Unusual Words",
-      "slug21": "unusual-words",
-      "slug22": "unusual-words",
-      "obsolete22": false
+      "slug": "unusual-words",
+      "new22": false,
+      "obsolete": false
     },
     "3.1.4": {
       "en": "Abbreviations",
-      "slug21": "abbreviations",
-      "slug22": "abbreviations",
-      "obsolete22": false
+      "slug": "abbreviations",
+      "new22": false,
+      "obsolete": false
     },
     "3.1.5": {
       "en": "Reading Level",
-      "slug21": "reading-level",
-      "slug22": "reading-level",
-      "obsolete22": false
+      "slug": "reading-level",
+      "new22": false,
+      "obsolete": false
     },
     "3.1.6": {
       "en": "Pronunciation",
-      "slug21": "pronunciation",
-      "slug22": "pronunciation",
-      "obsolete22": false
+      "slug": "pronunciation",
+      "new22": false,
+      "obsolete": false
     },
     "3.2.1": {
       "en": "On Focus",
-      "slug21": "on-focus",
-      "slug22": "on-focus",
-      "obsolete22": false
+      "slug": "on-focus",
+      "new22": false,
+      "obsolete": false
     },
     "3.2.2": {
       "en": "On Input",
-      "slug21": "on-input",
-      "slug22": "on-input",
-      "obsolete22": false
+      "slug": "on-input",
+      "new22": false,
+      "obsolete": false
     },
     "3.2.3": {
       "en": "Consistent Navigation",
-      "slug21": "consistent-navigation",
-      "slug22": "consistent-navigation",
-      "obsolete22": false
+      "slug": "consistent-navigation",
+      "new22": false,
+      "obsolete": false
     },
     "3.2.4": {
       "en": "Consistent Identification",
-      "slug21": "consistent-identification",
-      "slug22": "consistent-identification",
-      "obsolete22": false
+      "slug": "consistent-identification",
+      "new22": false,
+      "obsolete": false
     },
     "3.2.5": {
       "en": "Change on Request",
-      "slug21": "change-on-request",
-      "slug22": "change-on-request",
-      "obsolete22": false
+      "slug": "change-on-request",
+      "new22": false,
+      "obsolete": false
+    },
+    "3.2.6": {
+      "en": "Consistent Help",
+      "slug": "consistent-help",
+      "new22": true,
+      "obsolete": false
     },
     "3.3.1": {
       "en": "Error Identification",
-      "slug21": "error-identification",
-      "slug22": "error-identification",
-      "obsolete22": false
+      "slug": "error-identification",
+      "new22": false,
+      "obsolete": false
     },
     "3.3.2": {
       "en": "Labels or Instructions",
-      "slug21": "labels-or-instructions",
-      "slug22": "labels-or-instructions",
-      "obsolete22": false
+      "slug": "labels-or-instructions",
+      "new22": false,
+      "obsolete": false
     },
     "3.3.3": {
       "en": "Error Suggestion",
-      "slug21": "error-suggestion",
-      "slug22": "error-suggestion",
-      "obsolete22": false
+      "slug": "error-suggestion",
+      "new22": false,
+      "obsolete": false
     },
     "3.3.4": {
       "en": "Error Prevention (Legal, Financial, Data)",
-      "slug21": "error-prevention-legal-financial-data",
-      "slug22": "error-prevention-legal-financial-data",
-      "obsolete22": false
+      "slug": "error-prevention-legal-financial-data",
+      "new22": false,
+      "obsolete": false
     },
     "3.3.5": {
       "en": "Help",
-      "slug21": "help",
-      "slug22": "help",
-      "obsolete22": false
+      "slug": "help",
+      "new22": false,
+      "obsolete": false
     },
     "3.3.6": {
       "en": "Error Prevention (All)",
-      "slug21": "error-prevention-all",
-      "slug22": "error-prevention-all",
-      "obsolete22": false
+      "slug": "error-prevention-all",
+      "new22": false,
+      "obsolete": false
+    },
+    "3.3.7": {
+      "en": "Redundant Entry",
+      "slug": "redundant-entry",
+      "new22": true,
+      "obsolete": false
+    },
+    "3.3.8": {
+      "en": "Accessible Authentication (Minimum)",
+      "slug": "accessible-authentication-minimum",
+      "new22": true,
+      "obsolete": false
+    },
+    "3.3.9": {
+      "en": "Accessible Authentication (Enhanced)",
+      "slug": "accessible-authentication-enhanced",
+      "new22": true,
+      "obsolete": false
     },
     "4.1.1": {
       "en": "Parsing",
-      "slug21": "parsing",
-      "slug22": "parsing",
-      "obsolete22": true
+      "slug": "parsing",
+      "new22": false,
+      "obsolete": true
     },
     "4.1.2": {
       "en": "Name, Role, Value",
-      "slug21": "name-role-value",
-      "slug22": "name-role-value",
-      "obsolete22": false
+      "slug": "name-role-value",
+      "new22": false,
+      "obsolete": false
     },
     "4.1.3": {
       "en": "Status Messages",
-      "slug21": "status-messages",
-      "slug22": "status-messages",
-      "obsolete22": false
+      "slug": "status-messages",
+      "new22": false,
+      "obsolete": false
     }
-  },
-  "added22": {
-    "2.4": [
-      {
-        "id": "2.4.11",
-        "en": "Focus Not Obscured (Minimum)",
-        "level": "AA",
-        "slug": "focus-not-obscured-minimum"
-      },
-      {
-        "id": "2.4.12",
-        "en": "Focus Not Obscured (Enhanced)",
-        "level": "AAA",
-        "slug": "focus-not-obscured-enhanced"
-      },
-      {
-        "id": "2.4.13",
-        "en": "Focus Appearance",
-        "level": "AAA",
-        "slug": "focus-appearance"
-      }
-    ],
-    "2.5": [
-      {
-        "id": "2.5.7",
-        "en": "Dragging Movements",
-        "level": "AA",
-        "slug": "dragging-movements"
-      },
-      {
-        "id": "2.5.8",
-        "en": "Target Size (Minimum)",
-        "level": "AA",
-        "slug": "target-size-minimum"
-      }
-    ],
-    "3.2": [
-      {
-        "id": "3.2.6",
-        "en": "Consistent Help",
-        "level": "A",
-        "slug": "consistent-help"
-      }
-    ],
-    "3.3": [
-      {
-        "id": "3.3.7",
-        "en": "Redundant Entry",
-        "level": "A",
-        "slug": "redundant-entry"
-      },
-      {
-        "id": "3.3.8",
-        "en": "Accessible Authentication (Minimum)",
-        "level": "AA",
-        "slug": "accessible-authentication-minimum"
-      },
-      {
-        "id": "3.3.9",
-        "en": "Accessible Authentication (Enhanced)",
-        "level": "AAA",
-        "slug": "accessible-authentication-enhanced"
-      }
-    ]
   }
 }

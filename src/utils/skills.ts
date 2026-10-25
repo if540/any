@@ -1,12 +1,18 @@
-// 無障礙技能樹：把「網站無障礙規範」的 78 項成功準則，和文章的 wcag 欄位對應起來
-import guide from '../data/a11y-guide.json';
+// 無障礙技能樹：把「網站無障礙規範」的成功準則，和文章的 wcag 欄位對應起來
+import guideData from '../data/a11y-guide.json';
 import { getArticles, type Article } from './content';
 
 export type Level = 'A' | 'AA' | 'AAA';
 
 export const LEVEL_LABEL: Record<Level, string> = { A: '基礎', AA: '進階', AAA: '傳說' };
 export const MAX_STARS = 5;
+interface GuideCriterion { id: string; name: string; level: string; guideline: string; principle: string; text: string; obsolete?: boolean }
+const guide = guideData as { source: string; principles: typeof guideData.principles; guidelines: typeof guideData.guidelines; criteria: GuideCriterion[] };
+
 export const GUIDE_SOURCE = guide.source;
+/** 規範列出的全部編號（含已刪除的 4.1.1）與實際成為技能的準則 */
+export const OBSOLETE_CRITERIA = guide.criteria.filter((c) => c.obsolete).map((c) => ({ id: c.id, name: c.name }));
+export const GUIDE_TOTAL = guide.criteria.length;
 
 export interface SkillArticle { id: string; title: string }
 
@@ -74,7 +80,8 @@ export async function getSkillTree(): Promise<SkillTree> {
   }
   const maxArticles = Math.max(0, ...[...bySc.values()].map((v) => v.length));
 
-  const skills: Skill[] = guide.criteria.map((c) => {
+  // 規範標示「因過時而刪除」的準則（4.1.1）不列為技能
+  const skills: Skill[] = guide.criteria.filter((c) => !c.obsolete).map((c) => {
     const list = bySc.get(c.id) ?? [];
     return {
       id: c.id,
@@ -103,16 +110,19 @@ export async function getSkillTree(): Promise<SkillTree> {
   const total = stat(skills);
   const byLevel = (lv: Level[]) => skills.filter((s) => lv.includes(s.level));
   const allOn = (list: Skill[]) => list.length > 0 && list.every((s) => s.stars > 0);
+  const nA = byLevel(['A']).length;
+  const nAA = byLevel(['A', 'AA']).length;
+  const half = Math.ceil(skills.length / 2);
 
   const achievements: Achievement[] = [
     { id: 'first', name: '初次點亮', condition: '解鎖第 1 項技能', earned: total.unlocked >= 1, group: 'milestone' },
     { id: 'ten', name: '十項技能', condition: '解鎖 10 項技能', earned: total.unlocked >= 10, group: 'milestone' },
     { id: 'five-star', name: '五星技能', condition: '任一技能達到 5 顆星', earned: skills.some((s) => s.stars === MAX_STARS), group: 'milestone' },
     { id: 'legend', name: '傳說初現', condition: '解鎖第 1 項 AAA 傳說技能', earned: byLevel(['AAA']).some((s) => s.stars > 0), group: 'milestone' },
-    { id: 'half', name: '過半', condition: '解鎖 39 項技能', earned: total.unlocked >= 39, group: 'milestone' },
-    { id: 'badge-a', name: 'A 級標章', condition: '30 項 A 級技能全部解鎖', earned: allOn(byLevel(['A'])), group: 'milestone' },
-    { id: 'badge-aa', name: 'AA 級標章', condition: 'A 與 AA 級共 50 項全部解鎖', earned: allOn(byLevel(['A', 'AA'])), group: 'milestone' },
-    { id: 'badge-aaa', name: 'AAA 級標章', condition: '78 項技能全部解鎖', earned: allOn(skills), group: 'milestone' },
+    { id: 'half', name: '過半', condition: `解鎖 ${half} 項技能`, earned: total.unlocked >= half, group: 'milestone' },
+    { id: 'badge-a', name: 'A 級標章', condition: `${nA} 項 A 級技能全部解鎖`, earned: allOn(byLevel(['A'])), group: 'milestone' },
+    { id: 'badge-aa', name: 'AA 級標章', condition: `A 與 AA 級共 ${nAA} 項全部解鎖`, earned: allOn(byLevel(['A', 'AA'])), group: 'milestone' },
+    { id: 'badge-aaa', name: 'AAA 級標章', condition: `${skills.length} 項技能全部解鎖`, earned: allOn(skills), group: 'milestone' },
     ...principles.map((p) => ({
       id: `p-${p.id}`, name: `${p.name}守護者`, condition: `原則 ${p.id}「${p.name}」全部解鎖`,
       earned: allOn(skills.filter((s) => s.principle === p.id)), group: 'principle' as const,

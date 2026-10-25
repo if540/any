@@ -1,6 +1,8 @@
 """
-產生技能樹用的 WCAG 對照資料：每項成功準則的英文名稱與 W3C 網址代稱（slug），
-以及 WCAG 2.2 在各指引新增的成功準則。
+產生技能樹用的 WCAG 對照資料：每項成功準則的英文名稱、W3C 網址代稱（slug），
+以及是不是 WCAG 2.2 才新增的準則。
+
+網站無障礙規範（115 年 5 月版）以 WCAG 2.2 為基礎，所以對照以 WCAG 2.2 為主。
 
 用法：
   git clone --depth 1 --filter=blob:none --sparse https://github.com/w3c/wcag.git wcag
@@ -31,30 +33,20 @@ for m in re.finditer(r'<section class="principle"|<section class="guideline"|dat
         obsolete = 'no longer has utility and is removed' in html
         sc[f'{p}.{g}.{n}'] = {'ver': ver, 'slug': slug, 'en': name, 'level': level, 'obsolete': obsolete}
 
-# WCAG 2.1 與 2.2 代稱不同的項目（2.2 改名）
-SLUG21 = {'2.5.5': 'target-size'}
-EN21 = {'2.5.5': 'Target Size'}
-
 guide = json.load(open(guide_path, encoding='utf-8'))
-ids = [c['id'] for c in guide['criteria']]
-refs = {}
-for i in ids:
-    s = sc[i]
-    refs[i] = {
-        # 2.1 的名稱：2.2 把 2.5.5 改名、把 4.1.1 標為已移除
-        'en': EN21.get(i, re.sub(r'\s*\(Obsolete and removed\)', '', s['en'])),
-        'slug21': SLUG21.get(i, s['slug']),
-        'slug22': s['slug'],
-        'obsolete22': s['obsolete'],
+refs, mismatch = {}, []
+for c in guide['criteria']:
+    s = sc[c['id']]
+    refs[c['id']] = {
+        'en': re.sub(r'\s*\(Obsolete and removed\)', '', s['en']),
+        'slug': s['slug'],
+        'new22': s['ver'] == '22',      # WCAG 2.2 新增
+        'obsolete': s['obsolete'],
     }
+    if not s['obsolete'] and s['level'] != c['level']:
+        mismatch.append(f"{c['id']} 規範 {c['level']} / WCAG {s['level']}")
 
-# WCAG 2.2 新增（不在 78 項裡）的成功準則，依指引分組
-added = {}
-for k, s in sc.items():
-    if k in refs:
-        continue
-    gid = '.'.join(k.split('.')[:2])
-    added.setdefault(gid, []).append({'id': k, 'en': s['en'], 'level': s['level'], 'slug': s['slug']})
-
-json.dump({'criteria': refs, 'added22': added}, open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
-print(f'criteria={len(refs)} added22={sum(len(v) for v in added.values())}')
+missing = [k for k in sc if k not in refs]
+json.dump({'criteria': refs}, open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+print(f'criteria={len(refs)} new22={sum(r["new22"] for r in refs.values())} '
+      f'not-in-guide={missing} level-mismatch={mismatch}')
