@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" role="img" aria-labelledby="t">
+  <title id="t">Rocky Linux 在 Linux 家族中的位置</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}.mutstroke{stroke:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}.mutstroke{stroke:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="560" class="bg"/>
+
+  <!-- ===== 左：Red Hat 家族 ===== -->
+  <rect x="20" y="20" width="400" height="44" class="tag"/>
+  <text x="36" y="49" font-size="19" font-weight="700" class="tagtext">Red Hat 家族（rpm、dnf）</text>
+
+  <rect x="20" y="84" width="400" height="60" class="card stroke" stroke-width="3"/>
+  <text x="40" y="112" font-size="18" font-weight="700" class="fg">Fedora</text>
+  <text x="40" y="134" font-size="15" class="mut">最新功能的試驗場</text>
+  <path d="M220 144v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="20" y="180" width="400" height="60" class="card stroke" stroke-width="3"/>
+  <text x="40" y="208" font-size="18" font-weight="700" class="fg">CentOS Stream</text>
+  <text x="40" y="230" font-size="15" class="mut">RHEL 下一版的預覽</text>
+  <path d="M220 240v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="20" y="276" width="400" height="60" class="card stroke" stroke-width="3"/>
+  <text x="40" y="304" font-size="18" font-weight="700" class="fg">RHEL（Red Hat Enterprise Linux）</text>
+  <text x="40" y="326" font-size="15" class="mut">商業版，要付費訂閱</text>
+
+  <path d="M120 336v52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M320 336v52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="220" y="370" font-size="15" text-anchor="middle" class="mut">依原始碼重建、相容</text>
+
+  <rect x="28" y="404" width="184" height="80" class="o"/>
+  <rect x="20" y="396" width="184" height="80" class="card stroke" stroke-width="3"/>
+  <text x="112" y="430" font-size="20" font-weight="900" text-anchor="middle" class="fg">Rocky Linux</text>
+  <text x="112" y="456" font-size="15" text-anchor="middle" class="ink" font-weight="700">免費，本篇主角</text>
+
+  <rect x="236" y="396" width="184" height="80" class="card stroke" stroke-width="3"/>
+  <text x="328" y="430" font-size="20" font-weight="700" text-anchor="middle" class="fg">AlmaLinux</text>
+  <text x="328" y="456" font-size="15" text-anchor="middle" class="mut">免費，同類替代</text>
+
+  <text x="20" y="512" font-size="15" class="mut">原本的 CentOS Linux 已停止，</text>
+  <text x="20" y="534" font-size="15" class="mut">Rocky 是接替它的主要選擇之一</text>
+
+  <!-- ===== 右：Debian 家族 ===== -->
+  <rect x="450" y="20" width="250" height="44" class="tag"/>
+  <text x="466" y="49" font-size="19" font-weight="700" class="tagtext">Debian 家族（deb、apt）</text>
+
+  <rect x="450" y="84" width="250" height="60" class="card stroke" stroke-width="3"/>
+  <text x="470" y="112" font-size="18" font-weight="700" class="fg">Debian</text>
+  <text x="470" y="134" font-size="15" class="mut">社群維護</text>
+  <path d="M575 144v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="450" y="180" width="250" height="60" class="card stroke" stroke-width="3"/>
+  <text x="470" y="208" font-size="18" font-weight="700" class="fg">Ubuntu</text>
+  <text x="470" y="230" font-size="15" class="mut">以 Debian 為基礎</text>
+
+  <rect x="450" y="276" width="250" height="200" fill="none" class="mutstroke" stroke-width="3" stroke-dasharray="10 7"/>
+  <text x="470" y="312" font-size="17" font-weight="700" class="fg">兩個家族的差異</text>
+  <text x="470" y="344" font-size="15" class="mut">套件格式、套件管理員、</text>
+  <text x="470" y="368" font-size="15" class="mut">防火牆、安全模組、</text>
+  <text x="470" y="392" font-size="15" class="mut">設定檔位置都不同</text>
+  <text x="470" y="432" font-size="15" class="ink" font-weight="700">同一個指令，</text>
+  <text x="470" y="456" font-size="15" class="ink" font-weight="700">換台主機可能就不能用</text>
+</svg>
