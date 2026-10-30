@@ -44,8 +44,8 @@ Blob 就是 JavaScript 裝這串位元組的**容器**，再貼上一張 `type` 
 | 檔案 | `type` | 大小 | `file instanceof Blob` | 用 `.text()` 硬讀成文字 |
 | --- | --- | --- | --- | --- |
 | hello.txt | `text/plain` | 11 bytes | true | `你好 Blob` |
-| tiny.png | `image/png` | 79 bytes | true | `�PNG` 加一堆控制字元 |
-| tiny.jpg | `image/jpeg` | 634 bytes | true | `����JFIF` |
+| tiny.png | `image/png` | 79 bytes | true | 1 個亂碼符號、`PNG`，加一堆控制字元 |
+| tiny.jpg | `image/jpeg` | 634 bytes | true | 4 個亂碼符號、`JFIF`，加一堆控制字元 |
 | beep.mp3 | `audio/mpeg` | 1485 bytes | true | `ID3` 加控制字元 |
 | beep.wav | `audio/wav` | 1644 bytes | true | `RIFF…WA` |
 
@@ -54,7 +54,7 @@ Blob 就是 JavaScript 裝這串位元組的**容器**，再貼上一張 `type` 
 - **全部都是 Blob**，取得方式、API 完全一樣
 - **大部分格式都有固定的開頭**，叫做檔案簽章（magic number），程式就是靠這個認出格式
 - **文字檔沒有固定開頭**，它就是一個一個字的編碼。「你好 Blob」是 7 個字，卻佔 11 個位元組，因為一個中文字在 UTF-8 佔 3 個位元組
-- **用錯方式讀就是亂碼**：圖片的位元組照文字規則解讀，只會得到看不懂的符號
+- **用錯方式讀就是亂碼**：圖片的位元組照文字規則解讀，不合 UTF-8 規則的位元組會變成替代符號（U+FFFD，通常顯示成黑底問號），只剩 `PNG`、`JFIF` 這幾個剛好是英文字母的位元組看得懂
 
 另外，`type` 是瀏覽器**看副檔名猜的**，不是看內容。實測把 JPG 改名成 `.png`，`type` 就變成 `image/png`。
 
