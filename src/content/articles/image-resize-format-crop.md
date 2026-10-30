@@ -21,6 +21,8 @@ faq:
 
 這篇先實測找出原因，再整理前端控制圖片的必懂知識點，最後是可以直接套用的寫法。
 
+文中會用到 Blob、File、blob URL 這些概念，如果還不熟，可以先看姊妹篇[玩轉 Blob、File 與圖片](/any/articles/blob-file-image/)。
+
 ## 先看實測：檔案怎麼變大的
 
 用 Chromium 141 和 Cropper.js 1.7.0，走一遍常見的裁切上傳流程。測試圖是程式合成的照片風格 JPG（3000×2000），以及截圖風格、透明背景的 PNG。
@@ -113,6 +115,8 @@ canvas.toBlob((blob) => {
   // formData.append('image', file)
 }, 'image/jpeg', 0.8)
 ```
+
+Blob、File、data URL、blob URL 之間的關係和更多轉換寫法，整理在[玩轉 Blob、File 與圖片](/any/articles/blob-file-image/)。
 
 ### 6. 副檔名不可信
 

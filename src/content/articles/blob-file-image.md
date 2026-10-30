@@ -21,6 +21,8 @@ faq:
 
 Blob 在網路世界裡到底扮演什麼角色？這篇把五種檔案實際拆開來看。
 
+這篇和[前端圖片處理必懂：上傳後為什麼反而變大](/any/articles/image-resize-format-crop/)是姊妹篇：那篇講 canvas 怎麼把圖片存成檔案，這篇講檔案本身是什麼。
+
 ## 一句話：Blob 是「一串位元組 + 一張標籤」
 
 電腦裡的**所有檔案都是一串位元組**（byte，0 到 255 的數字）。文字、圖片、聲音沒有本質上的不同，差別只在於**這串數字依照什麼規則排列**：
@@ -111,7 +113,7 @@ Blob 就是 JavaScript 裝這串位元組的**容器**，再貼上一張 `type` 
 | Blob → 上傳 | `formData.append('file', blob, 'note.txt')` | 取出來變成 File，帶有檔名 |
 | 取一段 | `blob.slice(0, 3)` | 得到新的 Blob，原本的不變 |
 
-## 四個實用情境
+## 五個實用情境
 
 ### 1. data URL 轉回檔案，不用寫 atob 迴圈
 
@@ -163,6 +165,50 @@ URL.revokeObjectURL(img.src)
 ```
 
 `img.src = file` 直接塞物件是不行的：實測 `src` 會變成字串 `"[object File]"`，圖片載入失敗。blob URL 是指向記憶體裡那份 Blob 的捷徑，只在目前的頁面有效，用完記得 `revokeObjectURL` 釋放。
+
+### 5. 壓縮與解壓縮
+
+**Blob 本身不會壓縮或解壓縮**。它只是容器，裝進去什麼位元組，拿出來就是什麼位元組。要讓檔案變小，得靠另外的工具，而且分成兩種：
+
+| 項目 | 格式本身的壓縮 | 通用壓縮（gzip） |
+| --- | --- | --- |
+| 例子 | JPEG、PNG、mp3 存檔時就壓縮過了 | 把任何位元組再打包一次 |
+| 怎麼做 | 圖片：畫到 canvas 再 `toBlob` 重新編碼 | `CompressionStream` |
+| 會不會失真 | JPEG、mp3 會（有損） | 不會（無損），解壓後一模一樣 |
+| 詳細說明 | [前端圖片處理必懂](/any/articles/image-resize-format-crop/) | 本節 |
+
+瀏覽器內建的 `CompressionStream`、`DecompressionStream` 可以直接壓縮任何 Blob，不用裝套件：
+
+```js
+// 壓縮：任何 Blob 都可以
+const gz = await new Response(
+  blob.stream().pipeThrough(new CompressionStream('gzip'))
+).blob()
+
+// 解壓縮：還原成原本的位元組
+const back = await new Response(
+  gz.stream().pipeThrough(new DecompressionStream('gzip'))
+).blob()
+```
+
+`blob.stream()` 把 Blob 變成一段一段流動的資料，`pipeThrough` 讓它流過壓縮器，最後用 `new Response(…).blob()` 收集成新的 Blob。
+
+實測四種檔案用 gzip 壓縮（測試檔是程式產生的）：
+
+| 檔案 | 原始 | gzip 後 | 剩下 |
+| --- | --- | --- | --- |
+| JSON 資料（2000 筆） | 163 KB | 17 KB | **10%** |
+| 截圖 PNG | 47 KB | 31 KB | 66% |
+| mp3 | 79 KB | 69 KB | 87% |
+| 照片 JPG | 636 KB | 622 KB | **98%** |
+
+四種解壓後都和原檔一模一樣。從結果可以看出：
+
+- **文字類（JSON、CSV、記錄檔）效果最好**，重複的內容多，很好壓
+- **已經壓縮過的格式幾乎沒效**：JPG、mp3 存檔時就壓過了，再用 gzip 壓一次只少 2% 到 13%。想讓圖片變小，要調尺寸、格式和品質，不是 gzip
+- **只支援 `gzip`、`deflate`、`deflate-raw`**，實測不支援 zip。要產生或解開 `.zip` 檔，需要第三方套件
+
+常見用途：把大量 JSON 或記錄檔壓縮後再上傳，或是解開後端傳來的 `.gz` 檔。上傳壓縮檔時，後端要知道怎麼解開。支援度：Chrome 80、Firefox 113、Safari 16.4 起都能用。
 
 <div class="callout" role="note">
   <p class="callout-label"><span aria-hidden="true">⚠</span> 重點</p>
