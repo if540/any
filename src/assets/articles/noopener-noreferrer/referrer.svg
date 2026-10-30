@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" width="720" height="520" role="img" aria-labelledby="t">
+  <title id="t">從同一個網址點出去，外部網站在三種情況下收到的 Referer</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}.mutstroke{stroke:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .code{fill:#24292e}.codetext{fill:#e1e4e8}.codestr{fill:#9ecbff}.codecmt{fill:#959da5}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}.mutstroke{stroke:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="520" class="bg"/>
+
+  <text x="20" y="34" font-size="18" font-weight="700" class="mut">使用者所在的頁面</text>
+  <rect x="20" y="48" width="680" height="56" class="code"/>
+  <text x="40" y="83" font-size="18" class="mono codetext">https://your-site.example<tspan class="codestr">/orders/123?token=abc</tspan></text>
+
+  <text x="20" y="146" font-size="18" font-weight="700" class="mut">外部網站收到的 Referer</text>
+
+  <!-- 預設 -->
+  <rect x="20" y="162" width="680" height="96" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="162" width="200" height="96" class="tag"/>
+  <text x="36" y="200" font-size="18" font-weight="700" class="tagtext">什麼都沒加</text>
+  <text x="36" y="228" font-size="14" class="tagtext">瀏覽器預設政策</text>
+  <text x="240" y="204" font-size="18" class="mono fg">https://your-site.example/</text>
+  <text x="240" y="234" font-size="15" class="mut">只有網域，路徑和參數被拿掉</text>
+
+  <!-- unsafe-url -->
+  <rect x="28" y="286" width="680" height="96" class="o"/>
+  <rect x="20" y="278" width="680" height="96" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="278" width="200" height="96" class="tag"/>
+  <text x="36" y="316" font-size="18" font-weight="700" class="tagtext">放寬政策</text>
+  <text x="36" y="344" font-size="14" class="tagtext">referrer = unsafe-url</text>
+  <text x="240" y="312" font-size="15" class="mono fg">https://your-site.example/orders/123</text>
+  <text x="240" y="334" font-size="15" class="mono fg">?token=abc</text>
+  <text x="240" y="360" font-size="15" class="ink" font-weight="700">完整網址外洩，包含查詢參數</text>
+
+  <!-- noreferrer -->
+  <rect x="20" y="394" width="680" height="96" class="card stroke" stroke-width="3"/>
+  <rect x="20" y="394" width="200" height="96" class="tag"/>
+  <text x="36" y="432" font-size="18" font-weight="700" class="tagtext">rel="noreferrer"</text>
+  <text x="36" y="460" font-size="14" class="tagtext">不管政策怎麼設</text>
+  <text x="240" y="436" font-size="18" class="mono fg">（沒有 Referer）</text>
+  <text x="240" y="466" font-size="15" class="mut">對方不知道使用者從哪裡來</text>
+</svg>
