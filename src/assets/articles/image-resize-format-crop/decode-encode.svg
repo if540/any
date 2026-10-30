@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 600" width="720" height="600" role="img" aria-labelledby="t">
+  <title id="t">解壓再重新壓縮：636 KB 的 JPG 畫到 canvas 會解壓成約 23 MB 的像素，再依輸出設定重新壓縮</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .bar{fill:#5e5e5e}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}.bar{fill:#a8a8a8}
+    }
+  </style>
+
+  <rect width="720" height="600" class="bg"/>
+
+  <!-- 原檔 -->
+  <rect x="20" y="40" width="170" height="150" class="card stroke" stroke-width="2.5"/>
+  <text x="105" y="76" font-size="16" font-weight="700" text-anchor="middle" class="mono fg">photo.jpg</text>
+  <text x="105" y="104" font-size="15" text-anchor="middle" class="mut">壓縮檔</text>
+  <text x="105" y="160" font-size="26" font-weight="900" text-anchor="middle" class="fg">636 KB</text>
+
+  <!-- 解壓 -->
+  <path d="M192 115h70" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="226" y="102" font-size="17" font-weight="900" text-anchor="middle" class="ink">解壓</text>
+
+  <!-- canvas 像素 -->
+  <rect x="280" y="32" width="190" height="166" class="o"/>
+  <rect x="272" y="24" width="190" height="166" class="card stroke" stroke-width="3"/>
+  <text x="367" y="60" font-size="16" font-weight="700" text-anchor="middle" class="fg">canvas 裡的像素</text>
+  <text x="367" y="88" font-size="14" text-anchor="middle" class="mono mut">3000×2000×4 位元組</text>
+  <text x="367" y="136" font-size="30" font-weight="900" text-anchor="middle" class="fg">≈ 23 MB</text>
+  <text x="367" y="170" font-size="14" font-weight="700" text-anchor="middle" class="ink">原本的壓縮歸零</text>
+
+  <!-- 重新壓縮 -->
+  <path d="M464 115h52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="490" y="102" font-size="15" font-weight="900" text-anchor="middle" class="ink">重新</text>
+  <text x="490" y="140" font-size="15" font-weight="900" text-anchor="middle" class="ink">壓縮</text>
+
+  <!-- 結果 -->
+  <g font-size="14">
+    <rect x="526" y="24" width="174" height="50" class="card stroke" stroke-width="2"/>
+    <text x="538" y="46" class="fg">PNG（預設）</text>
+    <text x="538" y="66" font-weight="900" class="ink">8.65 MB</text>
+    <rect x="526" y="82" width="174" height="50" class="card stroke" stroke-width="2"/>
+    <text x="538" y="104" class="fg">JPEG 0.8</text>
+    <text x="538" y="124" font-weight="900" class="fg">557 KB</text>
+    <rect x="526" y="140" width="174" height="50" class="card stroke" stroke-width="2"/>
+    <text x="538" y="162" class="fg">1600 寬 + JPEG 0.8</text>
+    <text x="538" y="182" font-weight="900" class="fg">105 KB</text>
+  </g>
+
+  <text x="20" y="236" font-size="15" class="mut">canvas 只有像素，不記得原圖是 JPG，也不記得原本壓得多小</text>
+
+  <!-- 等比例長條 -->
+  <rect x="20" y="258" width="680" height="322" class="card stroke" stroke-width="3"/>
+  <text x="40" y="292" font-size="17" font-weight="700" class="fg">同一張圖在每個階段的大小（長條等比例）</text>
+
+  <g font-size="15">
+    <text x="40" y="334" class="fg">原檔 JPG</text>
+    <rect x="230" y="320" width="11" height="20" class="bar"/>
+    <text x="250" y="336" class="mono fg">636 KB</text>
+
+    <text x="40" y="384" font-weight="700" class="fg">解壓後的像素</text>
+    <rect x="230" y="370" width="420" height="20" class="o"/>
+    <text x="230" y="410" font-size="14" font-weight="700" class="ink">≈ 23 MB，原檔的 37 倍</text>
+
+    <text x="40" y="454" class="fg">輸出 PNG</text>
+    <rect x="230" y="440" width="159" height="20" class="bar"/>
+    <text x="398" y="456" class="mono fg">8.65 MB</text>
+
+    <text x="40" y="500" class="fg">輸出 JPEG 0.8</text>
+    <rect x="230" y="486" width="10" height="20" class="bar"/>
+    <text x="250" y="502" class="mono fg">557 KB</text>
+
+    <text x="40" y="546" class="fg">縮小 + JPEG 0.8</text>
+    <rect x="230" y="532" width="2" height="20" class="bar"/>
+    <text x="242" y="548" class="mono fg">105 KB</text>
+  </g>
+</svg>
