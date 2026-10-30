@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: noopener 防止新分頁改掉原本的頁面，noreferrer 不告訴對方你從哪裡來。實測現代瀏覽器的預設行為、window.open 的例外，整理加與不加的優缺點。
 pubDate: 2026-10-30
 tags: [HTML, 資安, Next.js]
-draft: true
+draft: false
 coverTitle: "noopener\nnoreferrer\n加不加"
 coverMotif: target
 tldr: "noopener 讓新分頁拿不到 window.opener，防止它把原本的分頁換成釣魚頁；noreferrer 不送出 Referer，而且同時包含 noopener 的效果。現代瀏覽器的 target=\"_blank\" 已經預設套用 noopener，但 window.open() 沒有，要自己加。noreferrer 的代價是對方的流量分析看不到你的網站，要不要加看你在意隱私還是導流。"
