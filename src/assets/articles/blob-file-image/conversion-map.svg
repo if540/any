@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" width="720" height="640" role="img" aria-labelledby="t">
+  <title id="t">Blob 的轉換地圖：哪些東西可以變成 Blob，Blob 又可以變成什麼</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="640" class="bg"/>
+
+  <text x="20" y="34" font-size="18" font-weight="700" class="fg">變成 Blob</text>
+  <text x="700" y="34" font-size="18" font-weight="700" text-anchor="end" class="fg">從 Blob 變成</text>
+
+  <!-- 左：輸入 -->
+  <g font-size="15">
+    <rect x="20" y="54" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="34" y="82" font-weight="700" class="fg">選檔 &lt;input type=file&gt;</text>
+    <text x="34" y="108" class="mono mut">本來就是 File</text>
+
+    <rect x="20" y="140" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="34" y="168" font-weight="700" class="fg">字串、位元組</text>
+    <text x="34" y="194" class="mono mut">new Blob([…])</text>
+
+    <rect x="20" y="226" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="34" y="254" font-weight="700" class="fg">canvas</text>
+    <text x="34" y="280" class="mono mut">canvas.toBlob()</text>
+
+    <rect x="20" y="312" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="34" y="340" font-weight="700" class="fg">網址（含 data URL）</text>
+    <text x="34" y="366" font-size="14" class="mono mut">fetch(u) → .blob()</text>
+  </g>
+
+  <!-- 中：Blob -->
+  <rect x="278" y="150" width="164" height="200" class="o"/>
+  <rect x="270" y="142" width="164" height="200" class="card stroke" stroke-width="3"/>
+  <text x="352" y="214" font-size="30" font-weight="900" text-anchor="middle" class="fg">Blob</text>
+  <text x="352" y="246" font-size="14" text-anchor="middle" class="mut">位元組 + type</text>
+  <text x="352" y="290" font-size="14" text-anchor="middle" class="ink" font-weight="700">File = Blob</text>
+  <text x="352" y="312" font-size="14" text-anchor="middle" class="ink" font-weight="700">+ 檔名、修改時間</text>
+
+  <g class="stroke" stroke-width="2.5" fill="none">
+    <path d="M230 90L268 190" marker-end="url(#arrow)"/>
+    <path d="M230 176L268 220" marker-end="url(#arrow)"/>
+    <path d="M230 262L268 262" marker-end="url(#arrow)"/>
+    <path d="M230 348L268 300" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- 右：輸出 -->
+  <g font-size="15">
+    <rect x="490" y="54" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="504" y="82" font-weight="700" class="fg">文字、位元組</text>
+    <text x="504" y="108" font-size="14" class="mono mut">.text()、.arrayBuffer()</text>
+
+    <rect x="490" y="140" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="504" y="168" font-weight="700" class="fg">blob URL → 顯示、播放</text>
+    <text x="504" y="194" font-size="14" class="mono mut">URL.createObjectURL()</text>
+
+    <rect x="490" y="226" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="504" y="254" font-weight="700" class="fg">圖片像素 → canvas</text>
+    <text x="504" y="280" font-size="14" class="mono mut">createImageBitmap()</text>
+
+    <rect x="490" y="312" width="210" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="504" y="340" font-weight="700" class="fg">上傳</text>
+    <text x="504" y="366" font-size="14" class="mono mut">FormData、fetch body</text>
+  </g>
+
+  <g class="stroke" stroke-width="2.5" fill="none">
+    <path d="M434 190L488 90" marker-end="url(#arrow)"/>
+    <path d="M434 220L488 176" marker-end="url(#arrow)"/>
+    <path d="M434 262L488 262" marker-end="url(#arrow)"/>
+    <path d="M434 300L488 348" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- 底部：較少用 -->
+  <rect x="20" y="412" width="680" height="208" class="card stroke" stroke-width="3"/>
+  <text x="40" y="446" font-size="17" font-weight="700" class="fg">其他常用</text>
+  <g font-size="15">
+    <text x="40" y="480" class="fg">下載成檔案</text>
+    <text x="250" y="480" class="mono mut">a.href = createObjectURL(blob); a.download</text>
+    <text x="40" y="514" class="fg">轉成 data URL 字串</text>
+    <text x="250" y="514" class="mono mut">FileReader.readAsDataURL(blob)</text>
+    <text x="40" y="548" class="fg">取一段</text>
+    <text x="250" y="548" class="mono mut">blob.slice(start, end)</text>
+    <text x="40" y="582" class="fg">加上檔名</text>
+    <text x="250" y="582" class="mono mut">new File([blob], name, { type })</text>
+  </g>
+</svg>
