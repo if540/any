@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 用 Cropper.js 裁切後上傳，636 KB 的照片變成 8.65 MB。實測找出元兇，整理前端控制圖片尺寸、格式、品質與裁切的必懂知識點，附上可以直接用的寫法。
 pubDate: 2026-10-30
 tags: [JavaScript, 圖片, Cropper.js]
-draft: true
+draft: false
 coverTitle: "圖片上傳\n為什麼\n反而變大"
 coverMotif: bars
 tldr: "圖片畫到 canvas 後一定會重新編碼。toDataURL() 沒指定格式時預設輸出 PNG，照片用 PNG 存會大十幾倍；base64 再多 1/3。解法：照片輸出 JPEG 品質 0.8、PNG 保持 PNG，用 toBlob 不用 toDataURL，自己算輸出尺寸限制在需要的大小，沒有改動就直接傳原檔。Cropper.js v1 的 maxWidth 會把小範圍裁切放大，副檔名也不可信，要看檔案內容判斷格式。"
@@ -53,6 +53,24 @@ JPG、PNG 都是**壓縮過的檔案**。畫到 canvas 時，瀏覽器會把它�
 - **沒改動就不要經過 canvas**，直接上傳原檔
 - **重新壓縮未必比較小**：原圖用品質 80 存，你用 0.92 重新壓縮，就會比原圖大
 - **PNG 重新輸出幾乎一定變大**：原檔通常經過壓縮工具最佳化，瀏覽器的 PNG 編碼器重視速度，壓得沒那麼小
+
+反過來說，**瀏覽器原生要把像素編碼成圖片檔，也只有 canvas 這條路**。在 Chromium 141 實測各個相關 API：
+
+| API | 能做什麼 |
+| --- | --- |
+| `HTMLCanvasElement.toBlob()`、`toDataURL()` | **編碼**成圖片檔 |
+| `OffscreenCanvas.convertToBlob()` | **編碼**成圖片檔，可以在 Web Worker 裡跑，大圖不卡畫面 |
+| `createImageBitmap()` | 只能**解碼** |
+| `ImageDecoder`（WebCodecs） | 只能**解碼**，解出來的影格沒有輸出成檔案的方法 |
+| `ImageEncoder` | **不存在** |
+| `VideoEncoder`、`AudioEncoder`、`MediaRecorder` | 處理影片和聲音，不產生圖片檔 |
+
+兩種 canvas 用的是同一套編碼器，格式限制也一樣，Safari 換成 `OffscreenCanvas` 照樣不能輸出 WebP。真的需要 canvas 做不到的事，只有兩條路：
+
+- **WebAssembly 編碼器**（例如 mozjpeg、libwebp 編譯成 WebAssembly）：壓得比瀏覽器內建的小，Safari 也能輸出 WebP；代價是要多載入幾百 KB 起跳的編碼器
+- **交給後端**（例如 Node.js 的 sharp）：結果一致，但前端要上傳原始大檔
+
+一般照片輸出 JPEG、PNG 維持 PNG，canvas 的 `toBlob` 就夠用了。
 
 ### 2. 格式：照片用 JPEG，透明用 PNG
 

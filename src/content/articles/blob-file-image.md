@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: txt、png、jpg、mp3 在前端都是 Blob，卻各自長得不一樣。實測拆開五種檔案，說明 Blob 是「一串位元組加一張標籤」，再整理 Blob、File、ArrayBuffer 的關係和常用的轉換寫法。
 pubDate: 2026-10-30
 tags: [JavaScript, Blob]
-draft: true
+draft: false
 coverTitle: "玩轉 Blob\nFile 與圖片"
 coverMotif: grid
 tldr: "Blob 就是「一串位元組 + 一張 type 標籤」。所有檔案在電腦裡都是位元組，txt、png、mp3 的差別在於位元組的排列規則，Blob 本身不管內容是什麼。File 是加了檔名的 Blob。要顯示或播放用 URL.createObjectURL，要讀內容用 text() 或 arrayBuffer()，要上傳直接放進 FormData。標籤寫錯時，<img> 會看內容照樣顯示，但直接開啟或上傳時會照標籤處理。"
