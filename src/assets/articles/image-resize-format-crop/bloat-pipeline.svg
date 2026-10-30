@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" width="720" height="720" role="img" aria-labelledby="t">
+  <title id="t">一張 636 KB 的 JPG，經過常見的裁切上傳流程，變成 8.65 MB</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="720" class="bg"/>
+
+  <!-- 原檔 -->
+  <rect x="20" y="20" width="680" height="92" class="card stroke" stroke-width="3"/>
+  <text x="40" y="56" font-size="20" font-weight="700" class="fg">使用者選的照片 photo.jpg</text>
+  <text x="40" y="88" font-size="16" class="mut">3000×2000，JPEG 有損壓縮</text>
+  <text x="680" y="74" font-size="26" font-weight="900" text-anchor="end" class="fg">636 KB</text>
+  <path d="M120 112v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- canvas -->
+  <rect x="20" y="148" width="680" height="92" class="card stroke" stroke-width="3"/>
+  <text x="40" y="184" font-size="20" font-weight="700" class="fg">畫到 canvas（getCroppedCanvas）</text>
+  <text x="40" y="216" font-size="16" class="mut">解壓成原始像素，壓縮效果歸零</text>
+  <text x="680" y="196" font-size="18" text-anchor="end" class="mono mut">3000×2000 像素</text>
+  <path d="M120 240v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- toDataURL -->
+  <rect x="28" y="284" width="680" height="110" class="o"/>
+  <rect x="20" y="276" width="680" height="110" class="card stroke" stroke-width="3"/>
+  <text x="40" y="312" font-size="20" font-weight="700" class="fg">toDataURL()：沒指定格式</text>
+  <text x="40" y="342" font-size="16" class="ink" font-weight="700">預設輸出 PNG（無損），照片用 PNG 存會非常大</text>
+  <text x="40" y="370" font-size="16" class="mut">寫成 'image/jpg'（少一個 e）也一樣變 PNG</text>
+  <text x="680" y="320" font-size="26" font-weight="900" text-anchor="end" class="ink">8.65 MB</text>
+  <path d="M120 386v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- base64 -->
+  <rect x="20" y="422" width="680" height="92" class="card stroke" stroke-width="3"/>
+  <text x="40" y="458" font-size="20" font-weight="700" class="fg">base64 字串（data URL）</text>
+  <text x="40" y="490" font-size="16" class="mut">比原始資料多約 1/3，整串放在記憶體裡</text>
+  <text x="680" y="470" font-size="26" font-weight="900" text-anchor="end" class="fg">11.5 MB</text>
+  <path d="M120 514v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- atob + File -->
+  <rect x="20" y="550" width="680" height="92" class="card stroke" stroke-width="3"/>
+  <text x="40" y="586" font-size="20" font-weight="700" class="fg">atob → Uint8Array → new File</text>
+  <text x="40" y="618" font-size="16" class="mut">轉回二進位，上傳的就是這個</text>
+  <text x="680" y="598" font-size="26" font-weight="900" text-anchor="end" class="ink">8.65 MB</text>
+
+  <rect x="20" y="662" width="680" height="44" class="tag"/>
+  <text x="40" y="691" font-size="18" font-weight="700" class="tagtext">結果：比原圖大約 14 倍</text>
+</svg>
