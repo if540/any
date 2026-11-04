@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 600" width="720" height="600" role="img" aria-labelledby="t">
+  <title id="t">next-sitemap 的運作方式：建置後讀取 .next 的建置清單，在 public 寫出 sitemap 索引與分割檔，動態內容另外用 server-sitemap 路由</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="600" class="bg"/>
+
+  <!-- 上排：建置流程 -->
+  <rect x="20" y="20" width="190" height="80" class="tag"/>
+  <text x="115" y="54" font-size="17" font-weight="700" text-anchor="middle" class="mono tagtext">next build</text>
+  <text x="115" y="80" font-size="14" text-anchor="middle" class="tagtext">產生頁面</text>
+  <path d="M212 60h34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="256" y="20" width="200" height="80" class="card stroke" stroke-width="2.5"/>
+  <text x="356" y="54" font-size="16" font-weight="700" text-anchor="middle" class="mono fg">.next/ 建置清單</text>
+  <text x="356" y="80" font-size="14" text-anchor="middle" class="ink" font-weight="700">只記錄預先產生的頁面</text>
+  <path d="M458 60h34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="510" y="28" width="190" height="80" class="o"/>
+  <rect x="502" y="20" width="190" height="80" class="card stroke" stroke-width="3"/>
+  <text x="597" y="54" font-size="16" font-weight="700" text-anchor="middle" class="mono fg">next-sitemap</text>
+  <text x="597" y="80" font-size="14" text-anchor="middle" class="mut">postbuild 執行</text>
+  <path d="M597 110v40" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="610" y="136" font-size="14" class="mut">寫出靜態檔</text>
+
+  <!-- public -->
+  <rect x="380" y="158" width="320" height="226" class="card stroke" stroke-width="3"/>
+  <text x="400" y="190" font-size="17" font-weight="700" class="mono fg">public/</text>
+  <g font-size="15">
+    <rect x="400" y="206" width="280" height="44" class="tag"/>
+    <text x="414" y="234" class="mono tagtext">sitemap.xml</text>
+    <text x="666" y="234" text-anchor="end" font-size="14" class="tagtext">索引（自動）</text>
+    <text x="414" y="280" class="mono fg">sitemap-0.xml</text>
+    <text x="666" y="280" text-anchor="end" font-size="14" class="mut">前 5000 筆</text>
+    <text x="414" y="312" class="mono fg">sitemap-1.xml</text>
+    <text x="666" y="312" text-anchor="end" font-size="14" class="mut">5001 筆起</text>
+    <text x="414" y="360" class="mono fg">robots.txt</text>
+    <path d="M400 330h280" class="stroke" stroke-width="1"/>
+  </g>
+
+  <!-- server sitemap -->
+  <rect x="20" y="158" width="320" height="140" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="190" font-size="15" font-weight="700" class="mono fg">/server-sitemap.xml</text>
+  <text x="40" y="216" font-size="14" class="mono mut">app/server-sitemap.xml/route.ts</text>
+  <text x="40" y="244" font-size="15" class="fg">getServerSideSitemap()</text>
+  <text x="40" y="272" font-size="14" class="ink" font-weight="700">請求時才從 CMS 產生，補動態頁面</text>
+  <path d="M398 228H344" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="250" y="322" font-size="13" text-anchor="middle" class="mono mut">由 additionalSitemaps 列進索引</text>
+
+  <!-- 實測的坑 -->
+  <rect x="20" y="410" width="680" height="170" class="card stroke" stroke-width="3"/>
+  <text x="40" y="442" font-size="17" font-weight="700" class="fg">實測要注意的地方（next-sitemap 4.2.3 + Next.js 16）</text>
+  <g font-size="15" class="fg">
+    <text x="40" y="476"><tspan class="ink" font-weight="700">✗</tspan> 沒有 generateStaticParams 的動態頁面（ƒ）不會出現</text>
+    <text x="40" y="506"><tspan class="ink" font-weight="700">✗</tspan> lastmod 預設全部是建置時間</text>
+    <text x="40" y="536"><tspan class="ink" font-weight="700">✗</tspan> getServerSideSitemap 不跳脫 &amp;，靜態檔才會</text>
+    <text x="40" y="566"><tspan class="ink" font-weight="700">✗</tspan> public/sitemap.xml 會蓋過 app/sitemap.ts，不會警告</text>
+  </g>
+</svg>

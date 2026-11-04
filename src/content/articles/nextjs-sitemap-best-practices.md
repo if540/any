@@ -1,13 +1,13 @@
 ---
-title: Next.js sitemap 最佳實踐：sitemap.ts 寫對的四件事
+title: Next.js sitemap 最佳實踐：寫對內容、拆成多份，以及 next-sitemap 的坑
 authors: [kerwin, claude]
-description: 用 Next.js 的 sitemap.ts 產生網站地圖很簡單，但實測發現它不會幫你跳脫網址，一個 & 就讓整份 XML 壞掉。整理 Google 實際採用的欄位、lastmod 的正確寫法、更新時機，以及大型網站怎麼拆分與做索引。
+description: 用 Next.js 的 sitemap.ts 產生網站地圖很簡單，但實測發現它不會幫你跳脫網址，一個 & 就讓整份 XML 壞掉。整理 Google 實際採用的欄位、lastmod 的正確寫法、更新時機，並比較三種產生多份 sitemap 的做法，包括 next-sitemap 套件實測要注意的地方。
 pubDate: 2026-11-04
 tags: [Next.js, SEO]
 draft: true
-coverTitle: "Next.js\nsitemap\n寫對"
+coverTitle: "Next.js\nsitemap\n拆成多份"
 coverMotif: grid
-tldr: "Next.js 的 sitemap.ts 會把網址原樣串進 XML，不會跳脫：網址裡有 & 就是格式錯誤的 XML，中文路徑和相對路徑也原樣輸出，要自己用 new URL() 加跳脫處理。Google 不看 changefreq 和 priority，lastmod 只在一直準確時才採用，所以不要寫 new Date()，要用資料真正的更新時間。sitemap.ts 預設在 build 時產生，新內容要靠 revalidate 才會出現。超過 5 萬個網址用 generateSitemaps 拆分，但 Next.js 不會產生 sitemap 索引，要自己寫。"
+tldr: "Next.js 的 sitemap.ts 會把網址原樣串進 XML，不會跳脫：網址裡有 & 就是格式錯誤的 XML，中文路徑和相對路徑也原樣輸出，要自己用 new URL() 加跳脫處理。Google 不看 changefreq 和 priority，lastmod 只在一直準確時才採用，所以不要寫 new Date()，要用資料真正的更新時間。sitemap.ts 預設在 build 時產生，新內容要靠 revalidate 才會出現。產生多份 sitemap 有三種做法：每個區段放 sitemap.ts、generateSitemaps、next-sitemap 套件。內建做法不會產生 sitemap 索引，要自己寫，generateSitemaps 的 id 是字串、份數在 build 時固定；next-sitemap 會自動拆分和產生索引，但 lastmod 預設是建置時間、動態頁面不會出現、getServerSideSitemap 不跳脫 &。"
 faq:
   - question: Next.js 的 sitemap.ts 會自動跳脫網址裡的 & 嗎？
     answer: 不會。實測 Next.js 16.4 把 url、images 等欄位直接串進 XML，網址裡的 & 原樣輸出，XML 解析器（xmllint、Python）都判定格式錯誤，整份讀不了。要自己先把 & 換成 &amp;，建議寫一個 loc() 函式統一處理。
@@ -15,11 +15,13 @@ faq:
     answer: 不建議。sitemap.ts 預設在 build 時產生，new Date() 會變成部署時間，每次部署所有網址都像剛更新。Google 只在 lastmod 一直準確時才採用，亂報的結果是被忽略。應該用資料庫或 CMS 裡內容真正的更新時間，沒有就不要寫。
   - question: generateSitemaps 會自動產生 sitemap 索引嗎？
     answer: 不會。實測只會產生 /products/sitemap/0.xml、1.xml 這些檔案，/products/sitemap.xml 是 404。要自己寫一個 Route Handler 輸出 sitemapindex，或是在 robots.ts 把每一份 sitemap 都列出來。
+  - question: 用 next-sitemap 要注意什麼？
+    answer: 實測 next-sitemap 4.2.3 搭配 Next.js 16：lastmod 預設每一筆都是建置時間，要設 autoLastmod false 並在 transform 填真正的更新時間；沒有 generateStaticParams 的動態頁面不會出現，要用 getServerSideSitemap 補；getServerSideSitemap 不會跳脫 &，要自己處理並加上 revalidate。另外 public/sitemap.xml 會蓋過 app/sitemap.ts，兩者不要混用。
 ---
 
 在 Next.js App Router 裡，sitemap 只要一個 `app/sitemap.ts` 就能產生。寫法很簡單，但「產生得出來」和「寫對」是兩回事。
 
-這篇用 **Next.js 16.4.5 的正式版建置（`next build` + `next start`）實測**，整理四件事：Google 到底看哪些欄位、網址要自己處理、什麼時候會更新、大型網站怎麼拆。
+這篇用 **Next.js 16.4.5 的正式版建置（`next build` + `next start`）實測**，先講三個寫對的重點：網址要自己處理、lastmod 要準、什麼時候會更新；再比較三種產生多份 sitemap 的做法，包括很多專案在用的 next-sitemap 套件。
 
 ## 先搞懂：sitemap 是清單，不是排名工具
 
@@ -158,9 +160,41 @@ export const revalidate = 3600 // 最多一小時重新產生一次
 
 用到 `cookies()`、`headers()` 這類請求時才有的 API，sitemap 就會變成每次請求都重新產生。sitemap 不需要這些，避免使用。
 
-## 重點四：大型網站要拆分，索引自己寫
+## 產生多份 sitemap
 
-Google 規定**一份 sitemap 最多 5 萬個網址，或 50 MB（未壓縮）**，超過就要拆。Next.js 提供 `generateSitemaps`：
+### 什麼時候要拆
+
+Google 規定**一份 sitemap 最多 5 萬個網址，或 50 MB（未壓縮）**，超過一定要拆。沒超過也可以拆，常見的理由是**依內容類型分開**：文章一份、商品一份、分類頁一份。Search Console 的 Sitemap 報表會分別列出每一份的狀態，哪一類網址出問題比較好看出來。
+
+拆成多份之後，要讓爬蟲知道總共有哪幾份，這就是 **sitemap 索引**（sitemap index）的工作：一份只列 sitemap 網址的清單，`robots.txt` 和 Search Console 都只要指向它。
+
+### 三種做法比較
+
+| 項目 | 做法一：每個區段放 `sitemap.ts` | 做法二：`generateSitemaps` | 做法三：next-sitemap 套件 |
+| --- | --- | --- | --- |
+| 產生的網址 | `/blog/sitemap.xml` | `/products/sitemap/0.xml`、`1.xml`… | `/sitemap-0.xml`、`/sitemap-1.xml`… |
+| 怎麼切 | 依路由區段 | 自己決定每份放哪些 | 依數量，`sitemapSize` 預設 5000 |
+| sitemap 索引 | **自己寫** | **自己寫** | 自動產生 `/sitemap.xml` |
+| 網址跳脫 | 自己處理 | 自己處理 | 靜態檔會，`getServerSideSitemap` 不會 |
+| 資料庫的新內容 | `revalidate` | `revalidate`，但份數在 build 時固定 | 要另外寫 server-sitemap 路由 |
+
+做法一、二是 Next.js 內建的，可以混用；做法三是另一套獨立的機制，**不要和內建的混用**，原因在後面。
+
+### 做法一：每個區段放一個 sitemap.ts
+
+最簡單的拆法。`sitemap.ts` 放在哪個路由資料夾，網址就在哪：
+
+```text
+app/sitemap.ts           → /sitemap.xml          一般頁面
+app/blog/sitemap.ts      → /blog/sitemap.xml     文章
+app/products/sitemap.ts  → /products/sitemap.xml 商品
+```
+
+每個檔案的寫法和前面的基本寫法一樣，適合「每一類都不到 5 萬筆，只是想分開管理」的情況。
+
+### 做法二：generateSitemaps，同一類切成很多份
+
+同一類超過 5 萬筆時，用 `generateSitemaps` 決定要切幾份，每一份再依 `id` 撈自己那一段：
 
 ```ts
 // app/products/sitemap.ts
@@ -184,14 +218,17 @@ export default async function sitemap(props: {
 }
 ```
 
-這裡有兩個坑。
+實測有三個坑：
 
-**第一，`id` 是字串。** Next.js 16 起，`id` 改成 `Promise<string>`。`generateSitemaps` 裡回傳的是數字 `1`，拿到的卻是字串 `'1'`。實測 `id + 1` 得到 `"11"`，不是 `2`，而且 TypeScript 不會報錯，因為字串加數字是合法的。**一律先 `Number()` 轉換**。
+**第一，`id` 是字串。** Next.js 16 起，`id` 改成 `Promise<string>`。`generateSitemaps` 回傳的是數字 `1`，拿到的卻是字串 `'1'`。實測 `id + 1` 得到 `"11"`，不是 `2`，而且 TypeScript 不會報錯，因為字串加數字是合法的。**一律先 `Number()` 轉換**。
 
-**第二，Next.js 不會產生 sitemap 索引。** 實測只會產生 `/products/sitemap/0.xml`、`1.xml`、`2.xml`，`/products/sitemap.xml` 是 404。爬蟲要怎麼知道有這幾份？有兩種做法：
+**第二，份數在 build 時就固定了。** 實測建置時產生 0、1、2 三份，請求 `/products/sitemap/3.xml` 是 404。`revalidate` 只會更新既有幾份的內容，不會多出新的一份。商品持續增加、超過最後一份的容量時，新商品要等下次部署才會出現。資料成長快的話，可以排程定期重新部署，或是在 `generateSitemaps` 多回傳一份備用（空的 sitemap 也是合法的 XML）。
 
-1. 在 `robots.ts` 的 `sitemap` 傳陣列，把每一份都列出來
-2. 自己寫一個 sitemap 索引，`robots.ts` 只指向它（建議，Search Console 也只要提交一次）
+**第三，官方範例的切法有小問題。** 官方範例用 `WHERE id BETWEEN start AND end` 切，`BETWEEN` 兩端都包含，所以邊界那一筆（例如 id 50000）會同時出現在兩份裡；商品 id 不連續時，每份的數量也會不平均。照上面用 `offset`、`limit` 依順序分段比較穩。
+
+### 把多份串起來：自己寫 sitemap 索引
+
+做法一、二都**不會產生 sitemap 索引**。實測 `generateSitemaps` 只產生 `/products/sitemap/0.xml` 這些檔案，`/products/sitemap.xml` 是 404。
 
 ![示意圖，大型網站的 sitemap 結構。最上面是 /robots.txt，寫著 Sitemap: …/sitemap_index.xml，指向 /sitemap_index.xml，這是 sitemap 索引，要自己寫 Route Handler。索引再指向四份 sitemap：/sitemap.xml 是一般頁面，由 app/sitemap.ts 產生；…/sitemap/0.xml 是商品 1 到 5 萬，…/sitemap/1.xml 是商品 5 到 10 萬，…/sitemap/2.xml 是商品 10 萬起，這三份由 app/products/sitemap.ts 加 generateSitemaps 產生。下方說明：每份上限 5 萬個網址或 50 MB（未壓縮）；實測 /products/sitemap.xml 是 404，Next.js 不會自動產生索引。](../../assets/articles/nextjs-sitemap-best-practices/sitemap-index.svg)
 
@@ -206,7 +243,11 @@ export const revalidate = 3600
 
 export async function GET() {
   const ids = (await productSitemaps()).map((s) => s.id)
-  const paths = ['/sitemap.xml', ...ids.map((id) => `/products/sitemap/${id}.xml`)]
+  const paths = [
+    '/sitemap.xml',
+    '/blog/sitemap.xml',
+    ...ids.map((id) => `/products/sitemap/${id}.xml`),
+  ]
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -217,9 +258,123 @@ export async function GET() {
 }
 ```
 
-`robots.ts` 的 `sitemap` 改成 `https://www.example.com/sitemap_index.xml`。
+`robots.ts` 的 `sitemap` 改成 `https://www.example.com/sitemap_index.xml`，Search Console 也只要提交這一份。不想寫索引的話，也可以在 `robots.ts` 的 `sitemap` 傳陣列，把每一份都列出來。
 
-索引要**放在網站根目錄**。Google 規定索引裡列的 sitemap 必須在索引的同一層或下層目錄，放在根目錄才能涵蓋 `/sitemap.xml` 和 `/products/…` 兩邊。資料夾名稱不要用 `sitemap.xml`：實測和 `app/sitemap.ts` 同時存在時，`next build` 直接失敗（Conflicting route and metadata at /sitemap.xml）。
+兩個位置上的規則：
+
+- 索引要**放在網站根目錄**。Google 規定索引裡列的 sitemap 必須在索引的同一層或下層目錄，放在根目錄才涵蓋得到 `/blog/…` 和 `/products/…`
+- 資料夾名稱不要用 `sitemap.xml`。實測和 `app/sitemap.ts` 同時存在時，`next build` 直接失敗（Conflicting route and metadata at /sitemap.xml）
+
+### 做法三：用 next-sitemap 套件
+
+[next-sitemap](https://github.com/iamvishnusankar/next-sitemap) 的思路完全不同：它不是 Next.js 的路由，而是**建置完成後執行的指令**。它讀 `.next` 資料夾裡的建置清單，把有哪些頁面寫成靜態檔放進 `public/`。
+
+![示意圖，next-sitemap 的運作方式。next build 產生頁面，寫出 .next 建置清單，清單只記錄預先產生的頁面。next-sitemap 在 postbuild 執行，讀清單後在 public 資料夾寫出靜態檔：sitemap.xml 是自動產生的索引，sitemap-0.xml 放前 5000 筆，sitemap-1.xml 放 5001 筆起，還有 robots.txt。另外，動態內容用 app/server-sitemap.xml/route.ts 的 getServerSideSitemap()，請求時才從 CMS 產生，補上動態頁面，由 additionalSitemaps 列進索引。下方列出實測要注意的地方（next-sitemap 4.2.3 加 Next.js 16）：沒有 generateStaticParams 的動態頁面不會出現；lastmod 預設全部是建置時間；getServerSideSitemap 不跳脫 &，靜態檔才會；public/sitemap.xml 會蓋過 app/sitemap.ts，不會警告。](../../assets/articles/nextjs-sitemap-best-practices/next-sitemap-flow.svg)
+
+基本設定：
+
+```json
+// package.json
+{
+  "scripts": {
+    "build": "next build",
+    "postbuild": "next-sitemap"
+  }
+}
+```
+
+拆分是它的強項：網址超過 `sitemapSize`（預設 5000）就自動切成 `sitemap-0.xml`、`sitemap-1.xml`，並且**自動產生索引** `sitemap.xml`、寫好 `robots.txt`，這是內建做法沒有的。
+
+用 next-sitemap 4.2.3 搭配 Next.js 16.4.5 實測，預設設定的結果：
+
+| 項目 | 結果 |
+| --- | --- |
+| 拆分與索引 | ✓ 自動切檔、自動產生索引 |
+| 靜態檔的 `&` | ✓ 會跳脫成 `&amp;` |
+| 中文路徑 | ✗ 原樣輸出，沒有百分比編碼 |
+| `lastmod` | ✗ 每一筆都是**建置時間**（`autoLastmod` 預設開啟） |
+| 動態頁面 | ✗ 沒有 `generateStaticParams` 的頁面（建置表上的 `ƒ`）**不會出現** |
+| `getServerSideSitemap` 的 `&` | ✗ **不會跳脫**，實測輸出的 XML 格式錯誤 |
+| `getServerSideSitemap` 的快取 | ✗ Route Handler 預設是動態的，每次爬蟲來都重查 CMS |
+| 和 `app/sitemap.ts` 同時存在 | ✗ `public/sitemap.xml` 蓋過 `app/sitemap.ts`，建置不報錯 |
+
+`lastmod` 和 `sitemap.ts` 寫 `new Date()` 是同一個問題：每次部署全部變成今天。修正後的設定：
+
+```js
+// next-sitemap.config.js
+const { getAllPosts } = require('./lib/posts-for-sitemap') // 自己的資料來源
+
+// 只查一次，整理成「路徑 → 更新時間」對照表
+let updatedAtMap
+const getUpdatedAt = async (path) => {
+  updatedAtMap ??= getAllPosts().then(
+    (posts) => new Map(posts.map((p) => [`/posts/${p.slug}`, p.updatedAt])),
+  )
+  return (await updatedAtMap).get(path)
+}
+
+/** @type {import('next-sitemap').IConfig} */
+module.exports = {
+  siteUrl: 'https://www.example.com',
+  generateRobotsTxt: true,
+  sitemapSize: 5000,
+  autoLastmod: false, // 不要用建置時間
+  exclude: ['/server-sitemap.xml'],
+  robotsTxtOptions: {
+    additionalSitemaps: ['https://www.example.com/server-sitemap.xml'],
+  },
+  transform: async (config, path) => ({
+    loc: encodeURI(path),               // 中文路徑編碼；& 交給 next-sitemap 跳脫
+    lastmod: await getUpdatedAt(path),  // 有真正的更新時間才填
+  }),
+}
+```
+
+<div class="callout" role="note">
+  <p class="callout-label"><span aria-hidden="true">⚠</span> 重點</p>
+  <p>next-sitemap 的靜態檔<strong>會自己跳脫</strong>，所以 <code>transform</code> 裡只做 <code>encodeURI()</code>，不要再用前面的 <code>loc()</code>。實測傳入已跳脫的 <code>R&amp;amp;D</code>，輸出變成 <code>R&amp;amp;amp;D</code>。反過來，<code>getServerSideSitemap</code> <strong>不會跳脫</strong>，那裡要自己處理。</p>
+</div>
+
+動態頁面（例如資料庫裡隨時新增的商品）不在建置清單裡，要用 server-sitemap 補。記得自己跳脫，並加上 `revalidate`：
+
+```ts
+// app/server-sitemap.xml/route.ts
+import { getServerSideSitemap } from 'next-sitemap'
+import { loc } from '@/lib/sitemap-url' // 這裡要自己跳脫
+import { getProducts } from '@/lib/products'
+
+export const revalidate = 3600 // 不加的話，每次請求都重查資料
+
+export async function GET() {
+  const products = await getProducts()
+  return getServerSideSitemap(
+    products.map((p) => ({ loc: loc(`/products/${p.id}`), lastmod: p.updatedAt })),
+  )
+}
+```
+
+實測加上 `revalidate` 後，建置表上的 `/server-sitemap.xml` 從 `ƒ`（每次請求產生）變成 `○` 加 1 小時重新產生。
+
+### 留著 next-sitemap，還是換成內建？
+
+| 項目 | 內建 `sitemap.ts` | next-sitemap |
+| --- | --- | --- |
+| 動態內容 | 直接查資料，`revalidate` 更新 | 靜態檔只有建置時的頁面，動態要另寫路由 |
+| 拆分與索引 | 要自己寫索引 | 自動 |
+| 網址處理 | 全部自己來 | 靜態檔會跳脫，server-sitemap 不會 |
+| 維護狀態 | 跟著 Next.js 更新 | npm 上最新版 4.2.3 發布於 2023 年 9 月 |
+
+建議：
+
+- **既有專案運作正常**：可以先留著，把上面的設定修好（關掉 `autoLastmod`、server-sitemap 加跳脫和 `revalidate`），用 `xmllint` 檢查輸出
+- **新專案，或要升級 Next.js 大版本**：用內建的 `sitemap.ts`。套件靠讀 `.next` 的建置清單運作，清單格式是 Next.js 內部的東西，升級時多一個要確認的地方
+
+要換的話，順序很重要，因為 `public/sitemap.xml` 會**默默蓋過** `app/sitemap.ts`：
+
+1. 移除 `postbuild` 指令和 `next-sitemap.config.js`
+2. 刪掉 `public/` 裡產生出來的 `sitemap*.xml`、`robots.txt`（也檢查 `.gitignore`）
+3. 加上 `app/sitemap.ts`、`app/robots.ts`，需要的話加 sitemap 索引
+4. `next build && next start`，確認 `/sitemap.xml` 是新的內容
 
 ## 該放哪些網址
 
@@ -249,6 +404,7 @@ curl -s http://localhost:3000/robots.txt                         # 確認有 Sit
 - `lastModified` 來自內容真正的更新時間，沒有 `new Date()`
 - 資料來自資料庫或 CMS 時，有設 `revalidate`
 - 每份不超過 5 萬個網址；有拆分時，有 sitemap 索引
+- 用 next-sitemap 時：`autoLastmod` 已關閉、server-sitemap 有跳脫和 `revalidate`、沒有同時存在 `app/sitemap.ts`
 - 只放 canonical、會回 200、允許索引的網址
 - `robots.txt` 有 `Sitemap:`，Search Console 已提交
 
@@ -261,4 +417,5 @@ curl -s http://localhost:3000/robots.txt                         # 確認有 Sit
 - [Sitemaps XML format（Entity escaping 一節）｜sitemaps.org](https://www.sitemaps.org/protocol.html#escaping)
 - [Build and submit a sitemap｜Google Search Central](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap)
 - [Manage your sitemaps with sitemap index files｜Google Search Central](https://developers.google.com/search/docs/crawling-indexing/sitemaps/large-sitemaps)
+- [next-sitemap｜GitHub](https://github.com/iamvishnusankar/next-sitemap)
 - [Sitemaps ping endpoint is going away｜Google Search Central Blog](https://developers.google.com/search/blog/2023/06/sitemaps-lastmod-ping)
