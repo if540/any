@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 用 Next.js 的 sitemap.ts 產生網站地圖很簡單，但實測發現它不會幫你跳脫網址，一個 & 就讓整份 XML 壞掉。整理 Google 實際採用的欄位、lastmod 的正確寫法、更新時機，並比較三種產生多份 sitemap 的做法，包括 next-sitemap 套件實測要注意的地方。
 pubDate: 2026-11-04
 tags: [Next.js, SEO]
-draft: true
+draft: false
 coverTitle: "Next.js\nsitemap\n拆成多份"
 coverMotif: grid
 tldr: "Next.js 的 sitemap.ts 會把網址原樣串進 XML，不會跳脫：網址裡有 & 就是格式錯誤的 XML，中文路徑和相對路徑也原樣輸出，要自己用 new URL() 加跳脫處理。Google 不看 changefreq 和 priority，lastmod 只在一直準確時才採用，所以不要寫 new Date()，要用資料真正的更新時間。sitemap.ts 預設在 build 時產生，新內容要靠 revalidate 才會出現。產生多份 sitemap 有三種做法：每個區段放 sitemap.ts、generateSitemaps、next-sitemap 套件。內建做法不會產生 sitemap 索引，要自己寫，generateSitemaps 的 id 是字串、份數在 build 時固定；next-sitemap 會自動拆分和產生索引，但 lastmod 預設是建置時間、動態頁面不會出現、additionalPaths 出錯時建置照樣成功、getServerSideSitemap 不跳脫 &。"
@@ -15,6 +15,10 @@ faq:
     answer: 不建議。sitemap.ts 預設在 build 時產生，new Date() 會變成部署時間，每次部署所有網址都像剛更新。Google 只在 lastmod 一直準確時才採用，亂報的結果是被忽略。應該用資料庫或 CMS 裡內容真正的更新時間，沒有就不要寫。
   - question: generateSitemaps 會自動產生 sitemap 索引嗎？
     answer: 不會。實測只會產生 /products/sitemap/0.xml、1.xml 這些檔案，/products/sitemap.xml 是 404。要自己寫一個 Route Handler 輸出 sitemapindex，或是在 robots.ts 把每一份 sitemap 都列出來。
+  - question: lastmod 用建置時間，會影響 SEO 嗎？
+    answer: 不會直接影響排名，lastmod 不是排名訊號，它影響的是爬蟲多久回來重抓。但建置時間會讓每次部署所有頁面都像剛更新，Google 只採用一直準確的 lastmod，Bing 也表示日期一直是當天時可能忽略。被忽略後，真的有更新的頁面也不會被優先重抓，新聞這類常更新的內容影響最大。
+  - question: 動態頁要收錄、又要依單元拆分，next-sitemap 和內建 sitemap.ts 哪個好？
+    answer: 內建 sitemap.ts 比較適合。每個單元放一個 sitemap.ts 就天生分開，直接查資料所以動態頁自然收錄，各單元可以設不同的 revalidate；只需要自己寫一支 sitemap 索引。next-sitemap 的靜態檔只能依數量切，要依單元拆分得寫好幾支 server-sitemap，等於多套一層。
   - question: 用 next-sitemap 要注意什麼？
     answer: 實測 next-sitemap 4.2.3 搭配 Next.js 16：lastmod 預設每一筆都是建置時間，要設 autoLastmod false 並在 transform 填真正的更新時間；沒有 generateStaticParams 的動態頁面不會出現，要用 getServerSideSitemap 補；getServerSideSitemap 不會跳脫 &，要自己處理並加上 revalidate。另外 public/sitemap.xml 會蓋過 app/sitemap.ts，兩者不要混用。
 ---
@@ -129,7 +133,19 @@ Google 的說法是：「Google uses the `<lastmod>` value if it's consistently 
 - **每次部署，所有網址的 lastmod 都變成今天**，就算內容一個字都沒改
 - Google 比對後發現不準，**之後整份 sitemap 的 lastmod 都可能不再採信**，連真的有更新的頁面也被拖累
 
-正確做法：
+### 會影響 SEO 嗎？
+
+**不會直接影響排名**，lastmod 不是排名訊號。它影響的是**爬蟲多久回來重抓**。Bing 在 2023 年的文章裡直接點名這個錯誤：大部分 sitemap 的日期都是「sitemap 產生的時間」，如果日期一直是當天，Bing 可能會忽略它；Bing 也說正在把 lastmod 用在排程爬取上，優先抓最近有更新的頁面。
+
+| 項目 | lastmod 用建置時間 | lastmod 用真實更新時間 |
+| --- | --- | --- |
+| 搜尋引擎看到的 | 每次部署，所有頁面都「剛更新」 | 只有真的改過的頁面是新的 |
+| 結果 | 判定不準，lastmod 被忽略 | 被採用，改過的頁面比較快被重抓 |
+| 影響最大的 | 頁面多、內容常改的單元，例如新聞 | — |
+
+被忽略之後，搜尋引擎只能靠自己的判斷決定多久回來抓。小網站差別不大，**新聞這類「改了希望盡快反映」的內容影響最明顯**。
+
+### 正確做法
 
 | 情況 | `lastModified` 怎麼填 |
 | --- | --- |
@@ -137,7 +153,7 @@ Google 的說法是：「Google uses the `<lastmod>` value if it's consistently 
 | 只有發布時間 | 用發布時間，之後有實質修改再更新 |
 | 什麼時間都沒有（例如首頁、關於頁） | **不要寫**，省略比亂報好 |
 
-「實質修改」指的是內文變動。Google 特別提到，只改頁尾的版權年份不算。
+「實質修改」指的是內文變動。Google 特別提到，只改頁尾的版權年份不算。同樣地，如果資料庫的 `updatedAt` 會因為點閱數、按讚數變動而更新，那也不是內容的更新時間，拿來當 lastmod 一樣不準。
 
 ## 重點三：搞清楚 sitemap 什麼時候更新
 
@@ -433,6 +449,53 @@ export async function GET() {
 
 實測加上 `revalidate` 後，建置表上的 `/server-sitemap.xml` 從 `ƒ`（每次請求產生）變成 `○` 加 1 小時重新產生。
 
+### 網站越來越大：建置時產生，還是請求時產生？
+
+next-sitemap 的 `additionalPaths` 是**每次建置都從頭全部拉一遍**，沒有「只抓新增部分」的機制。資料量越大，影響越明顯：
+
+| 資料量 | 每次建置的負擔（API 每頁 100 筆） |
+| --- | --- |
+| 1 萬筆 | 100 次請求，幾秒鐘 |
+| 20 萬筆 | 2000 次請求，建置變慢，也對正式 API 造成負載 |
+
+加上「任何一頁失敗就讓建置失敗」，資料越多，因為 sitemap 而部署不了的機會也越高。
+
+有兩層可以改善：
+
+- **API 這一層**：開一支 sitemap 專用的端點，只回 `slug`、`updatedAt`，每頁拉大（例如 5000 筆）、用游標分頁。5 萬筆「網址加時間」的查詢其實很輕，慢的通常是一般 API 回了一堆用不到的欄位
+- **架構這一層**：不在建置時產生，改成**請求時產生並快取**，也就是內建 `sitemap.ts` 加 `revalidate`。每個單元獨立快取，過期時只重算那一個單元，不是整站；sitemap 和部署脫鉤，新內容不用等下次部署
+
+| 項目 | 建置時產生（next-sitemap） | 請求時產生（`sitemap.ts` + `revalidate`） |
+| --- | --- | --- |
+| 什麼時候重算 | 每次部署，全部 | 快取過期時，只有那個單元 |
+| 新內容出現 | 下次部署 | `revalidate` 時間到，或呼叫 `revalidatePath` |
+| API 出錯 | 建置失敗（或沒處理時默默沒有 sitemap） | 實測繼續提供上一份，恢復後自動更新 |
+| 對部署的影響 | 部署要等 sitemap 拉完 | 沒有影響 |
+
+### 動態頁要收錄、又要依單元拆分
+
+需求是「新聞、商品這些動態頁都要收錄，而且每個單元一份 sitemap」時，兩種做法的差別：
+
+| 需求 | next-sitemap | 內建 `sitemap.ts` |
+| --- | --- | --- |
+| 依單元拆分 | 靜態檔只能**依數量**切，新聞和商品會混在同一份；要分單元得寫好幾支 server-sitemap | 每個單元放一個 `sitemap.ts`，天生分開 |
+| 動態頁收錄 | 建置清單看不到，要靠 `additionalPaths` 或 server-sitemap 補 | 直接查資料，動態、靜態頁沒有差別 |
+| 各單元更新頻率 | 全部跟著部署 | 各自設 `revalidate`，例如新聞 10 分鐘、商品 1 小時 |
+| lastmod | 預設建置時間，要額外設定 | 從資料直接填 |
+| sitemap 索引 | 自動 | 要自己寫，約 20 行 |
+
+這個需求用內建做法比較適合。在 next-sitemap 裡做到「動態收錄加依單元拆分」，最後大部分會變成自己寫 server-sitemap 路由，等於是內建做法多套一層。結構會是這樣：
+
+```text
+app/robots.ts                  → 指向 /sitemap_index.xml
+app/sitemap_index.xml/route.ts → 索引，列出下面每一份
+app/sitemap.ts                 → 一般頁面（關於、聯絡…）
+app/news/sitemap.ts            → 新聞，revalidate = 600
+app/products/sitemap.ts        → 商品，revalidate = 3600
+```
+
+單一單元超過 5 萬筆時，該單元改用 `generateSitemaps`。但份數在 build 時固定，資料持續成長的話，要定期重新部署；或改寫成 Route Handler（例如 `app/products/sitemaps/[page]/route.ts`），在請求時計算份數，彈性較大，代價是要自己輸出 XML。
+
 ### 留著 next-sitemap，還是換成內建？
 
 | 項目 | 內建 `sitemap.ts` | next-sitemap |
@@ -444,7 +507,8 @@ export async function GET() {
 
 建議：
 
-- **既有專案運作正常**：可以先留著，把上面的設定修好（關掉 `autoLastmod`、`additionalPaths` 失敗要讓建置失敗、server-sitemap 加跳脫和 `revalidate`），用 `xmllint` 檢查輸出
+- **既有專案運作正常、量還不大**：可以先留著，把上面的設定修好（關掉 `autoLastmod`、`additionalPaths` 失敗要讓建置失敗、server-sitemap 加跳脫和 `revalidate`），用 `xmllint` 檢查輸出
+- **動態內容多、要依單元拆分，或資料量持續成長**：改用內建的 `sitemap.ts`，理由見上面兩節
 - **新專案，或要升級 Next.js 大版本**：用內建的 `sitemap.ts`。套件靠讀 `.next` 的建置清單運作，清單格式是 Next.js 內部的東西，升級時多一個要確認的地方
 
 要換的話，順序很重要，因為 `public/sitemap.xml` 會**默默蓋過** `app/sitemap.ts`：
@@ -496,4 +560,5 @@ curl -s http://localhost:3000/robots.txt                         # 確認有 Sit
 - [Build and submit a sitemap｜Google Search Central](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap)
 - [Manage your sitemaps with sitemap index files｜Google Search Central](https://developers.google.com/search/docs/crawling-indexing/sitemaps/large-sitemaps)
 - [next-sitemap｜GitHub](https://github.com/iamvishnusankar/next-sitemap)
+- [The Importance of Setting the "lastmod" Tag in Your Sitemap｜Bing Webmaster Blog](https://blogs.bing.com/webmaster/february-2023/The-Importance-of-Setting-the-lastmod-Tag-in-Your-Sitemap)
 - [Sitemaps ping endpoint is going away｜Google Search Central Blog](https://developers.google.com/search/blog/2023/06/sitemaps-lastmod-ping)
