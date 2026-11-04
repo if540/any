@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" width="720" height="520" role="img" aria-labelledby="t">
+  <title id="t">大型網站的 sitemap 結構：robots.txt 指向自己寫的 sitemap 索引，索引再列出每一份 sitemap</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="520" class="bg"/>
+
+  <!-- robots -->
+  <rect x="200" y="20" width="320" height="70" class="card stroke" stroke-width="2.5"/>
+  <text x="360" y="48" font-size="16" font-weight="700" text-anchor="middle" class="mono fg">/robots.txt</text>
+  <text x="360" y="74" font-size="13" text-anchor="middle" class="mono mut">Sitemap: …/sitemap_index.xml</text>
+  <path d="M360 92v30" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- index -->
+  <rect x="208" y="138" width="320" height="76" class="o"/>
+  <rect x="200" y="130" width="320" height="76" class="card stroke" stroke-width="3"/>
+  <text x="360" y="162" font-size="17" font-weight="700" text-anchor="middle" class="mono fg">/sitemap_index.xml</text>
+  <text x="360" y="190" font-size="14" text-anchor="middle" class="ink" font-weight="700">sitemap 索引：要自己寫 Route Handler</text>
+
+  <g class="stroke" stroke-width="2.5" fill="none">
+    <path d="M360 208L100 262" marker-end="url(#arrow)"/>
+    <path d="M360 208L273 262" marker-end="url(#arrow)"/>
+    <path d="M360 208L446 262" marker-end="url(#arrow)"/>
+    <path d="M360 208L620 262" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- children -->
+  <g font-size="14">
+    <rect x="20" y="270" width="160" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="100" y="300" text-anchor="middle" font-weight="700" class="mono fg">/sitemap.xml</text>
+    <text x="100" y="324" text-anchor="middle" class="mut">一般頁面</text>
+
+    <rect x="193" y="270" width="160" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="273" y="300" text-anchor="middle" font-weight="700" class="mono fg">…/sitemap/0.xml</text>
+    <text x="273" y="324" text-anchor="middle" class="mut">商品 1–5 萬</text>
+
+    <rect x="366" y="270" width="160" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="446" y="300" text-anchor="middle" font-weight="700" class="mono fg">…/sitemap/1.xml</text>
+    <text x="446" y="324" text-anchor="middle" class="mut">商品 5–10 萬</text>
+
+    <rect x="540" y="270" width="160" height="72" class="card stroke" stroke-width="2.5"/>
+    <text x="620" y="300" text-anchor="middle" font-weight="700" class="mono fg">…/sitemap/2.xml</text>
+    <text x="620" y="324" text-anchor="middle" class="mut">商品 10 萬起</text>
+  </g>
+  <text x="100" y="366" font-size="13" text-anchor="middle" class="mono mut">app/sitemap.ts</text>
+  <path d="M193 358h507" class="stroke" stroke-width="1.5"/>
+  <text x="446" y="380" font-size="13" text-anchor="middle" class="mono mut">app/products/sitemap.ts + generateSitemaps</text>
+
+  <!-- bottom notes -->
+  <rect x="20" y="404" width="680" height="96" class="card stroke" stroke-width="3"/>
+  <text x="40" y="436" font-size="15" class="fg"><tspan font-weight="700">每份上限：</tspan>5 萬個網址，或 50 MB（未壓縮）</text>
+  <text x="40" y="464" font-size="15" class="fg"><tspan font-weight="700">實測：</tspan><tspan class="mono">/products/sitemap.xml</tspan> 是 <tspan class="ink" font-weight="700">404</tspan>，</text>
+  <text x="40" y="488" font-size="15" class="fg">Next.js 不會自動產生索引</text>
+</svg>

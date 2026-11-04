@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" role="img" aria-labelledby="t">
+  <title id="t">Next.js 把網址原樣串進 XML：沒跳脫的 &amp; 讓整份 sitemap 格式錯誤，用 loc() 處理後才正確</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .code{fill:#24292e}.codetext{fill:#e1e4e8}.codestr{fill:#9ecbff}.codehi{fill:#ff6b1a}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="560" class="bg"/>
+
+  <!-- 左：直接串字串 -->
+  <text x="20" y="34" font-size="18" font-weight="700" class="fg">✗ 直接串字串</text>
+  <rect x="20" y="50" width="330" height="56" class="code"/>
+  <text x="36" y="84" font-size="15" class="mono codetext">url: <tspan class="codestr">`${BASE}/tags/Q&amp;A`</tspan></text>
+  <path d="M185 108v34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="198" y="132" font-size="14" class="mut">Next.js 原樣放進 XML</text>
+  <rect x="20" y="150" width="330" height="56" class="code"/>
+  <text x="36" y="184" font-size="15" class="mono codetext">&lt;loc&gt;…/tags/Q<tspan class="codehi" font-weight="700">&amp;</tspan>A&lt;/loc&gt;</text>
+  <path d="M185 208v34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="20" y="250" width="330" height="64" class="tag"/>
+  <text x="185" y="278" font-size="17" font-weight="700" text-anchor="middle" class="tagtext">XML 格式錯誤</text>
+  <text x="185" y="302" font-size="14" text-anchor="middle" class="tagtext">解析器整份拒絕，不是只壞一筆</text>
+
+  <!-- 右：用 loc() -->
+  <text x="370" y="34" font-size="18" font-weight="700" class="fg">✓ 用 loc() 處理</text>
+  <rect x="370" y="50" width="330" height="56" class="code"/>
+  <text x="386" y="84" font-size="15" class="mono codetext">url: loc(<tspan class="codestr">'/tags/Q&amp;A'</tspan>)</text>
+  <path d="M535 108v34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="548" y="132" font-size="14" class="mut">先跳脫再交給 Next.js</text>
+  <rect x="370" y="150" width="330" height="56" class="code"/>
+  <text x="386" y="184" font-size="15" class="mono codetext">&lt;loc&gt;…/tags/Q<tspan class="codehi" font-weight="700">&amp;amp;</tspan>A&lt;/loc&gt;</text>
+  <path d="M535 208v34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="378" y="258" width="330" height="64" class="o"/>
+  <rect x="370" y="250" width="330" height="64" class="card stroke" stroke-width="3"/>
+  <text x="535" y="278" font-size="17" font-weight="700" text-anchor="middle" class="fg">XML 正確</text>
+  <text x="535" y="302" font-size="14" text-anchor="middle" class="mut">解析器讀得到每一筆</text>
+
+  <!-- 底部：loc() 做的三件事 -->
+  <rect x="20" y="350" width="680" height="190" class="card stroke" stroke-width="3"/>
+  <text x="40" y="384" font-size="17" font-weight="700" class="fg">loc() 一次處理實測會出錯的三種輸入</text>
+  <g font-size="15">
+    <text x="40" y="424" class="mut">輸入</text>
+    <text x="300" y="424" class="mut">loc() 輸出</text>
+    <path d="M40 436h640" class="stroke" stroke-width="1"/>
+    <text x="40" y="466" class="mono fg">/tags/Q&amp;A</text>
+    <text x="300" y="466" class="mono fg">…/tags/Q<tspan class="ink" font-weight="700">&amp;amp;</tspan>A</text>
+    <text x="40" y="496" class="mono fg">/標籤/前端</text>
+    <text x="300" y="496" class="mono fg">…/<tspan class="ink" font-weight="700">%E6%A8%99</tspan>…</text>
+    <text x="40" y="526" class="mono fg">/about</text>
+    <text x="300" y="526" class="mono fg"><tspan class="ink" font-weight="700">https://www.example.com</tspan>/about</text>
+  </g>
+</svg>
