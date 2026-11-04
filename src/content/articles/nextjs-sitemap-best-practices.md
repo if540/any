@@ -7,7 +7,7 @@ tags: [Next.js, SEO]
 draft: true
 coverTitle: "Next.js\nsitemap\n拆成多份"
 coverMotif: grid
-tldr: "Next.js 的 sitemap.ts 會把網址原樣串進 XML，不會跳脫：網址裡有 & 就是格式錯誤的 XML，中文路徑和相對路徑也原樣輸出，要自己用 new URL() 加跳脫處理。Google 不看 changefreq 和 priority，lastmod 只在一直準確時才採用，所以不要寫 new Date()，要用資料真正的更新時間。sitemap.ts 預設在 build 時產生，新內容要靠 revalidate 才會出現。產生多份 sitemap 有三種做法：每個區段放 sitemap.ts、generateSitemaps、next-sitemap 套件。內建做法不會產生 sitemap 索引，要自己寫，generateSitemaps 的 id 是字串、份數在 build 時固定；next-sitemap 會自動拆分和產生索引，但 lastmod 預設是建置時間、動態頁面不會出現、getServerSideSitemap 不跳脫 &。"
+tldr: "Next.js 的 sitemap.ts 會把網址原樣串進 XML，不會跳脫：網址裡有 & 就是格式錯誤的 XML，中文路徑和相對路徑也原樣輸出，要自己用 new URL() 加跳脫處理。Google 不看 changefreq 和 priority，lastmod 只在一直準確時才採用，所以不要寫 new Date()，要用資料真正的更新時間。sitemap.ts 預設在 build 時產生，新內容要靠 revalidate 才會出現。產生多份 sitemap 有三種做法：每個區段放 sitemap.ts、generateSitemaps、next-sitemap 套件。內建做法不會產生 sitemap 索引，要自己寫，generateSitemaps 的 id 是字串、份數在 build 時固定；next-sitemap 會自動拆分和產生索引，但 lastmod 預設是建置時間、動態頁面不會出現、additionalPaths 出錯時建置照樣成功、getServerSideSitemap 不跳脫 &。"
 faq:
   - question: Next.js 的 sitemap.ts 會自動跳脫網址裡的 & 嗎？
     answer: 不會。實測 Next.js 16.4 把 url、images 等欄位直接串進 XML，網址裡的 & 原樣輸出，XML 解析器（xmllint、Python）都判定格式錯誤，整份讀不了。要自己先把 & 換成 &amp;，建議寫一個 loc() 函式統一處理。
@@ -269,7 +269,7 @@ export async function GET() {
 
 [next-sitemap](https://github.com/iamvishnusankar/next-sitemap) 的思路完全不同：它不是 Next.js 的路由，而是**建置完成後執行的指令**。它讀 `.next` 資料夾裡的建置清單，把有哪些頁面寫成靜態檔放進 `public/`。
 
-![示意圖，next-sitemap 的運作方式。next build 產生頁面，寫出 .next 建置清單，清單只記錄預先產生的頁面。next-sitemap 在 postbuild 執行，讀清單後在 public 資料夾寫出靜態檔：sitemap.xml 是自動產生的索引，sitemap-0.xml 放前 5000 筆，sitemap-1.xml 放 5001 筆起，還有 robots.txt。另外，動態內容用 app/server-sitemap.xml/route.ts 的 getServerSideSitemap()，請求時才從 CMS 產生，補上動態頁面，由 additionalSitemaps 列進索引。下方列出實測要注意的地方（next-sitemap 4.2.3 加 Next.js 16）：沒有 generateStaticParams 的動態頁面不會出現；lastmod 預設全部是建置時間；getServerSideSitemap 不跳脫 &，靜態檔才會；public/sitemap.xml 會蓋過 app/sitemap.ts，不會警告。](../../assets/articles/nextjs-sitemap-best-practices/next-sitemap-flow.svg)
+![示意圖，next-sitemap 的運作方式。next build 產生頁面，寫出 .next 建置清單，清單只記錄預先產生的頁面。next-sitemap 在 postbuild 執行，讀清單後在 public 資料夾寫出靜態檔：sitemap.xml 是自動產生的索引，sitemap-0.xml 放前 5000 筆，sitemap-1.xml 放 5001 筆起，還有 robots.txt。另外，動態內容用 app/server-sitemap.xml/route.ts 的 getServerSideSitemap()，請求時才從 CMS 產生，補上動態頁面，由 additionalSitemaps 列進索引。下方列出實測要注意的地方（next-sitemap 4.2.3 加 Next.js 16）：沒有 generateStaticParams 的動態頁面不會出現；lastmod 預設全部是建置時間；getServerSideSitemap 不跳脫 &，靜態檔才會；public/sitemap.xml 會蓋過 app/sitemap.ts，不會警告；additionalPaths 出錯只印紅字，建置照樣成功。](../../assets/articles/nextjs-sitemap-best-practices/next-sitemap-flow.svg)
 
 基本設定：
 
@@ -296,6 +296,7 @@ export async function GET() {
 | 動態頁面 | ✗ 沒有 `generateStaticParams` 的頁面（建置表上的 `ƒ`）**不會出現** |
 | `getServerSideSitemap` 的 `&` | ✗ **不會跳脫**，實測輸出的 XML 格式錯誤 |
 | `getServerSideSitemap` 的快取 | ✗ Route Handler 預設是動態的，每次爬蟲來都重查 CMS |
+| `additionalPaths` 出錯 | ✗ **只印紅字，結束碼 0**，建置成功但沒有 `sitemap.xml` |
 | 和 `app/sitemap.ts` 同時存在 | ✗ `public/sitemap.xml` 蓋過 `app/sitemap.ts`，建置不報錯 |
 
 `lastmod` 和 `sitemap.ts` 寫 `new Date()` 是同一個問題：每次部署全部變成今天。修正後的設定：
@@ -335,7 +336,84 @@ module.exports = {
   <p>next-sitemap 的靜態檔<strong>會自己跳脫</strong>，所以 <code>transform</code> 裡只做 <code>encodeURI()</code>，不要再用前面的 <code>loc()</code>。實測傳入已跳脫的 <code>R&amp;amp;D</code>，輸出變成 <code>R&amp;amp;amp;D</code>。反過來，<code>getServerSideSitemap</code> <strong>不會跳脫</strong>，那裡要自己處理。</p>
 </div>
 
-動態頁面（例如資料庫裡隨時新增的商品）不在建置清單裡，要用 server-sitemap 補。記得自己跳脫，並加上 `revalidate`：
+#### 補上動態頁面的兩種做法
+
+沒有 `generateStaticParams` 的動態頁面不在建置清單裡，next-sitemap 看不到。補法有兩種：
+
+| 項目 | A：建置時用 `additionalPaths` 向 API 要 | B：`getServerSideSitemap` 請求時產生 |
+| --- | --- | --- |
+| 資料什麼時候抓 | `next build` 之後抓一次 | 爬蟲來的時候（搭配 `revalidate`） |
+| 新內容出現在 sitemap | 下次部署 | `revalidate` 時間到 |
+| 拆分、跳脫 | next-sitemap 自動處理 | 要自己處理 |
+| 建置時需要 | 連得到正式 API | 不用 |
+
+內容多半跟著部署更新的網站，A 就夠用；部署之間新增很多內容、希望盡快被發現的，用 B。
+
+**做法 A 實測有一個很危險的地方：API 出錯時，建置照樣成功。** 把 API 關掉再建置，next-sitemap 只印出一行紅字 `TypeError: fetch failed`，結束碼卻是 0，`npm run build` 也是成功，`public/` 裡**完全沒有 `sitemap.xml`**。CI 不會攔下來，部署上去 `/sitemap.xml` 就是 404；如果 `public/` 裡留著舊檔，部署出去的就是舊的 sitemap。
+
+其他實測結果：
+
+- **重複的網址會自動去掉**：`additionalPaths` 回傳建置清單裡已經有的網址，輸出只有一筆，以 `additionalPaths` 的內容為準
+- **直接回傳 `{ loc, lastmod }` 物件也會跳脫**，不一定要經過 `config.transform`
+- **經過 `config.transform` 的 lastmod 是建置時間**（`autoLastmod` 開著時），API 有更新時間的話，直接放進回傳物件
+- **只抓第一頁就只有第一頁**：API 有分頁時，要自己把每一頁抓完
+- **靜態的 Route Handler 也會被當成頁面**：實測加了 `revalidate` 的 `/server-sitemap.xml` 出現在 sitemap 裡，`/feed.xml` 這類路由也一樣，要用 `exclude` 排除
+
+把這些都處理好的寫法：
+
+```js
+// next-sitemap.config.js
+const API = process.env.SITEMAP_API_URL // 正式 API，例如 https://api.example.com/items
+
+// 把所有分頁都抓完；任何一步不對就丟錯
+async function fetchAllItems() {
+  const all = []
+  for (let page = 1; ; page++) {
+    const res = await fetch(`${API}?page=${page}`, { signal: AbortSignal.timeout(10_000) })
+    if (!res.ok) throw new Error(`API ${res.status}：第 ${page} 頁`)
+    const { items, hasNext } = await res.json()
+    if (!Array.isArray(items)) throw new Error(`API 格式不對：第 ${page} 頁`)
+    all.push(...items)
+    if (!hasNext) return all
+  }
+}
+
+/** @type {import('next-sitemap').IConfig} */
+module.exports = {
+  siteUrl: 'https://www.example.com',
+  generateRobotsTxt: true,
+  autoLastmod: false,
+  exclude: ['/server-sitemap.xml', '/feed.xml'], // 靜態的 Route Handler 也會被列進去
+  additionalPaths: async () => {
+    try {
+      const items = await fetchAllItems()
+      if (items.length === 0) throw new Error('API 回傳 0 筆')
+      return items.map((it) => ({
+        loc: `/items/${encodeURIComponent(it.slug)}`,
+        lastmod: it.updatedAt, // API 給的真正更新時間
+      }))
+    } catch (err) {
+      // next-sitemap 會吞掉錯誤、照樣回傳成功，所以自己讓建置失敗
+      console.error('❌ sitemap 取資料失敗：', err.message)
+      process.exit(1)
+    }
+  },
+}
+```
+
+實測：API 正常時，7 筆分三頁全部抓到，`xmllint` 通過；API 關掉時，`npm run build` 結束碼變成 1，CI 會擋下來。
+
+幾個細節：
+
+- **`AbortSignal.timeout()`**：API 卡住時不會讓建置一直等
+- **`items.length === 0` 也當失敗**：API 回 200 但給空陣列，通常是出事了，不是真的沒資料
+- **`encodeURIComponent(slug)`**：slug 裡有 `&`、`?`、`#`、中文時，網址才不會被切錯。編碼後要和網站上連結實際用的網址一致
+- **`public/` 裡產生的檔案不要進版控**：next-sitemap 產生的 `sitemap*.xml`、`robots.txt` 加進 `.gitignore`，失敗時才不會默默用到舊檔
+- **只放公開的資料**：API 若會回傳草稿、下架的項目，要先篩掉
+
+#### 做法 B：server-sitemap
+
+請求時才產生，記得自己跳脫，並加上 `revalidate`：
 
 ```ts
 // app/server-sitemap.xml/route.ts
@@ -366,7 +444,7 @@ export async function GET() {
 
 建議：
 
-- **既有專案運作正常**：可以先留著，把上面的設定修好（關掉 `autoLastmod`、server-sitemap 加跳脫和 `revalidate`），用 `xmllint` 檢查輸出
+- **既有專案運作正常**：可以先留著，把上面的設定修好（關掉 `autoLastmod`、`additionalPaths` 失敗要讓建置失敗、server-sitemap 加跳脫和 `revalidate`），用 `xmllint` 檢查輸出
 - **新專案，或要升級 Next.js 大版本**：用內建的 `sitemap.ts`。套件靠讀 `.next` 的建置清單運作，清單格式是 Next.js 內部的東西，升級時多一個要確認的地方
 
 要換的話，順序很重要，因為 `public/sitemap.xml` 會**默默蓋過** `app/sitemap.ts`：
@@ -404,7 +482,7 @@ curl -s http://localhost:3000/robots.txt                         # 確認有 Sit
 - `lastModified` 來自內容真正的更新時間，沒有 `new Date()`
 - 資料來自資料庫或 CMS 時，有設 `revalidate`
 - 每份不超過 5 萬個網址；有拆分時，有 sitemap 索引
-- 用 next-sitemap 時：`autoLastmod` 已關閉、server-sitemap 有跳脫和 `revalidate`、沒有同時存在 `app/sitemap.ts`
+- 用 next-sitemap 時：`autoLastmod` 已關閉、`additionalPaths` 出錯會讓建置失敗、server-sitemap 有跳脫和 `revalidate`、沒有同時存在 `app/sitemap.ts`
 - 只放 canonical、會回 200、允許索引的網址
 - `robots.txt` 有 `Sitemap:`，Search Console 已提交
 
