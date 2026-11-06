@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" width="720" height="640" role="img" aria-labelledby="t">
+  <title id="t">一個請求經過的三層伺服器快取：整頁快取、請求記憶、資料快取，最後才打到外部 API</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="640" class="bg"/>
+
+  <!-- 請求 -->
+  <rect x="250" y="16" width="220" height="44" class="tag"/>
+  <text x="360" y="44" font-size="16" font-weight="700" text-anchor="middle" class="tagtext">瀏覽器請求頁面</text>
+  <path d="M360 62v26" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 第一層 -->
+  <rect x="20" y="96" width="680" height="120" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="128" font-size="13" font-weight="700" class="mut">第一層</text>
+  <text x="96" y="128" font-size="18" font-weight="700" class="fg">整頁快取（Full Route Cache）</text>
+  <text x="40" y="160" font-size="15" class="fg">存整頁的 HTML 和 RSC。命中就直接回，下面兩層都不會執行</text>
+  <text x="40" y="190" font-size="14" class="mut">觀察：建置表的 <tspan class="mono">○</tspan>、回應標頭 <tspan class="mono">x-nextjs-cache</tspan></text>
+  <text x="680" y="190" font-size="14" text-anchor="end" class="ink" font-weight="700">只在正式版</text>
+  <path d="M360 218v26" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="374" y="238" font-size="13" class="mut">沒命中，才渲染頁面</text>
+
+  <!-- 第二層 -->
+  <rect x="20" y="252" width="680" height="120" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="284" font-size="13" font-weight="700" class="mut">第二層</text>
+  <text x="96" y="284" font-size="18" font-weight="700" class="fg">請求記憶（Request Memoization）</text>
+  <text x="40" y="316" font-size="15" class="fg">同一次渲染裡，網址和選項相同的 GET 只真的打一次</text>
+  <text x="40" y="346" font-size="14" class="mut">觀察：用會計數的 API 看實際次數（記錄檔仍會印兩行）</text>
+  <text x="680" y="346" font-size="14" text-anchor="end" class="ink" font-weight="700">渲染完就清掉</text>
+  <path d="M360 374v26" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 第三層 -->
+  <rect x="28" y="416" width="680" height="140" class="o"/>
+  <rect x="20" y="408" width="680" height="140" class="card stroke" stroke-width="3"/>
+  <text x="40" y="440" font-size="13" font-weight="700" class="mut">第三層</text>
+  <text x="96" y="440" font-size="18" font-weight="700" class="fg">資料快取（Data Cache）</text>
+  <text x="40" y="472" font-size="15" class="fg">存 fetch 的回應，寫在 <tspan class="mono">.next/cache/fetch-cache</tspan></text>
+  <text x="40" y="500" font-size="15" class="ink" font-weight="700">跨請求、跨重啟，連重新 build 都還在</text>
+  <text x="40" y="530" font-size="14" class="mut">觀察：<tspan class="mono">logging.fetches</tspan> 的 cache hit／skip、直接列出快取檔</text>
+  <text x="680" y="530" font-size="14" text-anchor="end" class="mut">開發時另存在 <tspan class="mono">.next/dev/cache</tspan></text>
+  <path d="M360 550v26" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="374" y="570" font-size="13" class="mut">沒命中或過期</text>
+
+  <!-- API -->
+  <rect x="250" y="584" width="220" height="44" class="card stroke" stroke-width="2.5"/>
+  <text x="360" y="612" font-size="16" font-weight="700" text-anchor="middle" class="fg">外部 API</text>
+</svg>

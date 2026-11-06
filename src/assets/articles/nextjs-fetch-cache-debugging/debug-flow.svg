@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 620" width="720" height="620" role="img" aria-labelledby="t">
+  <title id="t">資料沒更新時的排查流程</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="620" class="bg"/>
+
+  <rect x="20" y="16" width="300" height="48" class="tag"/>
+  <text x="170" y="47" font-size="18" font-weight="700" text-anchor="middle" class="tagtext">資料沒更新？</text>
+  <path d="M170 66v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Q1 -->
+  <rect x="20" y="96" width="300" height="64" class="card stroke" stroke-width="3"/>
+  <text x="40" y="135" font-size="17" font-weight="700" class="fg">用 next dev 看的？</text>
+  <path d="M320 128h52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="336" y="118" font-size="15" font-weight="700" class="fg">是</text>
+  <rect x="380" y="96" width="320" height="100" class="card stroke" stroke-width="2"/>
+  <text x="396" y="124" font-size="15" class="fg">開發和正式版的快取不一樣</text>
+  <text x="396" y="152" font-size="15" class="fg"><tspan class="ink" font-weight="700">改用正式版建置</tspan>重現一次</text>
+  <text x="396" y="180" font-size="13" class="mut">dev 裡先看 logging.fetches 的 hit／skip</text>
+  <path d="M170 162v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="182" y="178" font-size="15" font-weight="700" class="fg">否</text>
+
+  <!-- Q2 -->
+  <rect x="20" y="192" width="300" height="64" class="card stroke" stroke-width="3"/>
+  <text x="40" y="221" font-size="17" font-weight="700" class="fg">建置表上這頁是 ○？</text>
+  <text x="40" y="244" font-size="13" class="mut">或回應有 x-nextjs-cache</text>
+  <path d="M320 224h52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="336" y="214" font-size="15" font-weight="700" class="fg">是</text>
+  <rect x="380" y="208" width="320" height="76" class="card stroke" stroke-width="2"/>
+  <text x="396" y="236" font-size="15" class="fg">整頁在建置時就產生好了</text>
+  <text x="396" y="264" font-size="15" class="fg">加 <tspan class="mono">revalidate</tspan>，或讓頁面變動態</text>
+  <path d="M170 258v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="182" y="274" font-size="15" font-weight="700" class="fg">否</text>
+
+  <!-- Q3 -->
+  <rect x="20" y="288" width="300" height="64" class="card stroke" stroke-width="3"/>
+  <text x="40" y="317" font-size="17" font-weight="700" class="fg">fetch 有 force-cache</text>
+  <text x="40" y="340" font-size="17" font-weight="700" class="fg">或 next.revalidate？</text>
+  <path d="M320 320h52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="336" y="310" font-size="15" font-weight="700" class="fg">是</text>
+  <rect x="380" y="296" width="320" height="100" class="card stroke" stroke-width="2"/>
+  <text x="396" y="324" font-size="15" class="fg">資料快取還沒過期</text>
+  <text x="396" y="352" font-size="15" class="fg">過期後<tspan class="ink" font-weight="700">第一個請求仍是舊的</tspan></text>
+  <text x="396" y="380" font-size="13" class="mut">要馬上更新：revalidateTag(tag, { expire: 0 })</text>
+  <path d="M170 354v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="182" y="370" font-size="15" font-weight="700" class="fg">否</text>
+
+  <!-- Q4 -->
+  <rect x="20" y="384" width="300" height="64" class="card stroke" stroke-width="3"/>
+  <text x="40" y="413" font-size="17" font-weight="700" class="fg">重新 build、部署了</text>
+  <text x="40" y="436" font-size="17" font-weight="700" class="fg">還是舊的？</text>
+  <path d="M320 416h52" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="336" y="406" font-size="15" font-weight="700" class="fg">是</text>
+  <rect x="388" y="420" width="320" height="100" class="o"/>
+  <rect x="380" y="412" width="320" height="100" class="card stroke" stroke-width="3"/>
+  <text x="396" y="440" font-size="15" class="fg">建置沿用了舊的資料快取</text>
+  <text x="396" y="468" font-size="15" class="fg">build 前刪掉</text>
+  <text x="396" y="496" font-size="14" class="mono ink" font-weight="700">.next/cache/fetch-cache</text>
+  <path d="M170 450v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="182" y="466" font-size="15" font-weight="700" class="fg">否</text>
+
+  <!-- end -->
+  <rect x="20" y="480" width="300" height="120" class="card stroke" stroke-width="2"/>
+  <text x="40" y="510" font-size="15" class="fg">不是 Next.js 伺服器的快取</text>
+  <text x="40" y="538" font-size="14" class="mut">檢查 CDN、API 自己的快取，</text>
+  <text x="40" y="562" font-size="14" class="mut">或瀏覽器端的 Router Cache</text>
+  <text x="40" y="586" font-size="13" class="mut">（用 router.refresh() 試）</text>
+</svg>
