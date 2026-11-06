@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-labelledby="t">
+  <title id="t">cacheLife 的 revalidate 和 expire：以 hours 為例，一小時內直接回快取，一小時到一天回舊的並在背景更新，超過一天沒人來就要等新的</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .soft{fill:#ffd8c2}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}.soft{fill:#5a2a10}
+    }
+  </style>
+
+  <rect width="720" height="400" class="bg"/>
+  <text x="20" y="36" font-size="17" font-weight="700" class="fg">以 <tspan class="mono">cacheLife('hours')</tspan> 為例：快取存好之後，下一個請求會怎樣？</text>
+
+  <!-- 三段 -->
+  <rect x="20" y="64" width="200" height="120" class="o"/>
+  <text x="120" y="104" font-size="18" font-weight="900" text-anchor="middle" class="onO">直接回快取</text>
+  <text x="120" y="134" font-size="14" text-anchor="middle" class="onO">新鮮</text>
+  <text x="120" y="162" font-size="13" text-anchor="middle" class="onO">不打 API</text>
+
+  <rect x="220" y="64" width="300" height="120" class="soft"/>
+  <text x="370" y="104" font-size="18" font-weight="900" text-anchor="middle" class="fg">先回舊的，背景更新</text>
+  <text x="370" y="134" font-size="14" text-anchor="middle" class="fg">這個人看到舊的</text>
+  <text x="370" y="162" font-size="13" text-anchor="middle" class="fg">下一個人看到新的</text>
+
+  <rect x="520" y="64" width="180" height="120" class="card stroke" stroke-width="2.5"/>
+  <text x="610" y="104" font-size="18" font-weight="900" text-anchor="middle" class="fg">等新的</text>
+  <text x="610" y="134" font-size="14" text-anchor="middle" class="fg">太久沒人來</text>
+  <text x="610" y="162" font-size="13" text-anchor="middle" class="fg">這次請求會變慢</text>
+
+  <!-- 軸 -->
+  <path d="M20 200H700" class="stroke" stroke-width="3"/>
+  <path d="M20 192v16M220 192v16M520 192v16" class="stroke" stroke-width="3"/>
+  <text x="20" y="232" font-size="14" class="mono fg">0</text>
+  <text x="220" y="232" font-size="14" text-anchor="middle" class="mono fg">revalidate</text>
+  <text x="220" y="254" font-size="14" text-anchor="middle" class="ink" font-weight="700">1 小時</text>
+  <text x="520" y="232" font-size="14" text-anchor="middle" class="mono fg">expire</text>
+  <text x="520" y="254" font-size="14" text-anchor="middle" class="ink" font-weight="700">1 天</text>
+
+  <!-- stale -->
+  <rect x="20" y="284" width="680" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="316" font-size="15" class="fg"><tspan class="mono" font-weight="700">stale</tspan>（5 分鐘）管的是<tspan font-weight="700">瀏覽器</tspan>：</text>
+  <text x="40" y="342" font-size="14" class="mut">站內換頁時，5 分鐘內直接用瀏覽器記住的內容，連伺服器都不問。</text>
+  <text x="40" y="366" font-size="14" class="mut">上面的 revalidate、expire 管的是伺服器。</text>
+</svg>

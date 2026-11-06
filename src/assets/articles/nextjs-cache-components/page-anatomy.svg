@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" role="img" aria-labelledby="t">
+  <title id="t">一個頁面的三種區塊：靜態、快取、動態，以及實測各自送到瀏覽器的時間</title>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .hatch{fill:url(#h)}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <defs>
+    <pattern id="h" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" class="card"/>
+      <line x1="0" y1="0" x2="0" y2="10" class="stroke" stroke-width="2" opacity="0.25"/>
+    </pattern>
+  </defs>
+
+  <rect width="720" height="560" class="bg"/>
+
+  <!-- 頁面外框 -->
+  <rect x="20" y="20" width="400" height="520" class="card stroke" stroke-width="3"/>
+  <text x="40" y="52" font-size="14" class="mono mut">app/blog/page.tsx</text>
+
+  <!-- 靜態 -->
+  <rect x="40" y="70" width="360" height="110" class="card stroke" stroke-width="2"/>
+  <text x="56" y="100" font-size="13" font-weight="700" class="mut">① 靜態</text>
+  <text x="56" y="132" font-size="22" font-weight="900" class="fg">部落格</text>
+  <text x="56" y="162" font-size="14" class="mut">沒有讀資料，自動預先產生</text>
+
+  <!-- 快取 -->
+  <rect x="48" y="208" width="360" height="130" class="o"/>
+  <rect x="40" y="200" width="360" height="130" class="card stroke" stroke-width="3"/>
+  <text x="56" y="230" font-size="13" font-weight="700" class="ink">② 快取</text>
+  <text x="56" y="262" font-size="17" font-weight="700" class="fg">文章列表</text>
+  <text x="56" y="290" font-size="14" class="mono mut">'use cache' + cacheLife('hours')</text>
+  <text x="56" y="314" font-size="14" class="mut">build 時算好，放進外殼</text>
+
+  <!-- 動態 -->
+  <rect x="40" y="350" width="360" height="170" class="hatch stroke" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="56" y="380" font-size="13" font-weight="700" class="mut">③ 動態</text>
+  <text x="56" y="412" font-size="17" font-weight="700" class="fg">我的偏好設定（讀 cookie）</text>
+  <text x="56" y="440" font-size="14" class="mono mut">&lt;Suspense fallback&gt;</text>
+  <text x="56" y="468" font-size="14" class="mut">外殼裡只有 fallback，</text>
+  <text x="56" y="492" font-size="14" class="mut">內容在請求時才算，串流補上</text>
+
+  <!-- 右側時間軸 -->
+  <text x="450" y="52" font-size="16" font-weight="700" class="fg">實測送達時間</text>
+  <path d="M470 80V520" class="stroke" stroke-width="3"/>
+  <circle cx="470" cy="80" r="6" class="tag"/>
+  <text x="488" y="86" font-size="14" class="mono fg">0 ms 送出請求</text>
+
+  <circle cx="470" cy="190" r="9" class="o"/>
+  <text x="488" y="184" font-size="18" font-weight="900" class="fg">112 ms</text>
+  <text x="488" y="208" font-size="14" class="fg">外殼送達：① + ② + fallback</text>
+  <text x="488" y="230" font-size="13" class="mut">從 build 時存好的 HTML 直接回</text>
+
+  <circle cx="470" cy="440" r="9" class="tag"/>
+  <text x="488" y="434" font-size="18" font-weight="900" class="fg">1653 ms</text>
+  <text x="488" y="458" font-size="14" class="fg">③ 串流補上</text>
+  <text x="488" y="480" font-size="13" class="mut">（測試 API 故意延遲 1.5 秒）</text>
+</svg>

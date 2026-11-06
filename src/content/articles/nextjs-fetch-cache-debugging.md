@@ -268,7 +268,7 @@ FileSystemCache: revalidateTag [ 'posts' ] { expire: 0 }
 FileSystemCache: get <hash> [ 'posts' ] FETCH true
 ```
 
-`get … FETCH true` 表示讀到快取，`false` 表示沒有。名稱有 `PRIVATE`，是**沒有寫在文件裡的內部開關**，只適合臨時排查，不要依賴它的輸出格式。
+`get … FETCH true` 表示讀到快取，`false` 表示沒有。官方文件只在 `use cache` 頁面的疑難排解裡提到它，名稱也帶著 `PRIVATE`，**適合臨時排查，不要依賴它的輸出格式**。
 
 ### 工具五：一支會計數的假 API
 
@@ -295,7 +295,7 @@ http.createServer((req, res) => {
 
 ## 開了 cacheComponents 的話
 
-Next.js 16 新增的 `cacheComponents` 換了一套規則：**沒有放在 `'use cache'` 裡的資料都不快取**，路由層級的 `dynamic`、`revalidate`、`fetchCache` 設定不能再用。官方的對照：
+Next.js 16 新增的 `cacheComponents` 換了一套規則，而且 **Next.js 17 會預設開啟**，完整說明請看〈[搞懂 Next.js Cache Components](/any/articles/nextjs-cache-components/)〉。簡單說：**沒有放在 `'use cache'` 裡的資料都不快取**，路由層級的 `dynamic`、`revalidate`、`fetchCache` 設定不能再用。官方的對照：
 
 | 原本（這篇講的） | 開了 cacheComponents |
 | --- | --- |
