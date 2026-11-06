@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 620" width="720" height="620" role="img" aria-labelledby="t">
+  <title id="t">console.log 印物件會變成好幾行，log 系統一行算一筆，搜尋訂單編號只找到孤立的一行；改成一行 JSON 就是完整的一筆</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .code{fill:#24292e}.codetext{fill:#e1e4e8}.codehi{fill:#ff6b1a}.codemut{fill:#959da5}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="620" class="bg"/>
+
+  <text x="20" y="34" font-size="17" font-weight="700" class="fg">✗ console.log('建立訂單失敗', order)</text>
+  <text x="20" y="58" font-size="14" class="mut">pm2 --time 的 log 檔（實測）：一次呼叫，變成 6 筆</text>
+
+  <rect x="20" y="72" width="680" height="226" class="code"/>
+  <g font-size="14" class="mono">
+    <text x="36" y="102" class="mono codemut">18:27:08</text><text x="130" y="102" class="mono codetext" xml:space="preserve">建立訂單失敗 {</text>
+    <text x="36" y="134" class="mono codemut">18:27:08</text><text x="130" y="134" class="mono codetext" xml:space="preserve">  id: '<tspan class="codehi" font-weight="700">A001</tspan>',</text>
+    <text x="36" y="166" class="mono codemut">18:27:08</text><text x="130" y="166" class="mono codetext" xml:space="preserve">  user: { id: 7, name: '王小明' },</text>
+    <text x="36" y="198" class="mono codemut">18:27:08</text><text x="130" y="198" class="mono codetext" xml:space="preserve">  items: [ { sku: 'X', qty: 2 }, … ],</text>
+    <text x="36" y="230" class="mono codemut">18:27:08</text><text x="130" y="230" class="mono codetext" xml:space="preserve">  total: 1280</text>
+    <text x="36" y="262" class="mono codemut">18:27:08</text><text x="130" y="262" class="mono codetext" xml:space="preserve">}</text>
+  </g>
+  <path d="M28 118h664M28 150h664M28 182h664M28 214h664M28 246h664" stroke="#959da5" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>
+  <text x="680" y="288" font-size="13" text-anchor="end" class="mono codemut">每條虛線 = log 系統切開的地方</text>
+
+  <!-- 搜尋結果 -->
+  <rect x="20" y="314" width="680" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="344" font-size="15" class="fg">搜尋 <tspan class="mono" font-weight="700">A001</tspan>，只找到：</text>
+  <text x="40" y="372" font-size="15" class="mono fg" xml:space="preserve">  id: 'A001',</text>
+  <text x="40" y="398" font-size="14" class="ink" font-weight="700">看不出是哪個事件、是不是錯誤、是誰的訂單</text>
+
+  <!-- 對照 -->
+  <path d="M360 418v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="20" y="470" font-size="17" font-weight="700" class="fg">✓ 一個事件，一行 JSON</text>
+  <rect x="28" y="490" width="680" height="64" class="o"/>
+  <rect x="20" y="482" width="680" height="64" class="code"/>
+  <text x="36" y="520" font-size="13" class="mono codetext">{"level":"error","msg":"建立訂單失敗","orderId":"<tspan class="codehi" font-weight="700">A001</tspan>","userId":7,"total":1280}</text>
+  <text x="20" y="582" font-size="14" class="fg">一筆就是完整的事件，可以用 <tspan class="mono">orderId</tspan>、<tspan class="mono">level</tspan> 這些欄位篩選</text>
+  <text x="20" y="604" font-size="13" class="mut">pm2、Docker、systemd 的 journald、各種雲端 log 服務，大多以「一行」為一筆</text>
+</svg>
