@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 網站突然出現 Apache 的 502 Proxy Error，兇手可能只是一行印物件的 log。用 Apache 反向代理接 Node.js 和 Next.js 實測三條路：log 那行丟錯讓行程掛掉、在回呼裡丟錯讓回應永遠不送出、印太大的物件讓請求排隊逾時，以及怎麼確認和修正。
 pubDate: 2026-11-06
 tags: [Node.js, Next.js]
-draft: true
+draft: false
 coverTitle: "一行 log\n502"
 coverMotif: code
 tldr: "物件對 log 不友善有兩個原因：JSON.stringify 遇到循環參考或 BigInt 會直接丟錯，console.log 和 JSON.stringify 遇到大物件又很花時間。前者在一般 Node 伺服器會讓行程掛掉，Apache 回 502 Proxy Error，重啟前再回 503；在 Next.js 不會掛，但如果發生在回呼裡，回應永遠不會送出，Apache 等到逾時一樣回 502。後者讓單執行緒被 log 佔住，實測 50 個同時請求就有 23 個逾時。解法是讓 log 永遠不會丟錯、只記錄需要的欄位。"
