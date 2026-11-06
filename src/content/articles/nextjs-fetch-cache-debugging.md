@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: Next.js 16 的 fetch 預設不快取，頁面卻常常停在舊資料。用正式版建置實測 fetch 的各種選項、三層伺服器快取的關係，以及重新 build 資料還是舊的原因，最後整理開發時的調試工具和排查流程。
 pubDate: 2026-11-06
 tags: [Next.js]
-draft: true
+draft: false
 coverTitle: "fetch\n快取\n怎麼查"
 coverMotif: stack
 tldr: "Next.js 16（沒開 cacheComponents）的 fetch 預設不快取，但頁面如果被判定為靜態，整頁會在 build 時產生，fetch 也就只跑那一次。fetch 結果存在 .next/cache/fetch-cache，實測連重新 build 都會沿用，CI 有快取 .next/cache 時，部署後資料可能還是舊的。revalidate 是先回舊資料、背景更新。調試時先在 next.config 開 logging.fetches 看 cache hit／skip，再用正式版建置、回應標頭 x-nextjs-cache 和列出快取檔確認。"

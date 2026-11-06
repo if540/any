@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: Next.js 17 會預設開啟 Cache Components。從「頁面分成靜態、快取、動態三種區塊」的心智模型開始，一步步說明 use cache、cacheLife、cacheTag、Suspense 怎麼搭配，再到快取鍵、存放位置、常見錯誤和調試，全部用 Next.js 16.4.5 實測。
 pubDate: 2026-11-06
 tags: [Next.js]
-draft: true
+draft: false
 coverTitle: "use cache\n從零開始"
 coverMotif: stack
 tldr: "Cache Components 的規則只有一條：預設什麼都不快取，打 API 或查資料庫的程式碼，你要嘛用 'use cache' 標成可快取，要嘛用 <Suspense> 包起來在請求時執行，兩個都沒做 build 就失敗。'use cache' 會把函式結果依參數存起來，cacheLife 決定存多久，cacheTag 讓你主動清掉。頁面會變成「build 時做好的外殼」加上「請求時串流補上的動態區塊」，實測外殼 112ms 就送達。'use cache' 預設存在記憶體，重啟或重新部署就清空。"
