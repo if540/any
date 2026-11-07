@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: Next.js 的 fetch GET 會經過兩層快取：只活在一次 render pass 的 Request Memoization 負責去重，跨請求保存的 Data Cache 負責持久。把四種路徑整理成一張流程圖，對照 Next.js 官方文件，並用 Next.js 16.4.5 正式版建置逐一實測。
 pubDate: 2026-11-07
 tags: [Next.js]
-draft: true
+draft: false
 coverTitle: "memo\n＋\nData Cache"
 coverMotif: stack
 tldr: "一次 render pass 裡呼叫 fetch GET：先看 Request Memoization，這次渲染已經打過就直接回。沒有的話，看這個 fetch 有沒有開快取；沒開就直接打 data source（fetch 網址背後的 API、CMS 或後端），只存 memo。有開就查 Data Cache：沒有就打 data source、存進 Data Cache 和 memo；有且沒過期就直接回；有但過期，先回舊資料、背景打 data source 更新 Data Cache，下一次 render pass 才拿到新的。memo 渲染完就清空，Data Cache 跨請求保存。這兩層只管 fetch，直接查資料庫不會經過。"
