@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 760" width="720" height="760" role="img" aria-labelledby="t">
+  <title id="t">一次 render pass 裡，fetch GET 經過 Request Memoization 和 Data Cache 的四種路徑</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    .pass{fill:#fff1e8}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}.pass{fill:#2a1a10}
+    }
+  </style>
+
+  <rect width="720" height="760" class="bg"/>
+
+  <!-- render pass 範圍 -->
+  <rect x="12" y="12" width="696" height="500" class="pass stroke" stroke-width="2" stroke-dasharray="10 6"/>
+  <text x="28" y="38" font-size="15" font-weight="700" class="ink">一次 render pass（渲染完就清空）</text>
+
+  <rect x="230" y="52" width="260" height="44" class="tag"/>
+  <text x="360" y="80" font-size="16" font-weight="700" text-anchor="middle" class="mono tagtext">fetch(url) GET</text>
+  <path d="M360 98v20" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Q1 memo -->
+  <rect x="200" y="126" width="320" height="56" class="card stroke" stroke-width="3"/>
+  <text x="360" y="152" font-size="16" font-weight="700" text-anchor="middle" class="fg">Request Memoization 有嗎？</text>
+  <text x="360" y="172" font-size="12" text-anchor="middle" class="mut">同網址、同選項，這次渲染已經打過</text>
+  <path d="M520 154h48" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="530" y="146" font-size="13" font-weight="700" class="fg">HIT</text>
+  <rect x="576" y="126" width="120" height="56" class="o"/>
+  <text x="636" y="150" font-size="14" font-weight="900" text-anchor="middle" class="onO">① 直接回</text>
+  <text x="636" y="170" font-size="12" text-anchor="middle" class="onO">不打 API</text>
+  <path d="M360 184v20" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="372" y="200" font-size="13" font-weight="700" class="fg">MISS</text>
+
+  <!-- Q2 cacheable -->
+  <rect x="200" y="212" width="320" height="56" class="card stroke" stroke-width="3"/>
+  <text x="360" y="238" font-size="16" font-weight="700" text-anchor="middle" class="fg">這個 fetch 有開快取嗎？</text>
+  <text x="360" y="258" font-size="12" text-anchor="middle" class="mono mut">force-cache 或 revalidate ≠ 0</text>
+  <path d="M200 240h-44" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="164" y="232" font-size="13" font-weight="700" class="fg">否</text>
+  <rect x="24" y="212" width="124" height="96" class="card stroke" stroke-width="2"/>
+  <text x="86" y="236" font-size="13" font-weight="700" text-anchor="middle" class="fg">打 API</text>
+  <text x="86" y="258" font-size="12" text-anchor="middle" class="mut">不查、也不存</text>
+  <text x="86" y="276" font-size="12" text-anchor="middle" class="mut">Data Cache</text>
+  <text x="86" y="296" font-size="12" text-anchor="middle" class="ink" font-weight="700">只存 memo</text>
+  <path d="M360 270v20" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="372" y="286" font-size="13" font-weight="700" class="fg">是</text>
+
+  <!-- Q3 data cache -->
+  <rect x="200" y="298" width="320" height="56" class="card stroke" stroke-width="3"/>
+  <text x="360" y="324" font-size="16" font-weight="700" text-anchor="middle" class="fg">Data Cache 有嗎？</text>
+  <text x="360" y="344" font-size="12" text-anchor="middle" class="mut">比對網址、方法、headers、body</text>
+
+  <!-- 三個結果 -->
+  <path d="M260 356L130 394" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M360 356v38" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M460 356L590 394" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="166" y="368" font-size="13" font-weight="700" class="fg">MISS</text>
+  <text x="372" y="380" font-size="13" font-weight="700" class="fg">HIT，沒過期</text>
+  <text x="534" y="368" font-size="13" font-weight="700" class="fg">HIT，過期</text>
+
+  <rect x="24" y="402" width="216" height="98" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="428" font-size="14" font-weight="900" class="fg">② 打 API 取新資料</text>
+  <text x="40" y="450" font-size="12" class="fg">存 memo</text>
+  <text x="40" y="470" font-size="12" class="fg">存 Data Cache（只存 200）</text>
+  <text x="40" y="490" font-size="12" class="mut">這次請求要等 API</text>
+
+  <rect x="252" y="402" width="216" height="98" class="o"/>
+  <text x="268" y="428" font-size="14" font-weight="900" class="onO">③ 直接回快取</text>
+  <text x="268" y="450" font-size="12" class="onO">存 memo</text>
+  <text x="268" y="470" font-size="12" class="onO">不打 API</text>
+
+  <rect x="480" y="402" width="216" height="98" class="card stroke" stroke-width="2.5"/>
+  <text x="496" y="428" font-size="14" font-weight="900" class="fg">④ 先回舊資料</text>
+  <text x="496" y="450" font-size="12" class="fg">舊資料存 memo</text>
+  <text x="496" y="470" font-size="12" class="fg">背景打 API</text>
+  <text x="496" y="490" font-size="12" class="mut">這次請求不用等</text>
+
+  <!-- Data Cache 區 -->
+  <rect x="12" y="540" width="696" height="200" class="card stroke" stroke-width="3"/>
+  <text x="28" y="570" font-size="15" font-weight="700" class="fg">Data Cache（跨 render pass、跨請求，存在 .next/cache/fetch-cache）</text>
+  <path d="M132 502v34" class="stroke" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <path d="M588 502v34" class="stroke" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <text x="40" y="604" font-size="14" class="fg">② 寫入新資料</text>
+  <text x="400" y="604" font-size="14" class="fg">④ 背景抓完才更新</text>
+  <text x="400" y="626" font-size="13" class="mut">失敗就保留舊資料</text>
+  <text x="400" y="648" font-size="13" class="ink" font-weight="700">下一次 render pass 才拿到新的</text>
+  <text x="40" y="694" font-size="13" class="mut">memo 在渲染結束就清空；Data Cache 一直留著，</text>
+  <text x="40" y="716" font-size="13" class="mut">直到過期、被 revalidateTag 清掉，或檔案被刪</text>
+</svg>
