@@ -88,14 +88,26 @@
   <!-- Data Cache 區 -->
   <rect x="12" y="540" width="696" height="200" class="card stroke" stroke-width="3"/>
   <text x="28" y="570" font-size="15" font-weight="700" class="fg">Data Cache（跨 render pass、跨請求，存在 .next/cache/fetch-cache）</text>
-  <path d="M132 502v34" class="stroke" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
-  <path d="M588 502v34" class="stroke" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
-  <text x="40" y="604" font-size="14" class="fg">② 寫入新資料</text>
-  <text x="400" y="604" font-size="14" class="fg">④ 背景抓完才更新</text>
-  <text x="400" y="626" font-size="13" class="mut">失敗就保留舊資料</text>
-  <text x="400" y="648" font-size="13" class="ink" font-weight="700">下一次 render pass 才拿到新的</text>
-  <text x="40" y="694" font-size="13" class="mut">memo 在渲染結束就清空；Data Cache 一直留著，</text>
-  <text x="40" y="716" font-size="13" class="mut">直到過期、被 revalidateTag 清掉，或檔案被刪</text>
+  <!-- 寫入：虛線往下 -->
+  <path d="M132 502v34" class="stroke" stroke-width="2.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <path d="M650 502v34" class="stroke" stroke-width="2.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <!-- 讀取：實線往上 -->
+  <path d="M360 538v-34" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <path d="M560 538v-34" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+  <path d="M354 586v120" class="stroke" stroke-width="1" opacity="0.4"/>
+  <text x="40" y="604" font-size="14" font-weight="700" class="fg">↑ 讀取（實線）</text>
+  <text x="40" y="630" font-size="13" class="fg">③ 讀出新鮮資料，直接回</text>
+  <text x="40" y="654" font-size="13" class="fg">④ 讀出舊資料，先回給這次渲染</text>
+  <text x="40" y="690" font-size="12" class="mut">內容不變</text>
+
+  <text x="372" y="604" font-size="14" font-weight="700" class="fg">↓ 寫入（虛線）</text>
+  <text x="372" y="630" font-size="13" class="fg">② 拿到新資料就寫入（只存 200）</text>
+  <text x="372" y="654" font-size="13" class="fg">④ 背景抓完才寫回，失敗就保留舊的</text>
+  <text x="372" y="678" font-size="13" class="ink" font-weight="700">所以下一次 render pass 才拿到新的</text>
+
+  <text x="28" y="726" font-size="12" class="mut">memo 渲染完就清空；Data Cache 一直留著，直到過期、被 revalidateTag 清掉，或檔案被刪</text>
+
   <!-- Data Source -->
   <path d="M360 742v28" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
   <text x="374" y="762" font-size="13" class="mut">兩層都沒有，才往下</text>
