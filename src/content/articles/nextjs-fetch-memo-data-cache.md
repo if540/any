@@ -7,14 +7,16 @@ tags: [Next.js]
 draft: true
 coverTitle: "memo\n＋\nData Cache"
 coverMotif: stack
-tldr: "一次 render pass 裡呼叫 fetch GET：先看 Request Memoization，這次渲染已經打過就直接回。沒有的話，看這個 fetch 有沒有開快取；沒開就直接打 API，只存 memo。有開就查 Data Cache：沒有就打 API、存進 Data Cache 和 memo；有且沒過期就直接回；有但過期，先回舊資料、背景打 API 更新 Data Cache，下一次 render pass 才拿到新的。memo 渲染完就清空，Data Cache 跨請求保存。"
+tldr: "一次 render pass 裡呼叫 fetch GET：先看 Request Memoization，這次渲染已經打過就直接回。沒有的話，看這個 fetch 有沒有開快取；沒開就直接打 data source（fetch 網址背後的 API、CMS 或後端），只存 memo。有開就查 Data Cache：沒有就打 data source、存進 Data Cache 和 memo；有且沒過期就直接回；有但過期，先回舊資料、背景打 data source 更新 Data Cache，下一次 render pass 才拿到新的。memo 渲染完就清空，Data Cache 跨請求保存。這兩層只管 fetch，直接查資料庫不會經過。"
 faq:
+  - question: Next.js 文件裡的 data source 是什麼？
+    answer: 是 fetch 網址背後真正產生資料的地方，例如外部 REST API、Headless CMS 的 API、公司自己的後端服務。Request Memoization 和 Data Cache 都沒命中時，才會真的去打 data source。這兩層快取只管 fetch；Server Component 直接用 ORM 查資料庫時，資料庫就是 data source，但查詢不會經過這兩層，要自己用 React 的 cache() 或 unstable_cache()。
   - question: Request Memoization 和 Data Cache 差在哪？
     answer: Request Memoization 只活在一次 render pass，同網址、同選項的 GET 在這次渲染裡只打一次，渲染完就清空，不能也不需要 revalidate。Data Cache 跨請求、跨重啟保存，存在 .next/cache/fetch-cache，要 fetch 有開快取（force-cache 或 revalidate 不是 0）才會使用，可以用時間或 revalidateTag 更新。
   - question: 什麼情況下 fetch 的結果會存進 Data Cache？
-    answer: fetch 有開快取（cache 是 force-cache，或 next.revalidate 是 false 或大於 0 的數字），而且回應是 200。實測 no-store、在動態頁面沒加選項的 fetch 都不會存；force-cache 但 API 回 500 也不會存，下一個請求會再打一次 API。
+    answer: fetch 有開快取（cache 是 force-cache，或 next.revalidate 是 false 或大於 0 的數字），而且回應是 200。實測 no-store、在動態頁面沒加選項的 fetch 都不會存；force-cache 但 data source 回 500 也不會存，下一個請求會再打一次。
   - question: Data Cache 過期之後，這次請求會拿到新資料嗎？
-    answer: 不會。過期後的第一個請求拿到的是舊資料，Next.js 同時在背景打 API 更新 Data Cache，下一次 render pass 才拿到新的。實測同一頁兩個元件讀同一筆過期資料，兩個都拿到舊資料，背景只打了一次 API。背景更新失敗時會保留舊資料。
+    answer: 不會。過期後的第一個請求拿到的是舊資料，Next.js 同時在背景打 data source 更新 Data Cache，下一次 render pass 才拿到新的。實測同一頁兩個元件讀同一筆過期資料，兩個都拿到舊資料，背景只打了一次。背景更新失敗時會保留舊資料。
 ---
 
 這篇從克爾溫整理的一份筆記開始：在 Next.js 呼叫一次 `fetch` GET，資料到底從哪裡來？筆記把它分成四種情況，而且全部發生在**一次 render pass** 裡。
@@ -36,7 +38,7 @@ faq:
 | --- | --- | --- |
 | 存在哪 | 記憶體 | 磁碟，`.next/cache/fetch-cache` |
 | 活多久 | **一次 render pass**，渲染完就清空 | **跨 render pass**、跨請求、跨重啟 |
-| 用途 | 去重：同一次渲染裡不重複打 API | 持久：不同請求之間共用資料 |
+| 用途 | 去重：同一次渲染裡不重複打 data source | 持久：不同請求之間共用資料 |
 | 什麼時候用 | 自動，所有 GET | fetch 有開快取才用 |
 | 怎麼比對 | 網址和選項相同 | 網址、方法、headers、body 相同 |
 | 要不要更新 | 不用，下次渲染就是新的一輪 | 時間到或 `revalidateTag` |
@@ -44,11 +46,35 @@ faq:
 
 官方文件對兩者的區分是：「the Data Cache is persistent across incoming requests and deployments, whereas memoization only lasts the lifetime of a request.」
 
+## 再定義：data source 是什麼
+
+兩層都沒命中時，才會真的打出去，打到的地方官方文件叫 **data source**：
+
+> If a cached response is not found, the request is made to the data source, the result is stored in the Data Cache, and memoized.
+
+文件沒有另外下定義，從上下文看，它指的是 **`fetch` 網址背後、真正產生資料的地方**：
+
+```text
+Request Memoization  →  Data Cache  →  Data Source
+（這次渲染）             （跨請求）       （真正的資料來源）
+```
+
+| 常見的 data source | 例子 |
+| --- | --- |
+| 外部 REST API | 金流、物流、天氣 |
+| Headless CMS 的 API | 文章、商品內容 |
+| 公司自己的後端服務 | 會員、訂單 API |
+
+有兩點要特別注意：
+
+- **這兩層快取只管 `fetch`**。Server Component 直接用 ORM（Prisma、Drizzle 之類）查資料庫時，資料庫就是 data source，但這個查詢**完全不經過**這兩層：沒有自動去重，也沒有 Data Cache，要自己處理，見文末「不是 fetch 的資料怎麼辦」
+- **不要 `fetch` 自己的 Route Handler**。讓 Server Component 打自己的 `/api/...`，Route Handler 再去查資料庫，資料等於繞了一圈回到同一台伺服器，多一次 HTTP 往返。Server Component 直接呼叫資料存取函式就好
+
 ## 四種路徑
 
-![流程圖，一次 render pass 裡 fetch GET 的四種路徑。外框是一次 render pass，渲染完就清空。fetch(url) GET 先問：Request Memoization 有嗎？也就是同網址、同選項，這次渲染已經打過。HIT 的話，① 直接回，不打 API。MISS 的話，問：這個 fetch 有開快取嗎？也就是 force-cache 或 revalidate 不是 0。否的話，打 API，不查也不存 Data Cache，只存 memo。是的話，問：Data Cache 有嗎？比對網址、方法、headers、body。MISS 的話，② 打 API 取新資料，存 memo，存 Data Cache（只存 200），這次請求要等 API。HIT 而且沒過期，③ 直接回快取，存 memo，不打 API。HIT 但過期，④ 先回舊資料，舊資料存 memo，背景打 API，這次請求不用等。外框下方是 Data Cache，跨 render pass、跨請求，存在 .next/cache/fetch-cache：② 寫入新資料；④ 背景抓完才更新，失敗就保留舊資料，下一次 render pass 才拿到新的。memo 在渲染結束就清空；Data Cache 一直留著，直到過期、被 revalidateTag 清掉，或檔案被刪。](../../assets/articles/nextjs-fetch-memo-data-cache/flow.svg)
+![流程圖，一次 render pass 裡 fetch GET 的四種路徑。外框是一次 render pass，渲染完就清空。fetch(url) GET 先問：Request Memoization 有嗎？也就是同網址、同選項，這次渲染已經打過。HIT 的話，① 直接回，不打 data source。MISS 的話，問：這個 fetch 有開快取嗎？也就是 force-cache 或 revalidate 不是 0。否的話，打 data source，不查也不存 Data Cache，只存 memo。是的話，問：Data Cache 有嗎？比對網址、方法、headers、body。MISS 的話，② 打 data source，存 memo，存 Data Cache（只存 200），這次請求要等它回應。HIT 而且沒過期，③ 直接回快取，存 memo，不打 data source。HIT 但過期，④ 先回舊資料，舊資料存 memo，背景打 data source，這次請求不用等。外框下方是 Data Cache，跨 render pass、跨請求，存在 .next/cache/fetch-cache：② 寫入新資料；④ 背景抓完才更新，失敗就保留舊資料，下一次 render pass 才拿到新的。memo 在渲染結束就清空；Data Cache 一直留著，直到過期、被 revalidateTag 清掉，或檔案被刪。兩層都沒有，才往下到 Data Source，也就是 fetch 網址背後真正產生資料的地方：外部 API、Headless CMS、自家後端服務。](../../assets/articles/nextjs-fetch-memo-data-cache/flow.svg)
 
-測試用一支會計數的假 API，每被打一次就加 1，看頁面上的數字和 API 的累計次數，就知道每一步有沒有真的打出去。
+測試時的 data source 是一支會計數的假 API，每被打一次就加 1，看頁面上的數字和 API 的累計次數，就知道每一步有沒有真的打出去。下面的實測表格裡寫「API」的地方，指的就是它。
 
 ### ① memo HIT：直接回
 
@@ -68,7 +94,7 @@ faq:
 
 所以元件可以「誰需要資料誰自己 fetch」，不用在最上層抓好再一層層傳 props，同一次渲染只會打一次。
 
-### ② memo MISS → Data Cache MISS：打 API，存起來
+### ② memo MISS → Data Cache MISS：打 data source，存起來
 
 > **原筆記**：req memorize miss 先 check data cache miss，打新 API 取新資料，並儲 req memoize，如果有 revalidate > 0 更新跨請求 data cache。
 
@@ -76,7 +102,7 @@ faq:
 
 <div class="callout" role="note">
   <p class="callout-label"><span aria-hidden="true">⚠</span> 修正一：不是 revalidate &gt; 0，而是「有開快取」</p>
-  <p>Next.js 15 起 fetch 預設不快取。有開快取指的是 <code>cache: 'force-cache'</code>，或 <code>next.revalidate</code> 是 <code>false</code> 或大於 0 的數字。只寫 <code>force-cache</code> 沒寫 revalidate 也會存，而且是永久保存。沒開快取的 fetch <strong>連 Data Cache 都不會查</strong>，直接打 API，只存 memo。</p>
+  <p>Next.js 15 起 fetch 預設不快取。有開快取指的是 <code>cache: 'force-cache'</code>，或 <code>next.revalidate</code> 是 <code>false</code> 或大於 0 的數字。只寫 <code>force-cache</code> 沒寫 revalidate 也會存，而且是永久保存。沒開快取的 fetch <strong>連 Data Cache 都不會查</strong>，直接打 data source，只存 memo。</p>
 </div>
 
 官方文件的說法：「For uncached data (e.g. no `cache` option defined or using `{ cache: 'no-store' }`), the result is always fetched from the data source, and memoized.」
@@ -129,7 +155,7 @@ faq:
 
 - **過期後的那一次，兩個元件都拿到舊資料**，畫面前後一致，不會一半新一半舊
 - **背景只打了一次 API**，兩個元件共用同一次更新
-- **使用者不用等**：這次請求不用等 API 回應，代價是看到的是舊一點的資料
+- **使用者不用等**：這次請求不用等 data source 回應，代價是看到的是舊一點的資料
 
 ## 主動清掉時，走的是另一條路
 
@@ -140,7 +166,7 @@ Next.js 16 的 `revalidateTag` 要指定第二個參數，兩種寫法的效果�
 | 寫法 | 下一次 render pass |
 | --- | --- |
 | `revalidateTag('posts', 'max')` | 跟 ④ 一樣：先回舊的，背景更新 |
-| `revalidateTag('posts', { expire: 0 })` | 走 ②：Data Cache MISS，等 API 回新資料 |
+| `revalidateTag('posts', { expire: 0 })` | 走 ②：Data Cache MISS，等 data source 回新資料 |
 
 這兩種在〈[Next.js 16 的 fetch 快取](/any/articles/nextjs-fetch-cache-debugging/)〉有實測過程。
 
@@ -165,7 +191,7 @@ export const getPost = cache(async (id: string) => {
 
 ## 一張表總結
 
-| 路徑 | memo | 有開快取？ | Data Cache | 打 API？ | 存 memo | 存 Data Cache |
+| 路徑 | memo | 有開快取？ | Data Cache | 打 data source？ | 存 memo | 存 Data Cache |
 | --- | --- | --- | --- | --- | --- | --- |
 | ① | HIT | — | — | 不打 | — | — |
 | ② 沒開快取 | MISS | 否 | 不查 | 打 | ✓ | ✗ |
