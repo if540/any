@@ -9,6 +9,8 @@ coverTitle: "memo\n＋\nData Cache"
 coverMotif: stack
 tldr: "一次 render pass 裡呼叫 fetch GET：先看 Request Memoization，這次渲染已經打過就直接回。沒有的話，看這個 fetch 有沒有開快取；沒開就直接打 data source（fetch 網址背後的 API、CMS 或後端），只存 memo。有開就查 Data Cache：沒有就打 data source、存進 Data Cache 和 memo；有且沒過期就直接回；有但過期，先回舊資料、背景打 data source 更新 Data Cache，下一次 render pass 才拿到新的。memo 渲染完就清空，Data Cache 跨請求保存。這兩層只管 fetch，直接查資料庫不會經過。"
 faq:
+  - question: fetch 加了 AbortSignal.timeout() 還會去重嗎？
+    answer: 不會。Next.js 只要看到 fetch 有傳 signal，就跳過 Request Memoization，不分辨是哪一種 signal，多個元件共用同一個 signal 也一樣。但 signal 不影響 Data Cache：實測 signal 加 next.revalidate，三個元件同時未命中只打一次 data source，過期後的背景更新也只打一次。沒開快取的 fetch 加了 signal 就會重複打，要用 React 的 cache() 把資料函式包起來，在函式這一層去重。
   - question: Next.js 文件裡的 data source 是什麼？
     answer: 是 fetch 網址背後真正產生資料的地方，例如外部 REST API、Headless CMS 的 API、公司自己的後端服務。Request Memoization 和 Data Cache 都沒命中時，才會真的去打 data source。這兩層快取只管 fetch；Server Component 直接用 ORM 查資料庫時，資料庫就是 data source，但查詢不會經過這兩層，要自己用 React 的 cache() 或 unstable_cache()。
   - question: Request Memoization 和 Data Cache 差在哪？
@@ -89,7 +91,7 @@ Request Memoization  →  Data Cache  →  Data Source
 | 三個元件 GET 同一個網址 | 2 次（每次渲染 1 次） | **去重了** |
 | 兩個元件 POST 同一個網址 | 4 次 | POST 不去重 |
 | 網址一樣，但 headers 不同 | 各自打 | 選項不同就不算同一個 |
-| 加了 `AbortController` 的 `signal` | 各自打 | 官方提供的關閉方法 |
+| 加了 `signal`（包括 `AbortSignal.timeout()`） | 各自打 | 官方提供的關閉方法，見後面「加了 signal 會怎樣」 |
 | Route Handler 裡連續 GET 兩次 | 2 次 | Route Handler 不在元件樹裡，不去重 |
 
 所以元件可以「誰需要資料誰自己 fetch」，不用在最上層抓好再一層層傳 props，同一次渲染只會打一次。
@@ -156,6 +158,70 @@ Request Memoization  →  Data Cache  →  Data Source
 - **過期後的那一次，兩個元件都拿到舊資料**，畫面前後一致，不會一半新一半舊
 - **背景只打了一次 API**，兩個元件共用同一次更新
 - **使用者不用等**：這次請求不用等 data source 回應，代價是看到的是舊一點的資料
+
+## 加了 signal 會怎樣：以逾時為例
+
+正式環境常幫 fetch 加上逾時，避免 data source 卡住時頁面一直等：
+
+```ts
+fetch(url, { signal: AbortSignal.timeout(5000) })
+```
+
+這樣寫，**情境 ① 的去重就沒了**。Next.js 16.4.5 負責去重的原始碼（`dedupe-fetch.js`）第一個判斷就是：
+
+```js
+if (options && options.signal) {
+  // If we're passed a signal, then we assume that
+  // someone else controls the lifetime of this object and opts out of
+  // caching. It's effectively the opt-out mechanism.
+  return originalFetch(resource, options)
+}
+```
+
+它不分辨 signal 是用來逾時還是手動取消，只要有傳就直接打出去。這也是官方說「用 `AbortController` 的 `signal` 關閉去重」的原理。
+
+但 **signal 只影響 memo，不影響 Data Cache**。實測同一頁三個元件各自 fetch 同一個網址，請求頁面兩次：
+
+| 寫法 | data source 被打幾次 | 結果 |
+| --- | --- | --- |
+| 各自 `AbortSignal.timeout(5000)` | 6 次 | 去重失效 |
+| 三個元件**共用同一個** `AbortSignal.timeout(5000)` | 6 次 | 共用也一樣失效 |
+| `AbortSignal.timeout(5000)` + `force-cache` | 1 次 | Data Cache 擋下來了 |
+| 用 React `cache()` 包住，逾時寫在裡面 | 2 次（每次渲染 1 次） | 去重恢復 |
+
+有開快取時，就算 memo 沒作用也不會重複打 data source。實測 `AbortSignal.timeout(5000)` 加 `next: { revalidate: 5 }`，三個元件：
+
+| 時間 | 三個元件拿到的 | data source 累計 | 說明 |
+| --- | --- | --- | --- |
+| 第 1 次請求 | 第 1 版 ×3 | 1 | 三個同時 MISS，Data Cache 合併成一次 |
+| 第 2 次請求 | 第 1 版 ×3 | 1 | Data Cache HIT |
+| 6 秒後（過期） | 第 1 版 ×3 | 2 | 回舊的，背景只打一次 |
+| 再下一次 | 第 2 版 ×3 | 2 | 新的 |
+
+所以要不要加 `cache()`，看這個 fetch 有沒有開快取：
+
+| 情況 | 不加 `cache()` 的結果 | 要不要加 |
+| --- | --- | --- |
+| signal + 有開快取（`revalidate`、`force-cache`） | 每個元件各查一次 Data Cache，但不會重複打 data source | 建議加，當保險 |
+| signal + 沒開快取（`no-store`、預設、`revalidate: 0`） | 幾個元件就打幾次 | **一定要加** |
+
+被多個元件共用的資料函式，建議一律用 `cache()` 包起來，就不用靠「剛好有開快取」來避免重複；之後有人把快取關掉，也不會突然變成重複打 data source：
+
+```ts
+import { cache } from 'react'
+
+export const getPosts = cache(async () => {
+  const res = await fetch('https://api.example.com/posts', {
+    signal: AbortSignal.timeout(5000), // 逾時照樣有效
+    next: { revalidate: 300 },         // Data Cache 照樣有效
+  })
+  return res.json()
+})
+```
+
+元件都改成呼叫 `getPosts()`，去重改由 React `cache()` 在函式這一層處理，同一次 render pass 只執行一次。
+
+> signal 關掉的是 memo，不是 Data Cache；`cache()` 是把 memo 補回來。
 
 ## 主動清掉時，走的是另一條路
 
