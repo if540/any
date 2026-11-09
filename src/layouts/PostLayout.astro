@@ -131,7 +131,11 @@ if (p.faq?.length) {
         ))}
       </p>
       {p.tags && p.tags.length > 0 && (
-        <p class="tags">{p.tags.map((t) => <span class="tag">{t}</span>)}</p>
+        <p class="tags">{p.tags.map((t) => (
+          p.kind === 'articles'
+            ? <a class="tag" href={withBase(`/articles/?tag=${encodeURIComponent(t)}`)}>{t}</a>
+            : <span class="tag">{t}</span>
+        ))}</p>
       )}
       {p.wcag && p.wcag.length > 0 && (
         <p class="wcag">
@@ -197,6 +201,9 @@ if (p.faq?.length) {
   .post-head .meta { margin: 0 0 0.5rem; }
   .post-head .meta a[rel='author'] { white-space: nowrap; }
   .tags { margin: 0; }
+  /* 文章的標籤連到列表的篩選結果 */
+  a.tag { color: var(--fg); text-decoration: none; }
+  a.tag:hover { color: var(--link); border-color: var(--orange); text-decoration: underline; }
   .wcag { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.6rem 0 0; font-size: 0.85rem; }
   .wcag-label { font-weight: 700; margin-right: 0.2rem; }
   .wcag-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.1rem 0.5rem; background: #111; color: #fafaf7; text-decoration: none; box-shadow: 2px 2px 0 var(--orange); }

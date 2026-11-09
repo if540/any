@@ -4,17 +4,71 @@ import ArticleCard from '../../components/ArticleCard.astro';
 import { getArticles } from '../../utils/content';
 
 const articles = await getArticles();
+
+// 標籤依文章數多到少排序；只出現一次的收進「更多標籤」，避免篩選列太長
+const counts = new Map<string, number>();
+for (const a of articles) for (const t of a.data.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+const sorted = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-Hant'));
+const mainTags = sorted.filter(([, n]) => n > 1);
+const moreTags = sorted.filter(([, n]) => n === 1);
 ---
 <BaseLayout title="文章" description="主題式長文：技術筆記、教學與觀點整理。">
   <h1>文章<span class="accent" aria-hidden="true">.</span></h1>
-  <p class="intro">主題式長文，把一件事寫清楚。共 {articles.length} 篇。</p>
+  <p class="intro">主題式長文，把一件事寫清楚。<span id="article-count">共 {articles.length} 篇。</span></p>
+
+  {/* 沒有 JavaScript 時篩選列保持隱藏，直接列出全部文章 */}
+  <div class="filter" id="tag-filter" role="group" aria-labelledby="tag-filter-label" hidden>
+    <span class="filter-label" id="tag-filter-label">依標籤篩選</span>
+    <div class="chips">
+      <button type="button" class="chip" data-tag="" aria-pressed="true">全部<span class="n">{articles.length}</span></button>
+      {mainTags.map(([t, n]) => (
+        <button type="button" class="chip" data-tag={t} aria-pressed="false">{t}<span class="n">{n}</span></button>
+      ))}
+    </div>
+    {moreTags.length > 0 && (
+      <details class="more">
+        <summary>更多標籤（{moreTags.length}）</summary>
+        <div class="chips">
+          {moreTags.map(([t, n]) => (
+            <button type="button" class="chip" data-tag={t} aria-pressed="false">{t}<span class="n">{n}</span></button>
+          ))}
+        </div>
+      </details>
+    )}
+  </div>
+  <p class="visually-hidden" role="status" id="filter-status"></p>
+
   <div class="list">
     {articles.map((post, i) => <ArticleCard post={post} index={i} />)}
   </div>
 </BaseLayout>
 
+<script>
+  import { initTagFilter } from '../../scripts/tag-filter';
+  initTagFilter();
+</script>
+
 <style>
   .accent { color: var(--orange); }
   .intro { color: var(--muted); margin: 0 0 1rem; }
   .list { border-top: 3px solid var(--line); }
+
+  .filter { margin: 0 0 1.5rem; }
+  .filter-label { display: block; font: 700 0.8rem var(--font-mono); letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    min-height: 2.25rem; padding: 0.25rem 0.75rem;
+    font: inherit; font-size: 0.9rem; color: var(--fg); background: var(--bg);
+    border: 2px solid var(--line); cursor: pointer;
+  }
+  .chip:hover { box-shadow: 3px 3px 0 var(--orange); }
+  /* 目前選取：反白 + 橘色陰影，不只靠顏色區分 */
+  .chip[aria-pressed='true'] { background: var(--fg); color: var(--bg); box-shadow: 3px 3px 0 var(--orange); font-weight: 700; }
+  .n { font: 700 0.75rem var(--font-mono); color: var(--muted); }
+  .chip[aria-pressed='true'] .n { color: inherit; }
+  .more { margin-top: 0.75rem; }
+  .more summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; width: fit-content; }
+  .more .chips { margin-top: 0.5rem; }
+  .list :global(.card[hidden]) { display: none; }
 </style>

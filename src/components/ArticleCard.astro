@@ -8,7 +8,7 @@ export interface Props { post: Article; index?: number }
 const { post, index } = Astro.props;
 const { title, description, pubDate, tags, authors } = post.data;
 ---
-<article class="card">
+<article class="card" data-tags={JSON.stringify(tags)}>
   {index !== undefined && <span class="idx" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>}
   <div>
     <h3><a href={withBase(`/articles/${post.id}/`)}>{title}</a></h3>
