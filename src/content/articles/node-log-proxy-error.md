@@ -1,8 +1,9 @@
 ---
 title: 為什麼在 Node.js 的 log 裡印物件，會讓網站出現 Proxy Error
 authors: [kerwin, claude]
-description: 網站突然出現 Apache 的 502 Proxy Error，兇手可能只是一行印物件的 log。用 Apache 反向代理接 Node.js 和 Next.js 實測三條路：log 那行丟錯讓行程掛掉、在回呼裡丟錯讓回應永遠不送出、印太大的物件讓請求排隊逾時，以及怎麼確認和修正。
+description: 網站出現 Apache 的 502 Proxy Error，排除 Windows 主控台 QuickEdit 這類環境因素後，程式裡的一行 log 也可能是原因。實測三條路：log 丟錯讓行程掛掉、回呼裡丟錯讓回應不送出、印太大的物件讓請求逾時，以及怎麼確認和修正。
 pubDate: 2026-11-06
+updatedDate: 2026-11-09
 tags: [Node.js, Next.js]
 draft: false
 coverTitle: "一行 log\n502"
@@ -27,9 +28,14 @@ The proxy server could not handle the request
 Reason: Error reading from remote server
 ```
 
-這是 Apache 當反向代理時的錯誤頁，意思是「後面的 Node.js 沒有好好回應我」。查到最後，原因可能只是**一行把物件印進 log 的程式碼**。
+這是 Apache 當反向代理時的錯誤頁，意思是「後面的 Node.js 沒有好好回應我」。原因可能在**環境**，也可能在**程式**。
 
-這篇實際架了 **Apache 2.4.58 反向代理，後面接 Node.js 22.23 和 Next.js 16.4.5**，重現三條「一行 log 變成 Proxy Error」的路，再說明怎麼確認和修正。
+<div class="callout" role="note">
+  <p class="callout-label"><span aria-hidden="true">⚠</span> 先排除環境</p>
+  <p>伺服器在 Windows 上、開在 cmd 視窗裡，而且是<strong>全站同時 502、沒有任何錯誤、到視窗按個鍵就好</strong>，多半是主控台的 QuickEdit 模式：有人點了一下視窗，Node 寫 log 時整個卡住。請先看〈<a href="/any/articles/windows-quickedit-proxy-error/">點一下 cmd 視窗，網站就 Proxy Error</a>〉。</p>
+</div>
+
+排除了環境因素，這篇講**程式端**的原因：一行把物件印進 log 的程式碼，就可能讓網站 502。實際架了 **Apache 2.4.58 反向代理，後面接 Node.js 22.23 和 Next.js 16.4.5**，重現三條「一行 log 變成 Proxy Error」的路，再說明怎麼確認和修正。
 
 <div class="callout" role="note">
   <p class="callout-label"><span aria-hidden="true">ⓘ</span> 測試環境</p>
@@ -171,12 +177,20 @@ export function GET() {
 
 `JSON.stringify(資料, null, 2)` 的縮排格式最常見，也最浪費：實測光是轉成文字就要 14 ms，還沒算寫入。
 
-另外一種情況：stdout 接到 pipe（例如 `node server.js | 某個 log 收集程式`），而讀的那一端卡住時，Node.js 會把還沒寫出去的 log 留在記憶體。實測讀取端完全不讀，打 60 次 `/report` 後，行程記憶體從 50 MB 漲到 454 MB。最後撞到記憶體上限被砍掉，就回到路徑一的 502、503。
+上面的數字是在 Linux、把 log 寫進檔案時量的。在 Windows 上，如果 log 是印到 cmd 視窗，每次寫入都是在主執行緒上同步呼叫 `WriteConsoleW`，還要等主控台把字畫到畫面上，通常比寫檔慢，佔住單執行緒的時間可能更長。這點沒有在 Windows 上實測，所以不給數字。
+
+還有一種情況是 stdout 接到 pipe（例如 `node server.js | 某個 log 收集程式`），而讀的那一端卡住了。結果**看作業系統**，因為 Node.js 官方文件寫明，pipe 的寫入在 POSIX 是非同步、在 Windows 是同步：
+
+| 平台 | 讀取端卡住時 |
+| --- | --- |
+| Linux、macOS | Node.js 把還沒寫出去的 log 留在記憶體。實測打 60 次 `/report`，記憶體從 50 MB 漲到 454 MB，最後撞到上限被砍掉，回到路徑一的 502、503 |
+| Windows | 寫入直接卡住，整個 Node 停住，跟 QuickEdit 一樣是全站 502（依官方文件，沒有實測） |
 
 ## 怎麼確認是 log 造成的
 
 | 看哪裡 | 找什麼 |
 | --- | --- |
+| **先排除環境**：Windows 的 cmd 視窗標題 | 開頭有「選取」或「Select」，就是 QuickEdit，不是程式的問題 |
 | Apache error log（Rocky Linux 通常是 `/var/log/httpd/error_log`） | `AH01102 … timeout` 表示逾時；`AH00957 … Connection refused` 表示後端掛了 |
 | Node.js 或 pm2 的 log | `TypeError: Converting circular structure to JSON`、`Do not know how to serialize a BigInt`、`uncaughtException`、`unhandledRejection` |
 | `pm2 list` | `↺` 欄位（重啟次數）一直增加，表示行程在掛 |
@@ -185,7 +199,7 @@ export function GET() {
 
 **502 但沒有 Connection refused、pm2 也沒重啟**，就是 Next.js 回呼那種「回應永遠不送出」的情況，或是路徑二的排隊逾時。
 
-伺服器跑在 Windows 的 cmd 視窗裡，而且是**全站同時 502、沒有任何錯誤、到視窗按個鍵就好**，那可能不是程式的問題，請看〈[點一下 cmd 視窗，網站就 Proxy Error](/any/articles/windows-quickedit-proxy-error/)〉。
+**全站同時 502、Node 的 log 沒有任何錯誤**，在 Windows 上先回頭檢查主控台（見開頭的提醒）；在 Linux 上則檢查 stdout 有沒有接到卡住的 pipe。
 
 ## 怎麼修
 
