@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: Next.js 伺服器端的 fetch 分兩層：底層是 Node 內建的 undici，上層是 Next.js 包上去的快取與去重。整理錯誤代碼怎麼讀、逾時怎麼調，並用 Next.js 16.4.5 與 Node 22 實測。
 pubDate: 2026-11-10
 tags: [Next.js, Node.js]
-draft: true
+draft: false
 coverTitle: "Next fetch\n×\nundici"
 coverMotif: stack
 tldr: "Next.js 沒有自己實作 fetch。Node 的全域 fetch 本來就是內建的 undici，Next.js 只是在啟動時把 globalThis.fetch 換成包裝過的版本，加上 Data Cache 和去重。所以快取行為看 Next.js；連線、逾時、錯誤看 undici。fetch failed 的真正原因在 err.cause；要調逾時或連線設定，在 instrumentation.ts 用 undici 的 setGlobalDispatcher。"

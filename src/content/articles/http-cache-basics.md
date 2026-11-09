@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: HTTP 快取只回答兩個問題：這份回應可以用多久、過期後怎麼確認有沒有變。用一張流程圖講清楚 max-age、no-cache、no-store、ETag 與 304，並用 Chromium 實測每一種設定。
 pubDate: 2026-11-10
 tags: [HTTP, 快取]
-draft: true
+draft: false
 coverTitle: "HTTP\n快取基礎"
 coverMotif: grid
 tldr: "HTTP 快取是伺服器用回應標頭告訴瀏覽器和 CDN 怎麼存。max-age 決定新鮮多久，新鮮期間完全不送請求；過期後帶 ETag 去問伺服器，沒變就回 304、不重傳內容。no-cache 是可以存但每次都要先問；no-store 才是完全不存。常用配方：檔名帶雜湊的靜態檔設 max-age 一年，HTML 設 no-cache。"
