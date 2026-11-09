@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 在 Windows 伺服器上用 cmd 視窗跑 Node.js，前面接 Apache 反向代理。有人點了一下視窗，網站就出現 Proxy Error；按 Enter 又自己好了。原因是 QuickEdit 選取模式會暫停主控台輸出，Node 寫 log 時整個卡住。說明原理、怎麼認出來，以及怎麼避免。
 pubDate: 2026-11-09
 tags: [Node.js, Windows]
-draft: true
+draft: false
 coverTitle: "點一下\ncmd\n就 502"
 coverMotif: code
 tldr: "Windows 傳統主控台（conhost）開著 QuickEdit 時，滑鼠點一下視窗就進入選取模式，主控台會暫停處理輸出。Node.js 寫 log 時呼叫的 WriteConsoleW 在主執行緒上，遲遲不返回，整個 Node 就停住，請求沒人處理，Apache 等到逾時回 502 Proxy Error。按 Enter、Esc 或右鍵離開選取模式，一切自動恢復。正式環境不要在互動式的 cmd 視窗裡跑伺服器：改成服務、把輸出導到檔案，或至少關掉 QuickEdit。"
