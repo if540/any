@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" width="720" height="330" role="img" aria-labelledby="t">
+  <title id="t">HTTP 快取的位置：瀏覽器裡的私有快取，以及 CDN 或反向代理上的共用快取</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="330" class="bg"/>
+
+  <rect x="28" y="38" width="200" height="150" class="o"/>
+  <rect x="20" y="30" width="200" height="150" class="card stroke" stroke-width="3"/>
+  <text x="36" y="60" font-size="17" font-weight="700" class="fg">瀏覽器</text>
+  <rect x="36" y="76" width="168" height="88" class="tag"/>
+  <text x="50" y="104" font-size="15" font-weight="700" class="tagtext">私有快取</text>
+  <text x="50" y="128" font-size="13" class="tagtext">只給這一位使用者</text>
+  <text x="50" y="148" font-size="13" class="tagtext">可以存個人化內容</text>
+
+  <path d="M232 105h34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="278" y="38" width="200" height="150" class="o"/>
+  <rect x="270" y="30" width="200" height="150" class="card stroke" stroke-width="3"/>
+  <text x="286" y="60" font-size="17" font-weight="700" class="fg">CDN、反向代理</text>
+  <rect x="286" y="76" width="168" height="88" class="tag"/>
+  <text x="300" y="104" font-size="15" font-weight="700" class="tagtext">共用快取</text>
+  <text x="300" y="128" font-size="13" class="tagtext">很多使用者共用一份</text>
+  <text x="300" y="148" font-size="13" class="tagtext">不能存個人化內容</text>
+
+  <path d="M482 105h34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="520" y="30" width="180" height="150" class="card stroke" stroke-width="2.5"/>
+  <text x="536" y="60" font-size="17" font-weight="700" class="fg">你的伺服器</text>
+  <text x="536" y="100" font-size="14" class="fg">產生回應，</text>
+  <text x="536" y="122" font-size="14" class="fg">並用回應標頭</text>
+  <text x="536" y="144" font-size="14" class="fg">告訴前面兩層</text>
+  <text x="536" y="166" font-size="14" class="fg">怎麼存</text>
+
+  <rect x="20" y="218" width="680" height="92" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="250" font-size="15" class="fg"><tspan font-weight="700">規則由伺服器決定，執行的是瀏覽器和 CDN</tspan></text>
+  <text x="40" y="276" font-size="14" class="mut">伺服器只送出 <tspan class="mono">Cache-Control</tspan> 等標頭；資料存在別人那裡，</text>
+  <text x="40" y="296" font-size="14" class="mut">送出去之後就改不了，只能等它過期</text>
+</svg>

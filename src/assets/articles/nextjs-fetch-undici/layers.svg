@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" role="img" aria-labelledby="t">
+  <title id="t">Next.js 伺服器端 fetch 的三層：Next.js 的快取層、去重層，最底下是 Node 內建的 undici</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="560" class="bg"/>
+
+  <!-- 你的程式 -->
+  <rect x="20" y="20" width="420" height="56" class="tag"/>
+  <text x="40" y="54" font-size="17" font-weight="700" class="tagtext">你的程式呼叫 <tspan class="mono">fetch()</tspan></text>
+  <path d="M230 78v24" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Next 外框 -->
+  <rect x="20" y="110" width="680" height="232" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="684" y="134" font-size="13" font-weight="700" text-anchor="end" class="mut">Next.js 加的兩層</text>
+
+  <rect x="40" y="146" width="400" height="76" class="card stroke" stroke-width="2.5"/>
+  <text x="58" y="176" font-size="17" font-weight="700" class="fg">① 快取層</text>
+  <text x="58" y="202" font-size="13" class="mono mut">createPatchedFetcher</text>
+  <text x="462" y="172" font-size="14" class="fg">Data Cache、revalidate、tags</text>
+  <text x="462" y="194" font-size="14" class="fg">判斷路由是不是動態</text>
+  <text x="462" y="216" font-size="14" class="fg">追蹤與 fetch log</text>
+  <path d="M230 224v20" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="40" y="252" width="400" height="76" class="card stroke" stroke-width="2.5"/>
+  <text x="58" y="282" font-size="17" font-weight="700" class="fg">② 去重層</text>
+  <text x="58" y="308" font-size="13" class="mono mut">createDedupeFetch</text>
+  <text x="462" y="284" font-size="14" class="fg">Request Memoization</text>
+  <text x="462" y="306" font-size="14" class="fg">同一次渲染的 GET 只打一次</text>
+  <path d="M230 344v26" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Node / undici -->
+  <rect x="28" y="386" width="672" height="100" class="o"/>
+  <rect x="20" y="378" width="672" height="100" class="card stroke" stroke-width="3"/>
+  <text x="40" y="410" font-size="17" font-weight="700" class="fg">③ Node 內建的 fetch，也就是 undici</text>
+  <text x="40" y="434" font-size="13" class="mono mut">node:internal/deps/undici/undici</text>
+  <text x="40" y="462" font-size="14" font-weight="700" class="ink">連線池、DNS、TCP、TLS、逾時、錯誤，全部在這一層</text>
+  <text x="676" y="410" font-size="13" font-weight="700" text-anchor="end" class="mut">Node 提供的</text>
+
+  <path d="M230 480v24" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="20" y="512" width="420" height="36" class="tag"/>
+  <text x="40" y="536" font-size="15" font-weight="700" class="tagtext">網路上的 API、CMS、後端</text>
+  <text x="462" y="536" font-size="14" class="mut">快取命中時不會走到這裡</text>
+</svg>
