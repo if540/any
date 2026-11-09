@@ -185,6 +185,8 @@ export function GET() {
 
 **502 但沒有 Connection refused、pm2 也沒重啟**，就是 Next.js 回呼那種「回應永遠不送出」的情況，或是路徑二的排隊逾時。
 
+伺服器跑在 Windows 的 cmd 視窗裡，而且是**全站同時 502、沒有任何錯誤、到視窗按個鍵就好**，那可能不是程式的問題，請看〈[點一下 cmd 視窗，網站就 Proxy Error](/any/articles/windows-quickedit-proxy-error/)〉。
+
 ## 怎麼修
 
 ### 一、記 log 的程式永遠不能丟錯

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" width="720" height="640" role="img" aria-labelledby="t">
+  <title id="t">點一下 cmd 視窗到網站出現 Proxy Error 的過程，以及按 Enter 之後恢復</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" class="fg"/>
+    </marker>
+  </defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif}
+    .mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+
+  <rect width="720" height="640" class="bg"/>
+
+  <!-- 1 -->
+  <rect x="20" y="20" width="440" height="68" class="tag"/>
+  <text x="40" y="50" font-size="17" font-weight="700" class="tagtext">① 有人點了一下 cmd 視窗</text>
+  <text x="40" y="74" font-size="13" class="tagtext">標題列變成「選取 C:\Windows\system32\cmd.exe」</text>
+  <path d="M240 90v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 2 -->
+  <rect x="20" y="120" width="440" height="68" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="150" font-size="17" font-weight="700" class="fg">② 主控台進入選取模式，暫停輸出</text>
+  <text x="40" y="174" font-size="13" class="mut">QuickEdit 的設計：選取時畫面不能捲動</text>
+  <path d="M240 190v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 3 -->
+  <rect x="28" y="228" width="440" height="80" class="o"/>
+  <rect x="20" y="220" width="440" height="80" class="card stroke" stroke-width="3"/>
+  <text x="40" y="250" font-size="17" font-weight="700" class="fg">③ 下一個 console.log 卡住</text>
+  <text x="40" y="274" font-size="13" class="mono mut">WriteConsoleW() 遲遲不返回</text>
+  <text x="40" y="292" font-size="13" class="ink" font-weight="700">它在主執行緒上，整個 Node 跟著停住</text>
+  <path d="M240 302v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 4 -->
+  <rect x="20" y="332" width="440" height="68" class="card stroke" stroke-width="2.5"/>
+  <text x="40" y="362" font-size="17" font-weight="700" class="fg">④ 新的請求進得來，但沒人處理</text>
+  <text x="40" y="386" font-size="13" class="mut">連線在排隊，Node 的事件迴圈不會再轉</text>
+  <path d="M240 402v22" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- 5 -->
+  <rect x="20" y="432" width="440" height="80" class="tag"/>
+  <text x="40" y="462" font-size="17" font-weight="700" class="tagtext">⑤ Apache 等到 ProxyTimeout</text>
+  <text x="40" y="488" font-size="14" class="tagtext">回 502 Proxy Error</text>
+  <text x="40" y="506" font-size="12" class="mono tagtext">Error reading from remote server</text>
+
+  <!-- 右側：恢復 -->
+  <rect x="490" y="220" width="210" height="292" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="506" y="250" font-size="16" font-weight="700" class="fg">按 Enter、Esc</text>
+  <text x="506" y="272" font-size="16" font-weight="700" class="fg">或按右鍵</text>
+  <text x="506" y="300" font-size="13" class="mut">離開選取模式</text>
+  <path d="M488 260h-20" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="506" y="340" font-size="14" class="fg">卡住的 log 寫出去</text>
+  <text x="506" y="364" font-size="14" class="fg">Node 繼續跑</text>
+  <text x="506" y="388" font-size="14" class="fg">排隊的請求一次處理</text>
+  <text x="506" y="424" font-size="13" class="ink" font-weight="700">但 Apache 早就回了 502，</text>
+  <text x="506" y="444" font-size="13" class="ink" font-weight="700">那些請求的結果</text>
+  <text x="506" y="464" font-size="13" class="ink" font-weight="700">使用者看不到</text>
+
+  <!-- 底部 -->
+  <rect x="20" y="540" width="680" height="84" class="card stroke" stroke-width="3"/>
+  <text x="40" y="572" font-size="15" class="fg"><tspan font-weight="700">沒有錯誤、沒有當機、CPU 是 0%</tspan>，Node 只是在等主控台</text>
+  <text x="40" y="600" font-size="14" class="mut">所以重啟、查程式都找不到原因；看一眼視窗標題最快</text>
+</svg>
