@@ -1,0 +1,26 @@
+---
+// /articles/tags/next-js/：某個標籤的第 1 頁
+import type { GetStaticPaths } from 'astro';
+import ArticleList from '../../../../components/articles/ArticleList.astro';
+import { getArticles } from '../../../../utils/content';
+import { collectTags, pageCount, slicePage } from '../../../../utils/article-list';
+
+export const getStaticPaths = (async () => {
+  const articles = await getArticles();
+  return collectTags(articles).map((t) => ({ params: { tag: t.slug } }));
+}) satisfies GetStaticPaths;
+
+const articles = await getArticles();
+const tags = collectTags(articles);
+const current = tags.find((t) => t.slug === Astro.params.tag)!;
+const posts = articles.filter((a) => a.data.tags.includes(current.name));
+---
+<ArticleList
+  posts={slicePage(posts, 1)}
+  total={posts.length}
+  allCount={articles.length}
+  tags={tags}
+  current={current}
+  page={1}
+  pages={pageCount(posts.length)}
+/>

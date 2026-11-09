@@ -1,0 +1,24 @@
+---
+// /articles/page/2/ 起；第 1 頁就是 /articles/
+import type { GetStaticPaths } from 'astro';
+import ArticleList from '../../../components/articles/ArticleList.astro';
+import { getArticles } from '../../../utils/content';
+import { collectTags, pageCount, slicePage } from '../../../utils/article-list';
+
+export const getStaticPaths = (async () => {
+  const articles = await getArticles();
+  const pages = pageCount(articles.length);
+  return Array.from({ length: pages - 1 }, (_, i) => ({ params: { page: String(i + 2) } }));
+}) satisfies GetStaticPaths;
+
+const page = Number(Astro.params.page);
+const articles = await getArticles();
+---
+<ArticleList
+  posts={slicePage(articles, page)}
+  total={articles.length}
+  allCount={articles.length}
+  tags={collectTags(articles)}
+  page={page}
+  pages={pageCount(articles.length)}
+/>

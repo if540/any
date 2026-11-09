@@ -1,0 +1,46 @@
+---
+// 分頁：上一頁、頁碼、下一頁。只有一頁時不顯示
+import { listPath } from '../../utils/article-list';
+import { withBase } from '../../utils/url';
+
+export interface Props { page: number; pages: number; tag?: string }
+const { page, pages, tag } = Astro.props;
+const href = (p: number) => withBase(listPath(tag, p));
+const numbers = Array.from({ length: pages }, (_, i) => i + 1);
+---
+{pages > 1 && (
+  <nav class="pager" aria-label="分頁">
+    <ul>
+      <li>
+        {page > 1
+          ? <a href={href(page - 1)} rel="prev"><span aria-hidden="true">←</span> 上一頁</a>
+          : <span class="off" aria-hidden="true">← 上一頁</span>}
+      </li>
+      {numbers.map((n) => (
+        <li>
+          {n === page
+            ? <a href={href(n)} aria-current="page"><span class="visually-hidden">第 </span>{n}<span class="visually-hidden"> 頁</span></a>
+            : <a href={href(n)}><span class="visually-hidden">第 </span>{n}<span class="visually-hidden"> 頁</span></a>}
+        </li>
+      ))}
+      <li>
+        {page < pages
+          ? <a href={href(page + 1)} rel="next">下一頁 <span aria-hidden="true">→</span></a>
+          : <span class="off" aria-hidden="true">下一頁 →</span>}
+      </li>
+    </ul>
+  </nav>
+)}
+
+<style>
+  .pager { margin-top: 2rem; }
+  ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  a, .off {
+    display: inline-flex; align-items: center; gap: 0.3rem; min-width: 2.5rem; min-height: 2.5rem;
+    justify-content: center; padding: 0.25rem 0.75rem; border: 2px solid var(--line);
+    color: var(--fg); text-decoration: none; font-family: var(--font-mono); font-weight: 700;
+  }
+  a:hover { box-shadow: 3px 3px 0 var(--orange); text-decoration: underline; }
+  a[aria-current='page'] { background: var(--fg); color: var(--bg); box-shadow: 3px 3px 0 var(--orange); }
+  .off { color: var(--muted); border-style: dashed; }
+</style>

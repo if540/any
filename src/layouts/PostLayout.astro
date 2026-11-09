@@ -8,6 +8,7 @@ import { SITE, AUTHORS, OWNER, authorNames, type AuthorKey } from '../consts';
 import { personId, personLd, authorHref } from '../utils/authors';
 import { absoluteUrl, withBase } from '../utils/url';
 import { formatDate } from '../utils/content';
+import { listPath, tagSlug } from '../utils/article-list';
 import guide from '../data/a11y-guide.json';
 
 export interface Props {
@@ -133,7 +134,7 @@ if (p.faq?.length) {
       {p.tags && p.tags.length > 0 && (
         <p class="tags">{p.tags.map((t) => (
           p.kind === 'articles'
-            ? <a class="tag" href={withBase(`/articles/?tag=${encodeURIComponent(t)}`)}>{t}</a>
+            ? <a class="tag" href={withBase(listPath(tagSlug(t)))}>{t}</a>
             : <span class="tag">{t}</span>
         ))}</p>
       )}
@@ -201,7 +202,7 @@ if (p.faq?.length) {
   .post-head .meta { margin: 0 0 0.5rem; }
   .post-head .meta a[rel='author'] { white-space: nowrap; }
   .tags { margin: 0; }
-  /* 文章的標籤連到列表的篩選結果 */
+  /* 文章的標籤連到該標籤的文章列表 */
   a.tag { color: var(--fg); text-decoration: none; }
   a.tag:hover { color: var(--link); border-color: var(--orange); text-decoration: underline; }
   .wcag { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.6rem 0 0; font-size: 0.85rem; }

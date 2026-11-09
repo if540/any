@@ -1,0 +1,120 @@
+---
+// 文章列表頁的共用版型：左側標籤、右側列表與分頁（窄螢幕改成上下排列）
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../ArticleCard.astro';
+import Pagination from './Pagination.astro';
+import type { Article } from '../../utils/content';
+import { PAGE_SIZE, listPath, type TagInfo } from '../../utils/article-list';
+import { withBase } from '../../utils/url';
+
+export interface Props {
+  posts: Article[];        // 這一頁的文章
+  total: number;           // 這個列表（全部或某個標籤）的文章數
+  allCount: number;        // 全站文章數
+  tags: TagInfo[];
+  current?: TagInfo;       // 目前的標籤，沒有就是「全部」
+  page: number;
+  pages: number;
+}
+
+const { posts, total, allCount, tags, current, page, pages } = Astro.props;
+const mainTags = tags.filter((t) => t.count > 1);
+const moreTags = tags.filter((t) => t.count === 1);
+const moreOpen = !!current && moreTags.some((t) => t.slug === current.slug);
+
+const pageSuffix = page > 1 ? `（第 ${page} 頁）` : '';
+const title = current ? `標籤：${current.name}${pageSuffix}` : `文章${pageSuffix}`;
+const description = current
+  ? `標籤「${current.name}」的文章，共 ${total} 篇。`
+  : '主題式長文：技術筆記、教學與觀點整理。';
+const start = (page - 1) * PAGE_SIZE;
+---
+<BaseLayout title={title} description={description}>
+  <div class="layout">
+    <aside class="side">
+      <nav aria-labelledby="tag-nav-title">
+        <p class="side-title" id="tag-nav-title">標籤</p>
+        <ul class="tags">
+          <li>
+            <a href={withBase(listPath())} aria-current={!current ? 'page' : undefined}>
+              全部<span class="n">{allCount}</span>
+            </a>
+          </li>
+          {mainTags.map((t) => (
+            <li>
+              <a href={withBase(listPath(t.slug))} aria-current={current?.slug === t.slug ? 'page' : undefined}>
+                {t.name}<span class="n">{t.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        {moreTags.length > 0 && (
+          <details class="more" open={moreOpen}>
+            <summary>更多標籤（{moreTags.length}）</summary>
+            <ul class="tags">
+              {moreTags.map((t) => (
+                <li>
+                  <a href={withBase(listPath(t.slug))} aria-current={current?.slug === t.slug ? 'page' : undefined}>
+                    {t.name}<span class="n">{t.count}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </nav>
+    </aside>
+
+    <div class="main">
+      {current ? (
+        <>
+          <p class="crumb"><a href={withBase(listPath())}>文章</a> / 標籤</p>
+          <h1>{current.name}<span class="accent" aria-hidden="true">.</span></h1>
+          <p class="intro">標籤「{current.name}」的文章，共 {total} 篇{pages > 1 && `，第 ${page} / ${pages} 頁`}。</p>
+        </>
+      ) : (
+        <>
+          <h1>文章<span class="accent" aria-hidden="true">.</span></h1>
+          <p class="intro">主題式長文，把一件事寫清楚。共 {total} 篇{pages > 1 && `，第 ${page} / ${pages} 頁`}。</p>
+        </>
+      )}
+
+      <h2 class="visually-hidden">文章列表</h2>
+      <div class="list">
+        {posts.map((post, i) => <ArticleCard post={post} index={start + i} />)}
+      </div>
+
+      <Pagination page={page} pages={pages} tag={current?.slug} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .layout { display: grid; gap: 2rem; }
+  @media (min-width: 64rem) {
+    .layout { grid-template-columns: 13rem minmax(0, 1fr); gap: 3rem; align-items: start; }
+    .side { position: sticky; top: 1.5rem; max-height: calc(100vh - 3rem); overflow-y: auto; overscroll-behavior: contain; padding-right: 0.25rem; }
+  }
+  .side-title { font: 700 0.8rem var(--font-mono); letter-spacing: 0.08em; margin: 0 0 0.75rem; padding: 0; border: 0; }
+  .tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  @media (min-width: 64rem) { .tags { flex-direction: column; gap: 0.35rem; } }
+  .tags a {
+    display: inline-flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+    min-height: 2.25rem; padding: 0.25rem 0.75rem; width: 100%;
+    color: var(--fg); text-decoration: none; border: 2px solid var(--line); background: var(--bg);
+  }
+  .tags a:hover { box-shadow: 3px 3px 0 var(--orange); text-decoration: underline; }
+  /* 目前的標籤：反白 + 橘色陰影 + 粗體，不只靠顏色區分 */
+  .tags a[aria-current='page'] { background: var(--fg); color: var(--bg); box-shadow: 3px 3px 0 var(--orange); font-weight: 700; }
+  .n { font: 700 0.75rem var(--font-mono); color: var(--muted); }
+  .tags a[aria-current='page'] .n { color: inherit; }
+  .more { margin-top: 0.75rem; }
+  .more summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; width: fit-content; }
+  .more .tags { margin-top: 0.5rem; }
+
+  .crumb { margin: 0 0 0.5rem; color: var(--muted); }
+  .crumb a { color: var(--muted); }
+  .accent { color: var(--orange); }
+  .intro { color: var(--muted); margin: 0 0 1rem; }
+  .list { border-top: 3px solid var(--line); }
+</style>

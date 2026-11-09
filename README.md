@@ -103,16 +103,24 @@ mood: 開心                      # 選填
 - 日誌預設不顯示，`toc: true` 可開啟；文章可用 `toc: false` 關閉
 - 互動程式在 `src/scripts/post.ts`，沒有 JavaScript 時目錄一律展開、連結照常可用
 
-## 文章標籤篩選
+## 文章列表：標籤與分頁
 
-文章列表（`/articles/`）上方有標籤篩選列，標籤取自每篇文章的 `tags`，不用另外設定。
+文章列表是兩欄式：寬螢幕（64rem 以上）左側是標籤、右側是文章；窄螢幕標籤在上、文章在下。標籤與分頁都是 build 時產生的靜態頁面，沒有 JavaScript 也能用。
 
-- 依文章數多到少排序；只有一篇的標籤收進「更多標籤」（`<details>`）
-- 一次選一個標籤；再按一次已選的標籤，等於回到「全部」
-- 選取狀態寫進網址 `?tag=`，可以直接分享；文章內頁的標籤會連到 `/articles/?tag=標籤`
-- 按鈕用 `aria-pressed` 標示選取（反白 + 橘色陰影，不只靠顏色），篩選結果用 `role="status"` 念出
-- 篩選後卡片重新編號；網址的標籤不存在時顯示全部
-- 互動程式在 `src/scripts/tag-filter.ts`，沒有 JavaScript 時篩選列隱藏，直接列出全部文章
+| 網址 | 內容 |
+| --- | --- |
+| `/articles/` | 全部文章，第 1 頁 |
+| `/articles/page/2/` | 全部文章，第 2 頁起 |
+| `/articles/tags/next-js/` | 某個標籤的文章，第 1 頁 |
+| `/articles/tags/next-js/page/2/` | 某個標籤的文章，第 2 頁起 |
+
+- 每頁 10 篇，在 `src/utils/article-list.ts` 的 `PAGE_SIZE` 調整
+- 標籤取自每篇文章的 `tags`，不用另外設定。網址片段由 `tagSlug()` 產生：轉小寫，空白和「.」換成「-」，中文保留（`Next.js` → `next-js`、`Rocky Linux` → `rocky-linux`、`無障礙` → `無障礙`）
+- 兩個不同寫法的標籤算出同一個網址時（例如 `Next.js` 和 `next js`），build 會直接失敗，請統一寫法
+- 標籤依文章數多到少排序；只有一篇的收進「更多標籤」（`<details>`），目前的標籤在裡面時自動展開
+- 目前的標籤、目前的頁碼用 `aria-current="page"` 標示（反白 + 橘色陰影，不只靠顏色）
+- 文章內頁的標籤會連到該標籤的列表
+- 共用版型在 `src/components/articles/ArticleList.astro`，分頁在 `Pagination.astro`
 
 ## 封面與解說圖
 
