@@ -1,7 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { AUTHOR_KEYS, DEFAULT_AUTHORS, MOTIF_NAMES } from './consts';
+import { AUTHOR_KEYS, DEFAULT_AUTHORS, MOTIF_NAMES, SERIES_KEYS } from './consts';
 import guide from './data/a11y-guide.json';
 
 // 兩個集合共用的 SEO / GEO 欄位
@@ -36,6 +36,7 @@ const articles = defineCollection({
       updatedDate: z.coerce.date().optional(),
       authors,
       tags: z.array(z.string()).default([]),
+      series: z.enum(SERIES_KEYS).optional(), // 專題單元（key 見 src/consts.ts 的 SERIES）
       wcag,
       cover: image().optional(),
       coverAlt: z.string().optional(),

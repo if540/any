@@ -4,6 +4,7 @@ authors: [kerwin, claude]
 description: noopener 防止新分頁改掉原本的頁面，noreferrer 不告訴對方你從哪裡來。實測現代瀏覽器的預設行為、window.open 的例外，整理加與不加的優缺點。
 pubDate: 2026-10-30
 tags: [HTML, 資安, Next.js]
+series: security
 draft: false
 coverTitle: "noopener\nnoreferrer\n加不加"
 coverMotif: target

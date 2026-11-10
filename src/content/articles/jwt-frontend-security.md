@@ -4,6 +4,7 @@ authors: [kerwin, claude]
 description: JWT 只有簽章、沒有加密；放 localStorage 會被 XSS 偷走，放 cookie 要防 CSRF。用實驗看清每個選項擋得住什麼、擋不住什麼，並對照 2026 年 8 月發布的 RFC 10017。
 pubDate: 2026-11-10
 tags: [資安, JWT]
+series: security
 draft: true
 coverTitle: "JWT\n放哪裡"
 coverMotif: chain

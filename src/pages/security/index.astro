@@ -1,0 +1,133 @@
+---
+// 資安專題單元的首頁：three.js 動態主視覺 + 單元文章列表
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { SERIES } from '../../consts';
+import { getArticles } from '../../utils/content';
+import { listPath, tagSlug } from '../../utils/article-list';
+import { absoluteUrl, withBase } from '../../utils/url';
+
+const unit = SERIES.security;
+const posts = (await getArticles()).filter((p) => p.data.series === 'security');
+const url = absoluteUrl(unit.href, Astro.site);
+const home = absoluteUrl('/', Astro.site);
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${url}#collection`,
+    url,
+    name: `${unit.title}專題`,
+    description: unit.description,
+    isPartOf: { '@id': `${home}#website` },
+    hasPart: posts.map((p) => ({ '@type': 'BlogPosting', headline: p.data.title, url: absoluteUrl(`/articles/${p.id}/`, Astro.site) })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首頁', item: home },
+      { '@type': 'ListItem', position: 2, name: `${unit.title}專題`, item: url },
+    ],
+  },
+];
+---
+<BaseLayout title={`${unit.title}專題`} description={unit.description} jsonLd={jsonLd}>
+  <div class="hero" data-security-hero>
+    <!-- 靜態盾牌：沒有 JavaScript 或 WebGL 時顯示；動畫就緒後由 canvas 取代 -->
+    <svg class="hero-fallback" viewBox="0 0 200 240" aria-hidden="true">
+      <path d="M100 12q44 22 82 28v66c0 62-44 94-82 116-38-22-82-54-82-116V40q38-6 82-28z" fill="none" stroke="#ff6b1a" stroke-width="4"/>
+      <path d="M100 40q32 16 58 21v48c0 46-32 70-58 87-26-17-58-41-58-87V61q26-5 58-21z" fill="none" stroke="#ff6b1a" stroke-width="2" opacity=".5"/>
+      <path d="M86 138l6-32a19 19 0 1 1 16 0l6 32z" fill="none" stroke="#fafaf7" stroke-width="3" stroke-linejoin="round"/>
+    </svg>
+    <canvas aria-hidden="true"></canvas>
+    <div class="hero-scrim" aria-hidden="true"></div>
+
+    <div class="hero-text">
+      <p class="eyebrow">專題單元 / SECURITY</p>
+      <h1>{unit.title}<span class="accent" aria-hidden="true">.</span></h1>
+      <p class="lead">{unit.description}</p>
+    </div>
+
+    <button type="button" class="hero-toggle" data-hero-toggle aria-pressed="false" hidden>
+      <span class="icon" aria-hidden="true"></span><span data-label>暫停動畫</span>
+    </button>
+  </div>
+
+  <p class="legend meta">
+    <span><b class="k k-plain" aria-hidden="true">A</b>防護罩內：解密後的明文</span>
+    <span><b class="k k-cipher" aria-hidden="true">#</b>防護罩外：加密的密文</span>
+    <span>外圍線框是四維超立方體在三維的投影</span>
+  </p>
+
+  <section aria-labelledby="unit-articles">
+    <div class="section-head">
+      <h2 id="unit-articles">單元文章</h2>
+      <span class="meta">共 {posts.length} 篇</span>
+    </div>
+    {posts.length > 0
+      ? posts.map((post) => <ArticleCard post={post} />)
+      : <p>這個單元的文章還在準備中。</p>}
+    <p class="more">
+      <a href={withBase(listPath(tagSlug('資安')))}>看「資安」標籤的全部文章 →</a>
+    </p>
+  </section>
+</BaseLayout>
+
+<script>
+  // three.js 只在這一頁載入，而且等主要內容顯示後才開始下載
+  const root = document.querySelector<HTMLElement>('[data-security-hero]');
+  if (root) {
+    const start = () => import('../../scripts/security-hero').then((m) => m.initSecurityHero(root));
+    'requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 200);
+  }
+</script>
+
+<style>
+  /* 主視覺固定用黑底，不跟著亮色／暗色模式變：資安感，也讓文字對比固定 */
+  .hero {
+    position: relative; overflow: hidden; isolation: isolate;
+    height: clamp(24rem, 62vh, 34rem);
+    background: #111; color: #fafaf7;
+    border: 3px solid var(--line); box-shadow: 8px 8px 0 var(--orange);
+    display: flex; align-items: flex-end;
+  }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.6s; }
+  .hero-fallback { position: absolute; right: 8%; top: 50%; height: 70%; transform: translateY(-50%); transition: opacity 0.4s; }
+  .hero:global(.is-ready) canvas { opacity: 1; }
+  .hero:global(.is-ready) .hero-fallback { opacity: 0; }
+  /* 文字後方的漸層遮罩：字元飄過標題時不影響閱讀 */
+  .hero-scrim { position: absolute; inset: 0; background: linear-gradient(90deg, #111 0%, rgb(17 17 17 / 0.88) 34%, rgb(17 17 17 / 0) 62%); }
+  .hero-text { position: relative; padding: clamp(1.25rem, 4vw, 2.5rem); max-width: 30rem; }
+  .eyebrow { margin: 0 0 0.5rem; font: 700 0.8rem var(--font-mono); letter-spacing: 0.14em; color: var(--orange); }
+  h1 { margin: 0 0 0.75rem; font-size: clamp(2.75rem, 9vw, 4.75rem); line-height: 1.05; }
+  .accent { color: var(--orange); }
+  .lead { margin: 0; font-weight: 500; }
+
+  .hero-toggle {
+    position: absolute; top: 0.75rem; right: 0.75rem;
+    display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0.35rem 0.8rem;
+    font: 700 0.85rem var(--font-sans); color: #fafaf7; background: #111; border: 2px solid #fafaf7; cursor: pointer;
+  }
+  .hero-toggle[hidden] { display: none; }
+  .hero-toggle:hover { background: #fafaf7; color: #111; }
+  /* 圖示：播放中顯示兩條直線（暫停），暫停時顯示三角形（播放） */
+  .icon { width: 0.7rem; height: 0.8rem; border-inline: 0.22rem solid currentColor; }
+  .hero-toggle[aria-pressed='true'] .icon { width: 0; height: 0; border: 0.4rem solid transparent; border-left: 0.7rem solid currentColor; border-right: 0; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1.5rem; margin: 1.25rem 0 0; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .k { display: inline-grid; place-items: center; width: 1.4rem; height: 1.4rem; background: #111; font-size: 0.85rem; }
+  .k-plain { color: #ff6b1a; }
+  .k-cipher { color: #c9c9c6; }
+
+  .more { margin-top: 1.5rem; font-weight: 700; }
+
+  @media (max-width: 40rem) {
+    /* 窄螢幕：盾牌在上、文字在下 */
+    .hero { height: clamp(28rem, 80vh, 36rem); }
+    .hero-scrim { background: linear-gradient(0deg, #111 0%, rgb(17 17 17 / 0.9) 36%, rgb(17 17 17 / 0) 62%); }
+    .hero-fallback { right: 50%; top: 32%; height: 48%; transform: translate(50%, -50%); }
+  }
+</style>

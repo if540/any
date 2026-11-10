@@ -16,11 +16,13 @@
     "@astrojs/markdown-satteri": "^0.4.4",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.6"
+    "astro": "^7.3.6",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@expo-google-fonts/noto-sans-tc": "^0.4.4",
     "@resvg/resvg-js": "^2.6.2",
+    "@types/three": "^0.187.0",
     "satori": "^0.35.0"
   }
 }

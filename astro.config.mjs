@@ -18,6 +18,8 @@ export default defineConfig({
   trailingSlash: 'always',
   output: 'static',
   integrations: [sitemap()],
+  // 資安專題首頁的 three.js 約 580 KB（gzip 144 KB），只在該頁延後載入，屬預期大小
+  vite: { build: { chunkSizeWarningLimit: 700 } },
   markdown: {
     processor: satteri({ hastPlugins: [tableRegion()] }),
     shikiConfig: {

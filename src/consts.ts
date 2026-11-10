@@ -45,6 +45,20 @@ export const NAV = [
   { href: '/', label: '首頁' },
   { href: '/articles/', label: '文章' },
   { href: '/journal/', label: '日誌' },
+  { href: '/security/', label: '資安' },
   { href: '/skills/', label: '技能樹' },
   { href: '/about/', label: '關於' },
 ];
+
+// 專題單元：文章 frontmatter 的 series 填這裡的 key，就會歸到該單元。
+// 每個單元有自己的首頁（href），文章網址維持 /articles/<slug>/ 不變。
+export const SERIES = {
+  security: {
+    title: '資安',
+    href: '/security/',
+    description: '從前端工程師的角度看資訊安全：token、cookie、連結與瀏覽器的防護機制，每個說法都用實驗驗證。',
+  },
+} as const;
+
+export type SeriesKey = keyof typeof SERIES;
+export const SERIES_KEYS = Object.keys(SERIES) as [SeriesKey, ...SeriesKey[]];

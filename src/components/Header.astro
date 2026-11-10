@@ -33,11 +33,13 @@ const isActive = (href: string) => {
   .logo { color: var(--white); font-weight: 900; font-size: 1.6rem; text-decoration: none; letter-spacing: -0.03em; }
   .logo:hover { color: var(--white); }
   .dot { color: var(--orange); }
-  ul { display: flex; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
+  /* 窄螢幕：項目不拆字，放不下就換行 */
+  ul { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
   nav a {
     display: block; padding: 0.4rem 0.75rem; color: var(--white);
-    text-decoration: none; font-weight: 700; font-size: 0.95rem;
+    text-decoration: none; font-weight: 700; font-size: 0.95rem; white-space: nowrap;
   }
   nav a:hover { color: var(--orange); }
   nav a[aria-current='page'] { background: var(--orange); color: var(--black); }
+  @media (max-width: 26rem) { nav a { padding-inline: 0.5rem; font-size: 0.9rem; } ul { gap: 0; } }
 </style>

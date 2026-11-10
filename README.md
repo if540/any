@@ -67,6 +67,7 @@ updatedDate: 2026-01-15        # 選填
 authors: [kerwin, claude]      # 掛名作者，預設 [kerwin]
 wcag: ['4.1.3']                # 選填，對應的成功準則，會點亮技能樹
 tags: [標籤一, 標籤二]
+series: security               # 選填，歸到專題單元（見「專題單元」）
 cover: ../../assets/articles/my-first-post/cover.jpg  # 選填，自訂封面
 coverAlt: 封面圖說明            # 有 cover 時必填
 coverTitle: "第一行\n第二行"   # 選填，自動封面上的標題與換行
@@ -121,6 +122,31 @@ mood: 開心                      # 選填
 - 目前的標籤、目前的頁碼用 `aria-current="page"` 標示（反白 + 橘色陰影，不只靠顏色）
 - 文章內頁的標籤會連到該標籤的列表
 - 共用版型在 `src/components/articles/ArticleList.astro`，分頁在 `Pagination.astro`
+
+## 專題單元
+
+專題單元把同一個主題的文章收在一起，並有自己的首頁。目前有「資安」（`/security/`）。
+
+- 文章在 frontmatter 加 `series: security` 就歸到單元；文章網址維持 `/articles/<slug>/` 不變
+- 歸到單元的文章，麵包屑會多一層「資安專題」，文末多一個回到專題的連結
+- 單元定義在 `src/consts.ts` 的 `SERIES`（名稱、網址、說明）；填了不存在的 key，build 會失敗
+- 新增單元：在 `SERIES` 加一筆，再建立 `src/pages/<單元>/index.astro` 當首頁
+
+**資安單元的主視覺**用 three.js 繪製（`src/scripts/security-hero.ts`）：
+
+| 畫面元素 | 意思 |
+| --- | --- |
+| 盾牌與外圍的線框球 | 防護罩 |
+| 飄浮的字元 | 防護罩外是不斷變動的密文；飄進防護罩變成橘色明文（解密），飄出去又變回密文（加密） |
+| 外圍緩慢變形的線框 | 四維超立方體投影到三維（次元） |
+| 整體緩慢漂移、翻轉 | 無重力 |
+
+- three.js 只在這一頁載入，而且等頁面內容顯示後才下載
+- 畫面是裝飾，`canvas` 設 `aria-hidden`；意思另外用圖例文字說明
+- 右上角有「暫停動畫／播放動畫」按鈕（`aria-pressed`）
+- 使用者設定「減少動態效果」時預設不播放，只畫一張靜止畫面，按播放才會動
+- 捲出視窗或切到其他分頁時停止運算
+- 沒有 JavaScript 或 WebGL 時，顯示靜態的 SVG 盾牌
 
 ## 封面與解說圖
 
