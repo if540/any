@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 430" width="720" height="430" role="img" aria-labelledby="t">
+  <title id="t">JWT 的三段：header、payload、signature，前兩段任何人都能解碼</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="430" class="bg"/>
+
+  <text x="20" y="36" font-size="15" font-weight="700" class="fg">一個 JWT 是用「.」接起來的三段字串</text>
+  <rect x="20" y="52" width="680" height="44" class="tag"/>
+  <text x="36" y="80" font-size="14" class="mono tagtext">eyJhbGci…</text>
+  <text x="203" y="80" font-size="16" font-weight="700" class="mono tagtext">.</text>
+  <text x="226" y="80" font-size="14" class="mono tagtext">eyJzdWIiOiJ1MTIzIiwicm9sZSI6…</text>
+  <text x="513" y="80" font-size="16" font-weight="700" class="mono tagtext">.</text>
+  <text x="536" y="80" font-size="14" class="mono tagtext">KyaGdZem…</text>
+
+  <path d="M110 98v36" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/><path d="M360 98v36" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/><path d="M610 98v36" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- header -->
+  <rect x="20" y="142" width="180" height="150" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="170" font-size="16" font-weight="700" class="fg">header</text>
+  <text x="36" y="192" font-size="13" class="mut">用什麼演算法簽章</text>
+  <text x="36" y="226" font-size="13" class="mono fg">{"alg":"HS256"}</text>
+  <text x="36" y="276" font-size="13" font-weight="700" class="ink">任何人都能解碼</text>
+
+  <!-- payload -->
+  <rect x="218" y="150" width="300" height="150" class="o"/>
+  <rect x="210" y="142" width="300" height="150" class="card stroke" stroke-width="3"/>
+  <text x="226" y="170" font-size="16" font-weight="700" class="fg">payload（內容）</text>
+  <text x="226" y="192" font-size="13" class="mut">使用者是誰、權限、何時到期</text>
+  <text x="226" y="222" font-size="13" class="mono fg">"sub": "u123",</text>
+  <text x="226" y="240" font-size="13" class="mono fg">"role": "member",</text>
+  <text x="226" y="258" font-size="13" class="mono fg">"exp": 1794302361</text>
+  <text x="226" y="282" font-size="13" font-weight="700" class="ink">任何人都能解碼，不需要密鑰</text>
+
+  <!-- signature -->
+  <rect x="520" y="142" width="180" height="150" class="card stroke" stroke-width="2.5"/>
+  <text x="536" y="170" font-size="16" font-weight="700" class="fg">signature</text>
+  <text x="536" y="192" font-size="13" class="mut">用伺服器的密鑰</text>
+  <text x="536" y="210" font-size="13" class="mut">對前兩段算出來</text>
+  <text x="536" y="252" font-size="13" class="fg">內容被改過，</text>
+  <text x="536" y="272" font-size="13" class="fg">驗證就會失敗</text>
+
+  <rect x="20" y="318" width="680" height="94" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="350" font-size="15" class="fg"><tspan font-weight="700">簽章不是加密</tspan>：它保證「沒被改過」，不保證「別人看不到」</text>
+  <text x="40" y="376" font-size="14" class="mut">所以 payload 不能放密碼、身分證號這類資料；</text>
+  <text x="40" y="398" font-size="14" class="mut">前端解碼出來的值只能拿來顯示，能不能做事要由伺服器驗證後決定</text>
+</svg>
