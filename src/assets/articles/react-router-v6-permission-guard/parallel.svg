@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-labelledby="t">
+  <title id="t">守衛只放在父路由時，子路由的 loader 會同時執行，資料照樣被抓</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="400" class="bg"/>
+  <text x="20" y="36" font-size="16" font-weight="700" class="fg">進入 <tspan class="mono">/admin/logs</tspan>：兩個 loader 同時開始</text>
+
+  <text x="20" y="74" font-size="13" class="mut">時間 →</text>
+  <path d="M80 70H690" class="stroke" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <text x="20" y="118" font-size="14" font-weight="700" class="fg">父 /admin</text>
+  <rect x="140" y="96" width="260" height="36" class="card stroke" stroke-width="2.5"/>
+  <text x="152" y="120" font-size="13" class="fg">guard：查權限 → 沒有，丟 403</text>
+
+  <text x="20" y="178" font-size="14" font-weight="700" class="fg">子 logs</text>
+  <rect x="148" y="164" width="420" height="36" class="o"/>
+  <rect x="140" y="156" width="420" height="36" class="card stroke" stroke-width="3"/>
+  <text x="152" y="180" font-size="13" font-weight="700" class="ink">沒有守衛：照樣呼叫日誌 API，抓回資料</text>
+
+  <path d="M140 220V90" class="stroke" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+  <text x="140" y="240" font-size="12" text-anchor="middle" class="mut">同時開始</text>
+
+  <rect x="20" y="262" width="680" height="120" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="294" font-size="15" class="fg"><tspan font-weight="700">畫面上看到的是 403</tspan>，但子路由的請求已經送出去了</text>
+  <text x="40" y="322" font-size="14" class="mut">React Router 會同時執行這次網址對到的所有 loader，</text>
+  <text x="40" y="344" font-size="14" class="mut">父路由丟錯不會讓子路由的 loader 停下來</text>
+  <text x="40" y="370" font-size="14" font-weight="700" class="ink">守衛要包在每一個需要保護的路由自己的 loader 上</text>
+</svg>

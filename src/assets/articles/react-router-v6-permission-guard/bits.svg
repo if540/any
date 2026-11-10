@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" width="720" height="420" role="img" aria-labelledby="t">
+  <title id="t">sum 等於 5 的意思：四個開關裡，Read 和 Update 是開的</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="420" class="bg"/>
+  <text x="20" y="40" font-size="17" font-weight="700" class="fg">sum = 5，拆成四個開關</text>
+<rect x="20" y="120" width="140" height="96" class="card stroke" stroke-width="2"/>
+<text x="90" y="178" font-size="34" font-weight="700" text-anchor="middle" class="mono mut">0</text>
+<text x="90" y="86" font-size="16" font-weight="700" text-anchor="middle" class="fg">Delete</text>
+<text x="90" y="108" font-size="13" text-anchor="middle" class="mono mut">8</text>
+<text x="90" y="204" font-size="13" text-anchor="middle" class="mut">沒有</text>
+<rect x="196" y="128" width="140" height="96" class="o"/><rect x="190" y="120" width="140" height="96" class="card stroke" stroke-width="3"/>
+<text x="260" y="178" font-size="34" font-weight="700" text-anchor="middle" class="mono ink">1</text>
+<text x="260" y="86" font-size="16" font-weight="700" text-anchor="middle" class="fg">Update</text>
+<text x="260" y="108" font-size="13" text-anchor="middle" class="mono mut">4</text>
+<text x="260" y="204" font-size="13" text-anchor="middle" class="fg">有</text>
+<rect x="360" y="120" width="140" height="96" class="card stroke" stroke-width="2"/>
+<text x="430" y="178" font-size="34" font-weight="700" text-anchor="middle" class="mono mut">0</text>
+<text x="430" y="86" font-size="16" font-weight="700" text-anchor="middle" class="fg">Create</text>
+<text x="430" y="108" font-size="13" text-anchor="middle" class="mono mut">2</text>
+<text x="430" y="204" font-size="13" text-anchor="middle" class="mut">沒有</text>
+<rect x="536" y="128" width="140" height="96" class="o"/><rect x="530" y="120" width="140" height="96" class="card stroke" stroke-width="3"/>
+<text x="600" y="178" font-size="34" font-weight="700" text-anchor="middle" class="mono ink">1</text>
+<text x="600" y="86" font-size="16" font-weight="700" text-anchor="middle" class="fg">Read</text>
+<text x="600" y="108" font-size="13" text-anchor="middle" class="mono mut">1</text>
+<text x="600" y="204" font-size="13" text-anchor="middle" class="fg">有</text>
+  <text x="20" y="262" font-size="15" class="fg"><tspan class="mono">4 + 1 = 5</tspan>：每個權限各佔一個位元，加起來就是 sum</text>
+
+  <rect x="20" y="290" width="680" height="112" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="322" font-size="15" font-weight="700" class="fg">判斷有沒有某個權限：用 &amp; 取出那個開關</text>
+  <text x="40" y="352" font-size="14" class="mono fg" xml:space="preserve">5 &amp; 4 = 4  → 等於 4，有 Update</text>
+  <text x="40" y="378" font-size="14" class="mono fg" xml:space="preserve">5 &amp; 8 = 0  → 不等於 8，沒有 Delete</text>
+</svg>
