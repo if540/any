@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" width="720" height="440" role="img" aria-labelledby="t">
+  <title id="t">withGuards 走過路由樹，把祖先的權限要求加上自己的，包進每個路由的 loader</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="440" class="bg"/>
+
+  <text x="20" y="34" font-size="15" font-weight="700" class="fg">路由設定</text>
+  <text x="400" y="34" font-size="15" font-weight="700" class="fg">每個 loader 實際檢查的</text>
+
+  <!-- admin -->
+  <rect x="20" y="52" width="320" height="64" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="78" font-size="15" font-weight="700" class="mono fg">admin</text>
+  <text x="36" y="102" font-size="13" class="fg">標記：報表 <tspan font-weight="700">Read</tspan></text>
+  <path d="M342 84h46" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <rect x="400" y="60" width="300" height="48" class="tag"/>
+  <text x="416" y="90" font-size="14" font-weight="700" class="tagtext">報表 Read</text>
+
+  <!-- logs -->
+  <path d="M60 118v56h40" class="stroke" stroke-width="2" fill="none"/>
+  <rect x="100" y="146" width="240" height="64" class="card stroke" stroke-width="2.5"/>
+  <text x="116" y="172" font-size="15" font-weight="700" class="mono fg">logs</text>
+  <text x="116" y="196" font-size="13" class="mut">沒有標記，有自己的 loader</text>
+  <path d="M342 178h46" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <rect x="408" y="162" width="300" height="48" class="o"/>
+  <rect x="400" y="154" width="300" height="48" class="card stroke" stroke-width="3"/>
+  <text x="416" y="184" font-size="14" font-weight="700" class="fg">報表 Read <tspan class="ink">（繼承）</tspan></text>
+
+  <!-- settings -->
+  <path d="M60 174v88h40" class="stroke" stroke-width="2" fill="none"/>
+  <rect x="100" y="234" width="240" height="64" class="card stroke" stroke-width="2.5"/>
+  <text x="116" y="260" font-size="15" font-weight="700" class="mono fg">settings</text>
+  <text x="116" y="284" font-size="13" class="fg">標記：報表 <tspan font-weight="700">Update</tspan></text>
+  <path d="M342 266h46" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <rect x="400" y="242" width="300" height="48" class="card stroke" stroke-width="2.5"/>
+  <text x="416" y="272" font-size="14" font-weight="700" class="fg">報表 Read ＋ Update</text>
+
+  <!-- index -->
+  <path d="M140 300v54h40" class="stroke" stroke-width="2" fill="none"/>
+  <rect x="180" y="326" width="160" height="64" class="card stroke" stroke-width="2.5"/>
+  <text x="196" y="352" font-size="15" font-weight="700" class="mono fg">index</text>
+  <text x="196" y="376" font-size="13" class="mut">沒有標記</text>
+  <path d="M342 358h46" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <rect x="408" y="342" width="300" height="48" class="o"/>
+  <rect x="400" y="334" width="300" height="48" class="card stroke" stroke-width="3"/>
+  <text x="416" y="364" font-size="14" font-weight="700" class="fg">報表 Read ＋ Update <tspan class="ink">（繼承）</tspan></text>
+
+  <text x="20" y="424" font-size="14" class="fg"><tspan font-weight="700">每個 loader 自己檢查全部的要求</tspan>，就算同時執行，子路由也不會偷跑</text>
+</svg>
