@@ -234,6 +234,8 @@ Framework 模式預設是伺服器渲染（SSR），設定 `ssr: false` 就輸�
 | Data | Framework | 加上 Vite 外掛，把路由設定搬到 `routes.ts`，每個路由改成路由模組 |
 | v6 | v7、v8 | 套件改成 `react-router`，import 路徑跟著改；先在 v6 開啟官方的 future flags，逐項處理 |
 
+從 v6 升到 v7 要改哪些舊寫法、每一項的實測結果，整理在〈[React Router 6.30 升級到 7.18 實測清單](/any/articles/react-router-6-to-7-upgrade/)〉。
+
 `createRoutesFromElements()` 是官方為了讓 Declarative 專案好升級而提供的，不用一次把所有 JSX 改寫成物件。這一步這次沒有實測。
 
 ## 和權限守衛系列的關係

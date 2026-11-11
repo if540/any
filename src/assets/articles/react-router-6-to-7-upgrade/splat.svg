@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" width="720" height="330" role="img" aria-labelledby="t">
+  <title id="t">splat 路由裡的相對連結，v6 和 v7 解析到不同網址</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="330" class="bg"/>
+  <text x="20" y="34" font-size="15" class="fg">目前在 <tspan class="mono" font-weight="700">/dashboard/stats</tspan>，路由是 <tspan class="mono">path="dashboard/*"</tspan>，元件裡有 <tspan class="mono">&lt;Link to="team"&gt;</tspan></text>
+
+  <rect x="20" y="60" width="330" height="150" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="90" font-size="16" font-weight="700" class="fg">v6</text>
+  <text x="36" y="118" font-size="13" class="fg">相對於路由本身的路徑</text>
+  <text x="36" y="140" font-size="13" class="mono mut">dashboard</text>
+  <text x="36" y="182" font-size="18" font-weight="700" class="mono fg">/dashboard/team</text>
+
+  <rect x="378" y="68" width="322" height="150" class="o"/>
+  <rect x="370" y="60" width="322" height="150" class="card stroke" stroke-width="3"/>
+  <text x="386" y="90" font-size="16" font-weight="700" class="fg">v7（或開啟 v7_relativeSplatPath）</text>
+  <text x="386" y="118" font-size="13" class="fg">相對於目前完整的網址</text>
+  <text x="386" y="140" font-size="13" class="mono mut">dashboard/stats</text>
+  <text x="386" y="182" font-size="18" font-weight="700" class="mono ink">/dashboard/stats/team</text>
+
+  <rect x="20" y="234" width="680" height="80" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="264" font-size="15" class="fg"><tspan font-weight="700">改法</tspan>：把 splat 拆成子路由，連結改成往上一層</text>
+  <text x="40" y="292" font-size="13" class="mono fg" xml:space="preserve">&lt;Route path="dashboard"&gt;&lt;Route path="*" … /&gt;&lt;/Route&gt;   &lt;Link to="../team"&gt;</text>
+</svg>
