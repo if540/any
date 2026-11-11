@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 380" width="720" height="380" role="img" aria-labelledby="t">
+  <title id="t">寫法 A：Guard 包住父路由的 element，子頁面要經過 Outlet 才會渲染，所以自然被擋住</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}.onO{fill:#111111}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="380" class="bg"/>
+
+  <text x="20" y="34" font-size="15" font-weight="700" class="fg">進入 <tspan class="mono">/admin/logs</tspan> 時的渲染順序</text>
+
+  <rect x="28" y="60" width="200" height="96" class="o"/>
+  <rect x="20" y="52" width="200" height="96" class="card stroke" stroke-width="3"/>
+  <text x="36" y="80" font-size="15" font-weight="700" class="mono fg">&lt;Guard&gt;</text>
+  <text x="36" y="104" font-size="13" class="fg">admin 的權限要求</text>
+  <text x="36" y="126" font-size="13" font-weight="700" class="ink">在這裡判斷</text>
+
+  <path d="M224 100h34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="241" y="88" font-size="12" font-weight="700" text-anchor="middle" class="fg">通過</text>
+
+  <rect x="270" y="52" width="200" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="286" y="80" font-size="15" font-weight="700" class="fg">後台版面</text>
+  <text x="286" y="104" font-size="13" class="fg">側欄、標題列</text>
+  <text x="286" y="126" font-size="13" class="mono mut">&lt;Outlet /&gt;</text>
+
+  <path d="M474 100h34" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="520" y="52" width="180" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="536" y="80" font-size="15" font-weight="700" class="fg">子頁面 logs</text>
+  <text x="536" y="104" font-size="13" class="fg">渲染後，</text>
+  <text x="536" y="126" font-size="13" class="fg">才開始抓資料</text>
+
+  <path d="M120 150v44" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="132" y="178" font-size="12" font-weight="700" class="fg">沒通過</text>
+  <rect x="20" y="204" width="330" height="64" class="tag"/>
+  <text x="36" y="232" font-size="14" font-weight="700" class="tagtext">顯示載入中、導到登入頁，或 403</text>
+  <text x="36" y="254" font-size="13" class="tagtext">版面和子頁面都不會渲染</text>
+
+  <rect x="20" y="292" width="680" height="72" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="322" font-size="15" class="fg"><tspan font-weight="700">子頁面一定要經過父層的 &lt;Outlet /&gt;</tspan>，父層被擋住，子頁面就不存在</text>
+  <text x="40" y="348" font-size="14" class="mut">所以守衛放在父路由就能保護底下所有頁面，不用往下傳</text>
+</svg>

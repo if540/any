@@ -1,23 +1,25 @@
 ---
 title: React Router v6 權限守衛設計：頁面進不進得去、按鈕顯不顯示
 authors: [kerwin, claude]
-description: 權限 API 回傳 id、unitName、sum，sum 用位元表示 Read 1、Create 2、Update 4、Delete 8。用 React Router 6.30 的 loader 守衛頁面、用 Can 元件守衛按鈕，並實測父路由守衛擋不住子路由 loader 的坑。
+description: 權限 API 回傳 id、unitName、sum，sum 用位元表示 Read 1、Create 2、Update 4、Delete 8。BrowserRouter 與 data router 兩種寫法並列，守衛頁面與按鈕，並實測各自的坑。
 pubDate: 2026-11-11
 tags: [React, React Router, 資安]
 series: security
 draft: true
 coverTitle: "React Router v6\n權限守衛"
 coverMotif: target
-tldr: "權限的 sum 是四個位元相加，判斷用 (sum & need) === need。權限 API 只呼叫一次，結果同時給兩種守衛：進入頁面的守衛包在每個路由自己的 loader 上，沒登入就導到登入頁、沒權限就丟 403 給 errorElement，頁面元件完全不會渲染；元件的守衛用 Can 元件，從 root 路由的 loader 資料判斷要不要顯示。要注意 loader 是同時執行的，守衛只放父路由擋不住子路由抓資料；解法是把權限標在路由設定上，用 withGuards 自動套到所有子孫路由，升級到 v7 則可改用 middleware。前端守衛只是使用體驗，API 一定要自己檢查權限。"
+tldr: "權限的 sum 是四個位元相加，判斷用 (sum & need) === need。權限 API 只呼叫一次，權限要求標在路由設定上，由 withGuards 自動套用。用 BrowserRouter 的專案，守衛包住路由的 element，子頁面經過 Outlet 才渲染，放在父路由就能保護整區。用 data router 的專案，守衛包住 loader 和 action；loader 是同時執行的，所以每個子路由都要帶著祖先的要求自己檢查。按鈕用 Can 元件控制。前端守衛只是使用體驗，API 一定要自己檢查權限。"
 faq:
   - question: sum 是 5 代表什麼權限？
     answer: 四種權限各佔一個位元：Read 1、Create 2、Update 4、Delete 8，有哪些就加起來。5 等於 4 加 1，代表有 Update 和 Read，沒有 Create 和 Delete。判斷時用位元 AND：(5 & 4) 等於 4，有 Update；(5 & 8) 等於 0，沒有 Delete。
   - question: 為什麼判斷要寫 (sum & need) === need，不是 (sum & need) > 0？
     answer: 兩種寫法在只檢查一個權限時結果相同，差在一次檢查多個權限。need 傳 Read | Delete（等於 9）時，sum 是 5 的結果是 1，用大於 0 會判斷成有權限，但其實缺 Delete。寫成等於 need，表示要求的權限必須全部都有。
-  - question: 守衛放在父路由，子路由就安全了嗎？
-    answer: 不安全。React Router v6 的 data router 會同時執行這次網址對到的所有 loader。實測守衛只放在父路由時，畫面雖然顯示 403，子路由的 loader 已經執行，資料 API 也已經呼叫。守衛要包在每一個需要保護的路由自己的 loader 上。比較不會漏掉的做法，是在路由設定的 handle 標記權限要求，再寫一個 withGuards 函式走過整棵路由樹，把祖先和自己的要求包進每個路由的 loader。React Router v7 的 middleware 會由父到子依序執行完才跑 loader，也能解決這個問題。
-  - question: 專案用的是 BrowserRouter 和 Routes，沒有 loader 怎麼辦？
-    answer: 可以寫一個元件包住 Outlet，權限載入中顯示載入畫面，沒權限顯示 403，有權限才渲染 Outlet。缺點是畫面會先閃一下載入中，而且子頁面如果在 useEffect 裡抓資料，要等守衛放行之後才會開始。
+  - question: data router 是什麼？怎麼知道專案用的是哪一種？
+    answer: React Router 6.4 起，用 createBrowserRouter 建立、交給 RouterProvider 的路由叫 data router，路由除了顯示畫面，還能用 loader 載入資料、用 action 處理表單。用 BrowserRouter 包住 Routes 或 useRoutes 的是非 data router。useLoaderData、useNavigation、useBlocker 這些 hook 只有 data router 能用，在 BrowserRouter 底下呼叫會直接丟錯。
+  - question: 專案用的是 BrowserRouter，這套設計還能用嗎？
+    answer: 可以。位元判斷、權限只載入一次、權限標在路由設定、Can 元件都一樣，只有兩處不同：頁面守衛改成用 Guard 元件包住路由的 element，權限改從 Context 取得。而且子頁面要經過父層的 Outlet 才渲染，守衛放在父路由就能保護整區，比 data router 單純。代價是第一次載入權限時會先看到載入中。
+  - question: data router 的守衛放在父路由，子路由就安全了嗎？
+    answer: 不安全。data router 會同時執行這次網址對到的所有 loader。實測守衛只放在父路由時，畫面雖然顯示 403，子路由的 loader 已經執行，資料 API 也已經呼叫。做法是把權限要求標在路由設定上，用 withGuards 把祖先和自己的要求包進每個路由的 loader 和 action。React Router v7 的 middleware 也能解決。
   - question: 前端做了權限守衛，API 還需要檢查嗎？
     answer: 一定要。前端的守衛只決定畫面顯示什麼，使用者打開開發者工具或直接呼叫 API，就能繞過。真正擋住資料和操作的，必須是 API 自己用伺服器上的權限資料檢查。
 ---
@@ -27,9 +29,9 @@ faq:
 - **進入頁面**：沒有「讀取」權限的人，連網址都不該進得去。
 - **元件顯示**：進得去的人，也只看得到自己能用的按鈕，例如有「修改」但沒有「刪除」。
 
-這篇用一個具體的前提來設計：權限從 API 取得，每一筆有 `id`、`unitName`、`sum` 三個欄位，`sum` 用位元表示四種權限。
+這篇用一個具體的前提來設計：權限從 API 取得，每一筆有 `id`、`unitName`、`sum` 三個欄位，`sum` 用位元表示四種權限。React Router v6 有兩種建立路由的方式，守衛的接法不同，所以**兩種寫法並列**，照你的專案選一種看。
 
-所有程式碼都在 **React Router 6.30.6 + React 19.3** 上用 Vitest 和 Testing Library 實測過，共 15 個測試全部通過。v7 的 middleware 另外在 React Router 7.18.5 上測過。
+所有程式碼都在 **React Router 6.30.6 + React 19.3** 上用 Vitest 和 Testing Library 實測過，共 42 個測試全部通過。
 
 ## 前提：API 回傳的權限
 
@@ -97,13 +99,13 @@ export function can(perms: Permissions, unit: UnitId, need: number): boolean {
 
 ## 整體設計
 
-![守衛的整體設計。最上方是權限 API，回傳 id、unitName、sum 的陣列。往下是 loadPermissions()，只呼叫 API 一次，結果共用。從這裡分成兩邊：左邊是第一種，進入頁面的守衛，放在路由的 loader，寫法是 guard(Unit.Orders, Perm.Read)：還沒登入（401）導到登入頁；沒有權限丟出 403，由 errorElement 顯示；有權限才執行頁面自己的 loader；頁面元件一次都不會渲染。右邊是第二種，元件顯示的守衛 Can，資料來自 useRouteLoaderData('root')：按鈕、欄位、選單項目沒有權限就不渲染，或改顯示替代內容。最下方說明：兩者都只是使用體驗，真正擋住請求的是 API 自己的權限檢查。](../../assets/articles/react-router-v6-permission-guard/overview.svg)
+![守衛的整體設計。最上方是權限 API，回傳 id、unitName、sum 的陣列。中間一區是兩種路由寫法共用的三塊：can() 做位元判斷；loadPermissions() 只呼叫 API 一次，結果共用；權限標在路由設定的 handle.permission，由 withGuards() 自動套用。往下分成兩邊。左邊是第一種，進入頁面的守衛：寫法 A 用 BrowserRouter，由 Guard 包住路由的 element；寫法 B 用 data router，守衛包住路由的 loader 和 action；兩者都是沒登入導到登入頁、沒權限顯示 403。右邊是第二種，元件顯示的守衛：Can 元件和 useCan，按鈕、欄位、選單項目沒有權限就不渲染，用法相同，只有權限的來源不同。最下方說明：兩者都只是使用體驗，真正擋住請求的是 API 自己的權限檢查。](../../assets/articles/react-router-v6-permission-guard/overview.svg)
 
-這個設計用的是 React Router 6.4 起的 **data router**（`createBrowserRouter` + `RouterProvider`），因為它的 loader 會在畫面渲染**之前**執行，守衛可以在頁面出現前就做決定。還在用 `<BrowserRouter>` 的專案，後面有另一種寫法。
+共用的部分有三塊：上一節的 `can()`，以及下面兩個。
 
 ### 權限只要一次
 
-每次換頁都重新呼叫權限 API 太浪費。把請求存成一個 Promise，所有 loader 和元件共用：
+每次換頁都重新呼叫權限 API 太浪費。把請求存成一個 Promise，全站共用：
 
 ```ts
 // permission-store.ts
@@ -132,35 +134,244 @@ export function resetPermissions() {
 }
 ```
 
-實測從訂單頁換到報表頁、再換回訂單頁，權限 API 只被呼叫一次。
+實測換頁多次，權限 API 只被呼叫一次。
 
-## ① 進入頁面的守衛
+### 權限要求標在路由設定上
 
-守衛是一個「包住 loader 的函式」：先檢查權限，通過了才執行頁面原本的 loader。
+哪個頁面需要什麼權限，直接寫在路由設定的 `handle.permission`：
+
+```tsx
+export type Requirement = { unit: UnitId; need: number }
+
+{ path: 'admin', handle: { permission: { unit: Unit.Reports, need: Perm.Read } }, … }
+```
+
+再由一個 `withGuards()` 函式走過整份設定，自動加上守衛。這樣一眼就看得出哪一區需要什麼權限，新增子頁面時也不會忘記。兩種寫法的 `withGuards()` 內容不同，下面各自說明。
+
+## 先確認：你的專案是哪一種路由
+
+React Router 6.4 起多了 **data router**：路由除了決定顯示哪個元件，還能載入資料、處理表單。分辨方式是看專案怎麼建立路由：
+
+| 項目 | 非 data router（寫法 A） | data router（寫法 B） |
+| --- | --- | --- |
+| 建立方式 | `<BrowserRouter>` ＋ `<Routes>` 或 `useRoutes()` | `createBrowserRouter()` ＋ `<RouterProvider>` |
+| 路由定義在哪 | 元件樹裡面 | 元件樹外面，啟動時固定 |
+| 資料什麼時候載入 | 元件渲染後，在 `useEffect` 裡抓 | 換頁時、渲染前，由 `loader` 載入 |
+| 權限守衛在哪擋 | 渲染時，會先看到載入中 | 渲染前，頁面完全不出現 |
+| 表單送出 | 自己呼叫 API | 可以交給 `action` |
+| 守衛的坑 | 很少 | 較多：loader 平行執行、`lazy`、`action` |
+
+有一批 API 只有 data router 能用。實測在 `<MemoryRouter>` 底下呼叫 `useLoaderData`、`useRouteLoaderData`、`useNavigation`、`useMatches`、`useFetcher`、`useBlocker`，全部丟錯「must be used within a data router」；`useNavigate`、`useLocation`、`useParams` 兩邊都能用。
+
+怎麼選：
+
+- **新專案**選 data router。官方文件寫明建議所有 web 專案使用 `createBrowserRouter`。
+- **既有專案用 `<BrowserRouter>` 而且運作良好**，不必為了守衛去換，用寫法 A 就好。資料已經交給 React Query、SWR 管理的專案也是。
+- 需要渲染前就擋權限、`errorElement`、`action`，或離開頁面前確認的 `useBlocker`，才值得換成 data router。
+
+## 寫法 A：`<BrowserRouter>`
+
+沒有 loader，守衛就放在渲染階段：權限放進 Context，用一個 `<Guard>` 元件包住路由的 `element`。
+
+```tsx
+// permission-react.tsx
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { Navigate, useLocation, type RouteObject } from 'react-router-dom'
+import { can, type Permissions, type UnitId } from './permission'
+import { loadPermissions, UnauthorizedError } from './permission-store'
+
+export type Requirement = { unit: UnitId; need: number }
+type State =
+  | { status: 'loading' }
+  | { status: 'ok'; perms: Permissions }
+  | { status: 'unauthorized' }
+  | { status: 'error' }
+const Ctx = createContext<State>({ status: 'loading' })
+
+export function PermissionProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<State>({ status: 'loading' })
+  useEffect(() => {
+    let alive = true
+    loadPermissions().then(
+      (perms) => alive && setState({ status: 'ok', perms }),
+      (e) => alive && setState({ status: e instanceof UnauthorizedError ? 'unauthorized' : 'error' }),
+    )
+    return () => { alive = false }
+  }, [])
+  return <Ctx.Provider value={state}>{children}</Ctx.Provider>
+}
+
+/** 進入頁面的守衛：包住路由的 element */
+export function Guard({ req, children }: { req: Requirement; children: ReactNode }) {
+  const state = useContext(Ctx)
+  const location = useLocation()
+  if (state.status === 'loading') return <p>載入中…</p>
+  if (state.status === 'error') return <h1>權限載入失敗</h1>
+  if (state.status === 'unauthorized') {
+    const back = encodeURIComponent(location.pathname + location.search)
+    return <Navigate to={`/login?redirect=${back}`} replace />
+  }
+  if (!can(state.perms, req.unit, req.need)) return <h1>沒有權限檢視這個頁面</h1>
+  return children
+}
+
+/** 給 <Can> 用：還沒載入完成時，當作沒有任何權限 */
+const EMPTY: Permissions = new Map()
+export function usePermissions(): Permissions {
+  const state = useContext(Ctx)
+  return state.status === 'ok' ? state.perms : EMPTY
+}
+
+/** 有標記 handle.permission 的路由，element 自動包上 <Guard> */
+export function withGuards(routes: RouteObject[]): RouteObject[] {
+  return routes.map((route) => {
+    const req = route.handle?.permission as Requirement | undefined
+    return {
+      ...route,
+      ...(req ? { element: <Guard req={req}>{route.element}</Guard> } : {}),
+      ...(route.children ? { children: withGuards(route.children) } : {}),
+    } as RouteObject
+  })
+}
+```
+
+用法：
+
+```tsx
+const routes: RouteObject[] = [
+  {
+    path: '/admin',
+    handle: { permission: { unit: Unit.Reports, need: Perm.Read } },
+    element: <AdminLayout />, // 裡面有 <Outlet />
+    children: [
+      { path: 'logs', element: <LogsPage /> }, // 不用標，父層擋住了
+      {
+        path: 'settings',
+        handle: { permission: { unit: Unit.Reports, need: Perm.Update } },
+        element: <SettingsPage />,
+      },
+    ],
+  },
+  { path: '/login', element: <LoginPage /> },
+]
+
+function AppRoutes() {
+  return useRoutes(withGuards(routes))
+}
+
+// main.tsx
+<BrowserRouter>
+  <PermissionProvider>
+    <AppRoutes />
+  </PermissionProvider>
+</BrowserRouter>
+```
+
+路由是用 `<Routes>` JSX 寫的話，不經過 `withGuards()`，直接包即可：`<Route path="/admin" element={<Guard req={…}><AdminLayout /></Guard>}>`。
+
+### 為什麼放在父路由就夠
+
+![進入 /admin/logs 時的渲染順序。第一個是 Guard，帶著 admin 的權限要求，在這裡判斷。通過的話，才渲染後台版面，裡面有側欄、標題列和 Outlet；再往下才渲染子頁面 logs，子頁面渲染後才開始抓資料。沒通過的話，顯示載入中、導到登入頁或 403，版面和子頁面都不會渲染。下方說明：子頁面一定要經過父層的 Outlet，父層被擋住，子頁面就不存在；所以守衛放在父路由就能保護底下所有頁面，不用往下傳。](../../assets/articles/react-router-v6-permission-guard/outlet.svg)
+
+子頁面是透過父層的 `<Outlet />` 渲染的。父層被 `<Guard>` 擋住，子頁面根本不會出現，它在 `useEffect` 裡的資料請求也不會發出。所以 `withGuards()` 不需要把祖先的要求往下傳。
+
+實測結果：
+
+| 情境 | 結果 |
+| --- | --- |
+| 沒權限，進 `/admin/logs` | 先顯示「載入中」，再顯示 403；**子頁面沒渲染、沒抓資料** |
+| 有 Read，進 `/admin/logs` | 進得去 |
+| 有 Read 沒 Update，進 `/admin/settings` | 403，顯示在後台版面內，側欄還在 |
+| 權限 API 回 401，進 `/admin/logs?page=2` | 導到 `/login?redirect=%2Fadmin%2Flogs%3Fpage%3D2` |
+
+要注意的只有兩點：
+
+- **第一次載入權限時會看到「載入中」**。可以把它換成跟版面一致的骨架畫面。
+- 官方把 `route.handle` 歸在 data router 的功能，是因為它原本要搭配 `useMatches()` 讀取。這裡是 `withGuards()` 自己讀設定物件，所以 `<BrowserRouter>` 也能用。
+
+## 寫法 B：data router
+
+data router 的 `loader` 在畫面渲染**之前**執行，守衛放在這裡，沒權限的頁面一次都不會渲染。但有一個一定要先知道的坑。
+
+### 坑：守衛放在父路由，擋不住子路由
+
+![進入 /admin/logs 時，兩個 loader 同時開始。父路由 /admin 的 guard 查權限，沒有，丟出 403。子路由 logs 沒有守衛，照樣呼叫日誌 API，抓回資料。畫面上看到的是 403，但子路由的請求已經送出去了。React Router 會同時執行這次網址對到的所有 loader，父路由丟錯不會讓子路由的 loader 停下來。守衛要包在每一個需要保護的路由自己的 loader 上。](../../assets/articles/react-router-v6-permission-guard/parallel.svg)
+
+官方文件寫明，換頁時「下一組對到的路由，它們的 loader 會**同時（in parallel）**被呼叫」。實測守衛只放在父路由 `/admin`、子路由 `logs` 的 loader 沒有守衛：畫面確實顯示 403，但子路由的 loader 已經執行了。這跟寫法 A 剛好相反。
+
+所以 `withGuards()` 在這裡要做更多事：**讓每個路由帶著祖先的要求，自己檢查**。
+
+![withGuards 走過路由樹的結果。左邊是路由設定：admin 標記報表 Read；底下的 logs 沒有標記，有自己的 loader；settings 標記報表 Update；settings 底下的 index 沒有標記。右邊是每個 loader 實際檢查的：admin 檢查報表 Read；logs 檢查報表 Read，是繼承來的；settings 檢查報表 Read 加 Update；index 檢查報表 Read 加 Update，也是繼承來的。下方說明：每個 loader 自己檢查全部的要求，就算同時執行，子路由也不會偷跑。](../../assets/articles/react-router-v6-permission-guard/inherit.svg)
 
 ```ts
-// guard.ts
-import { redirect, type LoaderFunction, type LoaderFunctionArgs } from 'react-router-dom'
+// with-guards.ts
+import {
+  redirect,
+  type ActionFunction, type LoaderFunction, type LoaderFunctionArgs, type RouteObject,
+} from 'react-router-dom'
 import { can, type UnitId } from './permission'
 import { loadPermissions, UnauthorizedError } from './permission-store'
 
-export function guard(unit: UnitId, need: number, loader?: LoaderFunction): LoaderFunction {
-  return async (args: LoaderFunctionArgs) => {
-    let perms
-    try {
-      perms = await loadPermissions()
-    } catch (e) {
-      if (e instanceof UnauthorizedError) {
-        const url = new URL(args.request.url)
-        throw redirect(`/login?redirect=${encodeURIComponent(url.pathname + url.search)}`)
-      }
-      throw e
+export type Requirement = { unit: UnitId; need: number }
+
+async function check(reqs: Requirement[], request: Request) {
+  let perms
+  try {
+    perms = await loadPermissions()
+  } catch (e) {
+    if (e instanceof UnauthorizedError) {
+      const url = new URL(request.url)
+      throw redirect(`/login?redirect=${encodeURIComponent(url.pathname + url.search)}`)
     }
-    if (!can(perms, unit, need)) {
-      throw new Response('Forbidden', { status: 403 })
-    }
-    return loader ? loader(args) : null
+    throw e
   }
+  if (!reqs.every((r) => can(perms, r.unit, r.need))) {
+    throw new Response('Forbidden', { status: 403 })
+  }
+}
+
+// 先檢查，通過了才執行原本的 loader 或 action
+const wrap = <F extends LoaderFunction | ActionFunction>(reqs: Requirement[], fn?: F) =>
+  (async (args: LoaderFunctionArgs) => {
+    await check(reqs, args.request)
+    return fn ? (fn as LoaderFunction)(args) : null
+  }) as unknown as F
+
+const fnOf = <T,>(v: unknown) => (typeof v === 'function' ? (v as T) : undefined)
+
+export function withGuards(routes: RouteObject[], inherited: Requirement[] = []): RouteObject[] {
+  return routes.map((route) => {
+    const own = route.handle?.permission as Requirement | undefined
+    const ownAction = route.handle?.actionPermission as Requirement | undefined
+    const reqs = own ? [...inherited, own] : inherited          // 祖先的 + 自己的
+    const actionReqs = ownAction ? [...reqs, ownAction] : reqs  // 送出表單可以要求更高
+    const loader = fnOf<LoaderFunction>(route.loader)
+    const action = fnOf<ActionFunction>(route.action)
+    const next: Record<string, unknown> = { ...route }
+
+    if (reqs.length > 0) {
+      if (route.lazy) {
+        // lazy 路由：包住載入回來的 loader、action（原因見下方表格）
+        const lazy = route.lazy
+        delete next.loader
+        delete next.action
+        next.lazy = async () => {
+          const m = await lazy()
+          return {
+            ...m,
+            loader: wrap(reqs, fnOf<LoaderFunction>(m.loader)),
+            ...(m.action ? { action: wrap(actionReqs, fnOf<ActionFunction>(m.action)) } : {}),
+          }
+        }
+      } else {
+        // 自己有 loader 或自己有標記，才加守衛
+        if (loader || own) next.loader = wrap(reqs, loader)
+        if (action) next.action = wrap(actionReqs, action)
+      }
+    }
+    if (route.children) next.children = withGuards(route.children, reqs)
+    return next as RouteObject
+  })
 }
 ```
 
@@ -168,7 +379,7 @@ export function guard(unit: UnitId, need: number, loader?: LoaderFunction): Load
 
 ```tsx
 // router.tsx
-const router = createBrowserRouter([
+export const router = createBrowserRouter(withGuards([
   {
     id: 'root',
     path: '/',
@@ -177,24 +388,32 @@ const router = createBrowserRouter([
     errorElement: <RouteError />,
     children: [
       {
-        path: 'orders',
-        loader: guard(Unit.Orders, Perm.Read, ordersLoader),
-        element: <OrdersPage />,
+        // 沒有 path 的路由：只用來標記權限和顯示 403，版面不會被蓋掉
+        handle: { permission: { unit: Unit.Orders, need: Perm.Read } },
         errorElement: <RouteError />,
+        children: [
+          { path: 'orders', loader: ordersLoader, element: <OrdersPage /> },
+          {
+            path: 'orders/:id',
+            handle: { actionPermission: { unit: Unit.Orders, need: Perm.Update } },
+            loader: orderLoader,
+            action: saveOrder, // 要有 Update 才會執行
+            element: <OrderPage />,
+          },
+        ],
       },
       {
-        path: 'orders/new',
-        loader: guard(Unit.Orders, Perm.Create),
-        element: <NewOrderPage />,
+        handle: { permission: { unit: Unit.Reports, need: Perm.Read } },
         errorElement: <RouteError />,
+        children: [{ path: 'reports', lazy: () => import('./pages/reports') }],
       },
       { path: 'login', element: <LoginPage /> },
     ],
   },
-])
+]))
 ```
 
-403 由 `errorElement` 顯示：
+403 由 `errorElement` 顯示，權限從 root 路由的 loader 取得：
 
 ```tsx
 // RouteError.tsx
@@ -207,122 +426,36 @@ export function RouteError() {
   }
   return <h1>發生錯誤</h1>
 }
-```
 
-每個子路由都放 `errorElement`，403 就會顯示在 `<Layout>` 裡面，導覽列還在，使用者可以點去別的頁面。
-
-實測結果（使用者的權限是訂單 5、會員 1）：
-
-| 情境 | 結果 |
-| --- | --- |
-| 進 `/orders`，有 Read | 進得去，`ordersLoader` 正常執行 |
-| 進 `/orders/new`，沒有 Create | 顯示 403 |
-| 進 `/reports`，API 沒給這個單元 | 顯示 403；**頁面元件渲染次數 0、資料 loader 沒有執行** |
-| 權限 API 回 401，進 `/orders?page=2` | 導到 `/login?redirect=%2Forders%3Fpage%3D2` |
-
-「頁面元件渲染次數 0」是 loader 守衛最大的好處：沒有權限的頁面一次都不會出現，不會閃一下再跳走，也不會先打出它的資料請求。
-
-### 一定要注意：守衛要放在每個路由上
-
-直覺上會想把守衛放在父路由，一次保護底下所有頁面。在 data router 裡**這樣擋不住**。
-
-![進入 /admin/logs 時，兩個 loader 同時開始。父路由 /admin 的 guard 查權限，沒有，丟出 403。子路由 logs 沒有守衛，照樣呼叫日誌 API，抓回資料。畫面上看到的是 403，但子路由的請求已經送出去了。React Router 會同時執行這次網址對到的所有 loader，父路由丟錯不會讓子路由的 loader 停下來。守衛要包在每一個需要保護的路由自己的 loader 上。](../../assets/articles/react-router-v6-permission-guard/parallel.svg)
-
-React Router 官方文件寫明，換頁時「下一組對到的路由，它們的 loader 會**同時（in parallel）**被呼叫」。實測守衛只放在父路由 `/admin`、子路由 `logs` 的 loader 沒包守衛：畫面確實顯示 403，但子路由的 loader 已經執行了。
-
-<div class="callout" role="note">
-  <p class="callout-label"><span aria-hidden="true">⚠</span> 重點</p>
-  <p><strong>每一個需要保護的路由，都要檢查權限</strong>。父路由的守衛只能決定畫面顯示 403，擋不住子路由抓資料。</p>
-</div>
-
-### 解法：權限標在路由上，自動繼承
-
-一個一個包 `guard()` 可行，但新增子頁面時很容易忘記。比較穩的做法是：**權限要求寫在路由設定上，讓程式自動套到所有子孫路由**。
-
-![withGuards 走過路由樹的結果。左邊是路由設定：admin 標記報表 Read；底下的 logs 沒有標記，有自己的 loader；settings 標記報表 Update；settings 底下的 index 沒有標記。右邊是每個 loader 實際檢查的：admin 檢查報表 Read；logs 檢查報表 Read，是繼承來的；settings 檢查報表 Read 加 Update；index 檢查報表 Read 加 Update，也是繼承來的。下方說明：每個 loader 自己檢查全部的要求，就算同時執行，子路由也不會偷跑。](../../assets/articles/react-router-v6-permission-guard/inherit.svg)
-
-先把 `guard()` 改成可以一次檢查多個要求，再寫一個函式走過整棵路由樹：
-
-```ts
-// with-guards.ts
-import { redirect, type LoaderFunction, type LoaderFunctionArgs, type RouteObject } from 'react-router-dom'
-import { can, type UnitId } from './permission'
-import { loadPermissions, UnauthorizedError } from './permission-store'
-
-export type Requirement = { unit: UnitId; need: number }
-
-function guardAll(reqs: Requirement[], loader?: LoaderFunction): LoaderFunction {
-  return async (args: LoaderFunctionArgs) => {
-    let perms
-    try {
-      perms = await loadPermissions()
-    } catch (e) {
-      if (e instanceof UnauthorizedError) {
-        const url = new URL(args.request.url)
-        throw redirect(`/login?redirect=${encodeURIComponent(url.pathname + url.search)}`)
-      }
-      throw e
-    }
-    if (!reqs.every((r) => can(perms, r.unit, r.need))) {
-      throw new Response('Forbidden', { status: 403 })
-    }
-    return loader ? loader(args) : null
-  }
-}
-
-export function withGuards(routes: RouteObject[], inherited: Requirement[] = []): RouteObject[] {
-  return routes.map((route) => {
-    const own = route.handle?.permission as Requirement | undefined
-    const reqs = own ? [...inherited, own] : inherited
-    const loader = typeof route.loader === 'function' ? route.loader : undefined
-    return {
-      ...route,
-      // 有任何權限要求（自己的或祖先的），loader 就換成「先檢查、再執行原本的」
-      ...(reqs.length > 0 ? { loader: guardAll(reqs, loader) } : {}),
-      ...(route.children ? { children: withGuards(route.children, reqs) } : {}),
-    } as RouteObject
-  })
+// 給 <Can> 用
+import { useRouteLoaderData } from 'react-router-dom'
+export function usePermissions(): Permissions {
+  return useRouteLoaderData('root') as Permissions
 }
 ```
 
-路由設定只要在 `handle.permission` 標記，建立 router 前交給 `withGuards()`：
-
-```tsx
-const router = createBrowserRouter(withGuards([
-  {
-    path: 'admin',
-    handle: { permission: { unit: Unit.Reports, need: Perm.Read } },
-    element: <AdminLayout />,
-    errorElement: <RouteError />,
-    children: [
-      { path: 'logs', loader: logsLoader, element: <LogsPage /> }, // 自動繼承 Read
-      {
-        path: 'settings',
-        handle: { permission: { unit: Unit.Reports, need: Perm.Update } },
-        children: [
-          { index: true, loader: settingsLoader, element: <SettingsPage /> }, // Read + Update
-        ],
-      },
-    ],
-  },
-]))
-```
-
-實測結果：
+把上面這份路由設定原樣搬去測（使用者的訂單權限是 5 或 1，沒有報表權限）：
 
 | 情境 | 結果 |
 | --- | --- |
-| 沒有報表權限，進 `/admin/logs` | 403，**子路由 loader 沒執行** |
-| 有 Read，進 `/admin/logs` | 進得去 |
-| 有 Read 沒 Update，進 `/admin/settings` | 403，孫路由的要求疊加上去，loader 沒執行 |
-| 有 Read + Update，進 `/admin/settings` | 進得去；三層都檢查，權限 API 仍只呼叫一次 |
-| 沒有標記權限的路由 | 不受影響 |
-| 權限 API 回 401 | 導到登入頁，loader 沒執行 |
+| 訂單 5，進 `/orders` | 進得去，選單只出現「訂單管理」 |
+| 進 `/reports` | 403 顯示在版面內，選單還在；**lazy 的 loader 沒執行** |
+| 訂單 1（只有 Read），在 `/orders/7` 送出表單 | 403，`saveOrder` 沒執行 |
+| 訂單 5（Read + Update），在 `/orders/7` 送出表單 | `saveOrder` 執行 |
+| 權限 API 回 401 | 導到登入頁，資料 loader 沒執行 |
 
-這樣做還有兩個好處：
+### `withGuards()` 為什麼寫成這樣
 
-- **權限寫在路由設定裡**，一眼就看得出哪一區需要什麼權限，不用逐個翻 loader。
-- 後面「元件顯示的守衛」提到的選單，也可以改成讀同一份 `handle.permission` 產生，路由和選單的條件就不會不一致。
+第一版的 `withGuards()` 只做一件事：把守衛 loader 加到每個子孫路由。實測後發現四個副作用，上面的版本是修正過的：
+
+| 第一版的問題 | 實測看到什麼 | 修正 |
+| --- | --- | --- |
+| lazy 路由的 loader 被吃掉 | 路由先有了靜態 loader，`lazy()` 回傳的 loader 被忽略，console 出現警告，頁面資料沒載入 | lazy 路由不加靜態 loader，改成包住 `lazy()` 載入回來的結果 |
+| action 沒有守衛 | 完全沒權限的人送出表單，action 照樣執行 | action 也包上守衛，並支援 `handle.actionPermission` |
+| 403 蓋掉整個版面 | 權限標在有版面的路由上，403 取代整個版面，側欄消失 | 權限標在版面底下「沒有 path 的路由」，403 顯示在版面內 |
+| 換頁多一段 loading | 原本沒有 loader 的頁面，`navigation.state` 會先變 `loading`，全域載入條閃一下 | 只在自己有 loader 或自己有標記的路由加守衛 |
+
+修不掉的有一個：自己有標記、卻沒有 loader 的路由，進入時還是會經過一次 `loading`，因為守衛本身就是 loader。權限已經載入過的話，只是一瞬間。
 
 ### 升級到 v7：middleware
 
@@ -333,69 +466,21 @@ React Router v7 加了 `middleware`，正是為了這個問題。官方文件說
 {
   path: 'admin',
   middleware: [requirePermission(Unit.Reports, Perm.Read)], // 丟出 403 或 redirect 就停下
-  children: [
-    { path: 'logs', loader: logsLoader, Component: LogsPage },
-  ],
+  children: [{ path: 'logs', loader: logsLoader, Component: LogsPage }],
 }
 ```
 
-我在 React Router 7.18.5 的 data router 上測過：父路由的 middleware 丟出 403，子路由的 loader 就不會執行，不開 `v8_middleware` 旗標也一樣。
+我在 React Router 7.18.5 的 data router 上測過：父路由的 middleware 丟出 403，子路由的 loader 就不會執行，不開 `v8_middleware` 旗標也一樣。將來升級時，把 `handle.permission` 換成 `middleware` 即可。
 
-v6 沒有 middleware，就用上面的 `withGuards()`。它不改變 React Router 的任何行為，只是在建立路由前多處理一次設定，將來升級 v7 時，把 `handle.permission` 換成 `middleware` 即可。
+## 元件顯示的守衛
 
-### 還在用 `<BrowserRouter>`：元件包住 `<Outlet />`
-
-沒有 loader 的專案，守衛只能放在渲染階段：
-
-```tsx
-// RequirePermission.tsx
-export function RequirePermission({ unit, need }: { unit: UnitId; need: number }) {
-  const state = usePermissionState() // 由 PermissionProvider 載入權限
-  const location = useLocation()
-
-  if (state.status === 'loading') return <p>載入中…</p>
-  if (state.status === 'unauthorized') {
-    const back = encodeURIComponent(location.pathname + location.search)
-    return <Navigate to={`/login?redirect=${back}`} replace />
-  }
-  if (!can(state.perms, unit, need)) return <h1>沒有權限檢視這個頁面</h1>
-  return <Outlet />
-}
-
-// 用法
-<Routes>
-  <Route element={<RequirePermission unit={Unit.Orders} need={Perm.Read} />}>
-    <Route path="/orders" element={<OrdersPage />} />
-  </Route>
-</Routes>
-```
-
-`PermissionProvider` 在 `useEffect` 裡呼叫同一個 `loadPermissions()`，把結果放進 Context。實測先顯示「載入中…」，權限回來後才顯示頁面或 403。
-
-兩種寫法的差別：
-
-| 項目 | loader 守衛（data router） | 元件守衛（`<BrowserRouter>`） |
-| --- | --- | --- |
-| 什麼時候判斷 | 渲染前 | 渲染時 |
-| 沒權限的頁面 | 完全不渲染 | 守衛擋住，`<Outlet />` 不渲染 |
-| 載入中的畫面 | 停在上一頁，等判斷完才換頁 | 會先出現「載入中」 |
-| 放在父層能不能保護子頁面 | **不能**，loader 同時執行 | 可以，子頁面要等守衛放行才渲染 |
-
-元件守衛放在父層反而是可以的，因為子頁面的元件要等 `<Outlet />` 渲染才會出現。這跟 loader 的行為剛好相反，從一種寫法換到另一種時要特別留意。
-
-## ② 元件顯示的守衛
-
-頁面裡的按鈕、欄位、選單，用同一份權限判斷要不要顯示。root 路由的 loader 已經回傳權限，任何頁面都能用 `useRouteLoaderData('root')` 拿到：
+兩種寫法都有 `usePermissions()`，只是來源不同（A 從 Context，B 從 root 路由的 loader）。`<Can>` 建立在它上面，所以**程式和用法完全一樣**：
 
 ```tsx
 // Can.tsx
 import type { ReactNode } from 'react'
-import { useRouteLoaderData } from 'react-router-dom'
-import { can, type Permissions, type UnitId } from './permission'
-
-export function usePermissions(): Permissions {
-  return useRouteLoaderData('root') as Permissions
-}
+import { can, type UnitId } from './permission'
+import { usePermissions } from './permission-react' // 寫法 B 改成自己的 usePermissions
 
 export function useCan(unit: UnitId, need: number): boolean {
   return can(usePermissions(), unit, need)
@@ -406,8 +491,6 @@ export function Can({ unit, need, children, fallback = null }: CanProps) {
   return useCan(unit, need) ? children : fallback
 }
 ```
-
-用法：
 
 ```tsx
 function OrdersPage() {
@@ -426,12 +509,12 @@ function OrdersPage() {
 }
 ```
 
-實測訂單權限 5（Read + Update）：「新增」沒有渲染、「編輯」有、「刪除」沒有，改顯示「無刪除權限」。
+實測訂單權限 5（Read + Update）：「新增」沒有渲染、「刪除」沒有渲染，改顯示「無刪除權限」。
 
 - **要包的是一段畫面，用 `<Can>`**；要拿布林值傳給其他元件（例如表格可不可以編輯），用 `useCan()`。
 - 沒權限時通常**直接不顯示**，不要只是把按鈕設成 disabled：disabled 的按鈕還是看得到，使用者會一直想點，卻不知道為什麼不能用。如果要讓使用者知道功能存在，用 `fallback` 寫明原因。
 
-選單也用同一個判斷，跟路由的守衛條件保持一致：
+選單也用同一個判斷：
 
 ```tsx
 const NAV = [
@@ -449,15 +532,21 @@ function Nav() {
 
 ## 登入、登出時要做的事
 
-權限存在 `pending` 裡，換人登入時不清掉，就會沿用上一個人的權限：
+換人登入時，舊的權限留在兩個地方：`loadPermissions()` 的快取，以及畫面手上那一份（寫法 A 的 Context、寫法 B 的 root loader 資料）。**只清快取不夠**。實測清掉快取後直接換頁，兩種寫法的 `<Can>` 都還在用上一個人的權限，原本看得到的「刪除」照樣顯示。
+
+最簡單、兩種寫法都適用的做法，是登入和登出後**讓瀏覽器重新載入頁面**，記憶體裡上一個人的資料也會一併清掉：
 
 ```ts
 async function logout() {
   await fetch('/api/logout', { method: 'POST', credentials: 'include' })
-  resetPermissions()
-  router.navigate('/login')
+  window.location.assign('/login') // 重新載入，快取和畫面上的權限都會重來
 }
+
+// 登入成功後
+window.location.assign(safeRedirect(new URLSearchParams(location.search).get('redirect')))
 ```
+
+不想重新載入的話，寫法 B 可以呼叫 `resetPermissions()` 之後再 `router.revalidate()`，實測 root loader 會重跑，`<Can>` 跟著更新。寫法 A 則要讓 `PermissionProvider` 提供重新載入的方法，這次沒有實作。
 
 登入成功後，依網址上的 `redirect` 跳回原本的頁面。這個值來自網址，任何人都能改，**只能接受站內路徑**：
 
@@ -478,32 +567,33 @@ export function safeRedirect(to: string | null, fallback = '/') {
   <p><strong>前端的守衛只決定畫面顯示什麼</strong>。使用者打開開發者工具、改掉 JavaScript，或直接呼叫 API，都能繞過。每一支 API 都必須用伺服器上的權限資料自己檢查，前端守衛是為了使用體驗，不是為了安全。</p>
 </div>
 
-另外，權限在使用期間可能被管理者調整，前端拿到的那份就過時了。API 回 403 時，可以呼叫 `resetPermissions()` 再用 `router.revalidate()` 重新載入，讓畫面跟著更新。這段這次沒有實測。
+另外，權限在使用期間可能被管理者調整，前端拿到的那份就過時了。API 回 403 時，可以用上一節的方式重新載入權限，讓畫面跟著更新。
 
 更多前端資安主題，請看[資安專題](/any/security/)。
 
 ## 這次實測了什麼
 
-在 React Router 6.30.6、React 19.3.1、Vitest 3.2.7（jsdom）上，共 15 個測試：
+在 React Router 6.30.6、React 19.3.1、Vitest 3.2.7（jsdom）上，共 42 個測試：
 
-- `can()` 的各種位元組合
-- loader 守衛：有權限、沒權限（403 且頁面不渲染、資料 loader 不執行）、401 導向登入並帶回原網址
+- `can()` 的各種位元組合、`safeRedirect()` 擋掉外部網址
 - 換頁多次，權限 API 只呼叫一次
-- 守衛只放父路由時，子路由 loader 照樣執行
-- `withGuards()`：要求自動繼承、孫路由疊加、沒標記的路由不受影響、401 導向登入
+- 寫法 A：載入中、403、子路由要求疊加、401 導向登入、子頁面沒渲染也沒抓資料
+- 寫法 B：文中的路由設定原樣測試，包含 lazy、action、版面保留、選單、401
+- 寫法 B 的坑：守衛只放父路由時，子路由 loader 照樣執行
+- `withGuards()` 第一版的四個副作用，以及修正後的結果
 - `<Can>` 依權限顯示、隱藏、顯示替代內容
-- `<BrowserRouter>` 寫法：先顯示載入中，再顯示頁面或 403
-- `safeRedirect()` 擋掉外部網址
+- 哪些 hook 在非 data router 會丟錯
+- 換人登入後只清快取、不重新載入，兩種寫法都會沿用舊權限；寫法 B 用 `router.revalidate()` 可以更新
 
 沒有測的：
 
 - 真實瀏覽器（測試跑在 jsdom）
-- `router.revalidate()` 搭配權限更新
-- 路由懶載入（`lazy`）搭配守衛
+- 寫法 A 不重新載入頁面的權限更新
+- 寫法 A 搭配 `React.lazy` 與 `Suspense`
 - React Router v7 只測了 middleware 擋住子路由 loader 這一點；v7 的套件名稱和部分 API 有調整，升級時要對照官方文件
 
 ## 一句話複習
 
-`sum` 是四個位元，用 `(sum & need) === need` 判斷；權限只要一次，**頁面用 loader 守衛、元件用 `<Can>`**；loader 是同時執行的，用 `withGuards()` 讓子路由自動繼承權限要求；最後，API 一定要自己檢查權限。
+`sum` 是四個位元，用 `(sum & need) === need` 判斷；權限只載入一次，要求標在路由設定上。**`<BrowserRouter>` 用 `<Guard>` 包住 element，放父路由就夠；data router 包住 loader 和 action，每個子路由都要自己檢查**。按鈕用 `<Can>`。最後，API 一定要自己檢查權限。
 
-參考資料：[React Router v6：loader](https://reactrouter.com/v6/route/loader)、[React Router：Middleware](https://reactrouter.com/how-to/middleware)。
+參考資料：[React Router v6：Picking a Router](https://reactrouter.com/6.26.1/routers/picking-a-router)、[React Router v6：loader](https://reactrouter.com/v6/route/loader)、[React Router：Middleware](https://reactrouter.com/how-to/middleware)。
