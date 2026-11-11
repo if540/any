@@ -29,6 +29,7 @@ faq:
 
 這是上下兩篇的上篇：
 
+- **前導篇**：〈[React Router 三種模式：Declarative、Data、Framework 差在哪](/any/articles/react-router-modes/)〉。還分不清 `<BrowserRouter>` 和 `createBrowserRouter` 的差別，建議先讀。
 - **上篇（這篇）**：系統設計，以及 `<BrowserRouter>` 專案的參考實作。
 - **下篇**：〈[data router 的 loader 守衛與它的坑](/any/articles/react-router-v6-data-router-guard/)〉。用 `createBrowserRouter` 的專案，架構不變，只換最上面的套用層，但有幾個非知道不可的坑。
 
