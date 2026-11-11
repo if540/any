@@ -5,7 +5,7 @@ description: React Router 有 Declarative、Data、Framework 三種模式，差�
 pubDate: 2026-11-11
 tags: [React, React Router]
 series: security
-draft: true
+draft: false
 coverTitle: "React Router\n三種模式"
 coverMotif: stack
 tldr: "React Router 用哪一種模式，看最上層用的是哪個 API：BrowserRouter 是 Declarative，只管網址對應元件；createBrowserRouter 是 Data，多了 loader、action、載入狀態；Framework 再加上 Vite 外掛，提供伺服器渲染、程式碼分割與型別安全。功能一層包一層，越往外 React Router 做得越多、你能自己決定的越少，所以自由度最高的是 Declarative，不是 Framework。v6 有前兩種，Framework 要 v7 以上。v8 在 2026 年 6 月發布，v6 已停止維護。"
