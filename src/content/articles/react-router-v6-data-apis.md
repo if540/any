@@ -4,7 +4,7 @@ authors: [kerwin, claude]
 description: 用一個任務清單範例，依序學會 React Router v6 data router 的常用 API：建立路由、loader 讀資料、action 寫資料、載入狀態、useFetcher 與錯誤處理，每個行為都在 Chromium 實測。
 pubDate: 2026-11-11
 tags: [React, React Router]
-draft: true
+draft: false
 coverTitle: "React Router v6\n常用 API"
 coverMotif: code
 tldr: "data router 把讀和寫都交給路由：loader 在畫面出現前讀資料，元件用 useLoaderData 拿；Form 送出時 action 處理寫入，回傳資料給 useActionData，或用 redirect 換頁，寫完後畫面上所有 loader 自動重新執行。useNavigation 告訴你目前在送出還是載入；不想換頁的操作用 useFetcher。loader 或 action 丟出 Response，就由 errorElement 顯示。"
