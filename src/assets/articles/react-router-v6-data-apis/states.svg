@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 470" width="720" height="470" role="img" aria-labelledby="t">
+  <title id="t">三種操作時 navigation.state 與 fetcher.state 的變化</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="470" class="bg"/>
+  <text x="20" y="34" font-size="13" class="mut">時間 →</text>
+  <path d="M74 30H700" class="stroke" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <text x="20" y="74" font-size="15" font-weight="700" class="fg">點連結換頁</text>
+  <text x="20" y="94" font-size="12" class="mono mut">navigation.state</text>
+<rect x="200" y="58" width="120" height="34" class="card stroke" stroke-width="2"/>
+<text x="260" y="80" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+<rect x="320" y="58" width="220" height="34" class="o stroke" stroke-width="2"/>
+<text x="430" y="80" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">loading</text>
+<rect x="540" y="58" width="160" height="34" class="card stroke" stroke-width="2"/>
+<text x="620" y="80" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+  <text x="430" y="112" font-size="12" text-anchor="middle" class="mut">新頁面的 loader 執行中</text>
+
+  <text x="20" y="160" font-size="15" font-weight="700" class="fg">送出表單</text>
+  <text x="20" y="180" font-size="12" class="mono mut">navigation.state</text>
+<rect x="200" y="144" width="80" height="34" class="card stroke" stroke-width="2"/>
+<text x="240" y="166" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+<rect x="280" y="144" width="170" height="34" class="o stroke" stroke-width="2"/>
+<text x="365" y="166" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">submitting</text>
+<rect x="450" y="144" width="150" height="34" class="o stroke" stroke-width="2"/>
+<text x="525" y="166" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">loading</text>
+<rect x="600" y="144" width="100" height="34" class="card stroke" stroke-width="2"/>
+<text x="650" y="166" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+  <text x="365" y="198" font-size="12" text-anchor="middle" class="mut">action 執行中</text>
+  <text x="525" y="198" font-size="12" text-anchor="middle" class="mut">redirect 後的 loader</text>
+
+  <text x="20" y="246" font-size="15" font-weight="700" class="fg">useFetcher 送出</text>
+  <text x="20" y="266" font-size="12" class="mono mut">fetcher.state</text>
+<rect x="200" y="230" width="80" height="34" class="card stroke" stroke-width="2"/>
+<text x="240" y="252" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+<rect x="280" y="230" width="170" height="34" class="o stroke" stroke-width="2"/>
+<text x="365" y="252" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">submitting</text>
+<rect x="450" y="230" width="150" height="34" class="o stroke" stroke-width="2"/>
+<text x="525" y="252" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">loading</text>
+<rect x="600" y="230" width="100" height="34" class="card stroke" stroke-width="2"/>
+<text x="650" y="252" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+  <text x="20" y="306" font-size="12" class="mono mut">navigation.state</text>
+<rect x="200" y="290" width="500" height="34" class="card stroke" stroke-width="2"/>
+<text x="450" y="312" font-size="13" font-weight="700" text-anchor="middle" class="mono fg">idle</text>
+  <text x="450" y="344" font-size="12" text-anchor="middle" class="mut">頁面本身沒有換頁，navigation 一直是 idle</text>
+
+  <rect x="20" y="368" width="680" height="86" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="398" font-size="15" class="fg"><tspan font-weight="700">用狀態決定畫面</tspan></text>
+  <text x="40" y="422" font-size="14" class="mut"><tspan class="mono">submitting</tspan>：按鈕改成「儲存中…」並停用，避免重複送出</text>
+  <text x="40" y="444" font-size="14" class="mut"><tspan class="mono">loading</tspan>：顯示頁面頂端的載入條；fetcher 看自己的 state，不影響整頁</text>
+</svg>

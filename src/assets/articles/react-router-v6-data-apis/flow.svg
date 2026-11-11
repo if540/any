@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" role="img" aria-labelledby="t">
+  <title id="t">data router 的資料流：讀取走 loader，寫入走 action，寫完自動重新讀取</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="560" class="bg"/>
+  <rect x="20" y="20" width="96" height="30" class="tag"/><text x="68" y="41" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">讀取</text>
+  <text x="128" y="41" font-size="14" class="mut">點連結、navigate()、GET 表單</text>
+<rect x="20" y="66" width="200" height="86" class="card stroke" stroke-width="2.5"/>
+<text x="34" y="94" font-size="15" font-weight="700" class="fg">換頁</text>
+<text x="34" y="118" font-size="13" class="mono mut">&lt;Link&gt; navigate()</text>
+<text x="34" y="138" font-size="13" class="mut">網址改變</text>
+<path d="M222 109H252" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="267" y="73" width="200" height="86" class="o"/><rect x="260" y="66" width="200" height="86" class="card stroke" stroke-width="3"/>
+<text x="274" y="94" font-size="15" font-weight="700" class="fg">loader</text>
+<text x="274" y="118" font-size="13" class="mono mut">({ params, request })</text>
+<text x="274" y="138" font-size="13" class="mut">畫面出現前執行</text>
+<path d="M462 109H492" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="500" y="66" width="200" height="86" class="card stroke" stroke-width="2.5"/>
+<text x="514" y="94" font-size="15" font-weight="700" class="fg">元件</text>
+<text x="514" y="118" font-size="13" class="mono mut">useLoaderData()</text>
+<text x="514" y="138" font-size="13" class="mut">拿到資料直接渲染</text>
+  <rect x="20" y="196" width="96" height="30" class="tag"/><text x="68" y="217" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">寫入</text>
+  <text x="128" y="217" font-size="14" class="mut">送出 POST、PUT、DELETE 表單</text>
+<rect x="20" y="242" width="200" height="86" class="card stroke" stroke-width="2.5"/>
+<text x="34" y="270" font-size="15" font-weight="700" class="fg">送出表單</text>
+<text x="34" y="294" font-size="13" class="mono mut">&lt;Form method="post"&gt;</text>
+<path d="M222 285H252" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="267" y="249" width="200" height="86" class="o"/><rect x="260" y="242" width="200" height="86" class="card stroke" stroke-width="3"/>
+<text x="274" y="270" font-size="15" font-weight="700" class="fg">action</text>
+<text x="274" y="294" font-size="13" class="mono mut">request.formData()</text>
+<text x="274" y="314" font-size="13" class="mut">處理寫入</text>
+  <path d="M462 270h30" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M462 300h30" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="500" y="242" width="200" height="40" class="card stroke" stroke-width="2.5"/>
+  <text x="514" y="267" font-size="13" class="fg"><tspan font-weight="700">回傳資料</tspan> → useActionData()</text>
+  <rect x="500" y="288" width="200" height="40" class="card stroke" stroke-width="2.5"/>
+  <text x="514" y="313" font-size="13" class="fg"><tspan font-weight="700">redirect()</tspan> → 換到新頁</text>
+
+  <path d="M360 330v40" class="stroke" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="140" y="380" width="440" height="68" class="tag"/>
+  <text x="360" y="410" font-size="16" font-weight="700" text-anchor="middle" class="tagtext">畫面上所有 loader 自動重新執行</text>
+  <text x="360" y="434" font-size="13" text-anchor="middle" class="tagtext">寫完不用自己重抓清單，畫面自動是最新的</text>
+
+  <rect x="20" y="474" width="680" height="70" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="504" font-size="15" class="fg"><tspan font-weight="700">不想換頁</tspan>（例如勾選完成），用 <tspan class="mono">useFetcher()</tspan> 送出：</text>
+  <text x="40" y="528" font-size="14" class="mut">一樣會執行 action、一樣會重新讀取，只是網址不變</text>
+</svg>
