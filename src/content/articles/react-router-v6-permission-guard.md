@@ -5,7 +5,7 @@ description: 權限 API 回傳 id、unitName、sum，sum 用位元表示 Read 1�
 pubDate: 2026-11-11
 tags: [React, React Router, 資安]
 series: security
-draft: true
+draft: false
 coverTitle: "React Router v6\n權限守衛（上）"
 coverMotif: target
 tldr: "權限的 sum 是四個位元相加，判斷用 (sum & need) === need。權限 API 只呼叫一次、結果共用；頁面需要的權限標在路由設定上，由 withGuards 自動用 Guard 元件包住 element。子頁面要經過父層的 Outlet 才渲染，所以守衛放在父路由就能保護整區。按鈕用 Can 元件控制。換人登入時重新載入頁面，避免沿用舊權限。前端守衛只是使用體驗，API 一定要自己檢查權限。"

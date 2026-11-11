@@ -5,7 +5,7 @@ description: 用 createBrowserRouter 時，權限守衛放在 loader 能在渲�
 pubDate: 2026-11-11
 tags: [React, React Router, 資安]
 series: security
-draft: true
+draft: false
 coverTitle: "React Router v6\n權限守衛（下）"
 coverMotif: target
 tldr: "data router 的 loader 在渲染前執行，守衛放在這裡，沒權限的頁面完全不會出現。但同一次換頁對到的 loader 是同時執行的，守衛只放父路由時，子路由的資料照樣被抓。解法是把權限標在路由設定上，用 withGuards 讓每個路由帶著祖先的要求自己檢查；lazy 路由要包住載入回來的 loader，action 也要包，權限標在版面底下沒有 path 的路由才不會蓋掉版面。React Router v7 的 middleware 由父到子依序執行，可以直接解決。"
