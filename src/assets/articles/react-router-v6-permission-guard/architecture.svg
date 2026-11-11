@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 640" width="720" height="640" role="img" aria-labelledby="t">
+  <title id="t">權限守衛的五層架構：資料來源、權限服務、判斷核心、權限宣告、套用</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="640" class="bg"/>
+
+  <!-- 左側層名 -->
+  <text x="20" y="30" font-size="13" font-weight="700" class="mut">層</text>
+  <text x="170" y="30" font-size="13" font-weight="700" class="mut">模組與職責</text>
+
+  <!-- 套用 -->
+  <rect x="20" y="44" width="130" height="96" class="tag"/>
+  <text x="85" y="88" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">⑤ 套用</text>
+  <text x="85" y="110" font-size="12" text-anchor="middle" class="tagtext">依賴 React Router</text>
+  <rect x="170" y="44" width="170" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="184" y="70" font-size="15" font-weight="700" class="mono fg">&lt;Guard&gt;</text>
+  <text x="184" y="94" font-size="13" class="fg">進入頁面</text>
+  <text x="184" y="114" font-size="12" class="mut">放行、登入頁、403</text>
+  <rect x="350" y="44" width="170" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="364" y="70" font-size="15" font-weight="700" class="mono fg">&lt;Can&gt; useCan</text>
+  <text x="364" y="94" font-size="13" class="fg">按鈕、欄位</text>
+  <text x="364" y="114" font-size="12" class="mut">顯示或隱藏</text>
+  <rect x="530" y="44" width="170" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="544" y="70" font-size="15" font-weight="700" class="mono fg">&lt;Nav&gt;</text>
+  <text x="544" y="94" font-size="13" class="fg">選單</text>
+  <text x="544" y="114" font-size="12" class="mut">只列出進得去的頁面</text>
+  <text x="170" y="160" font-size="12" class="mut">換成 data router 時，只有這一層要改（見下篇）</text>
+
+  <path d="M435 166v22" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)" transform="rotate(180 435 177)"/>
+
+  <!-- 宣告 -->
+  <rect x="20" y="196" width="130" height="96" class="tag"/>
+  <text x="85" y="240" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">④ 宣告</text>
+  <text x="85" y="262" font-size="12" text-anchor="middle" class="tagtext">單一來源</text>
+  <rect x="170" y="196" width="530" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="184" y="222" font-size="15" font-weight="700" class="mono fg">access.ts</text>
+  <text x="300" y="222" font-size="13" class="fg">哪個功能需要哪個單元的哪種權限</text>
+  <text x="184" y="248" font-size="13" class="fg">路由設定的 <tspan class="mono">handle.permission</tspan>、選單、<tspan class="mono">&lt;Can&gt;</tspan> 都引用這裡</text>
+  <text x="184" y="272" font-size="12" class="mut">權限規則改一處，三種守衛一起生效</text>
+
+  <path d="M435 296v22" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)" transform="rotate(180 435 307)"/>
+
+  <!-- 判斷 -->
+  <rect x="20" y="326" width="130" height="96" class="tag"/>
+  <text x="85" y="370" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">③ 判斷核心</text>
+  <text x="85" y="392" font-size="12" text-anchor="middle" class="tagtext">純函式</text>
+  <rect x="178" y="334" width="530" height="96" class="o"/>
+  <rect x="170" y="326" width="530" height="96" class="card stroke" stroke-width="3"/>
+  <text x="184" y="352" font-size="15" font-weight="700" class="mono fg">permission.ts</text>
+  <text x="320" y="352" font-size="13" class="mono fg">can(perms, unit, need)</text>
+  <text x="184" y="378" font-size="13" class="fg">權限種類、單元代號、位元判斷</text>
+  <text x="184" y="402" font-size="12" class="ink" font-weight="700">不認識 React、不認識路由，最容易測試</text>
+
+  <path d="M435 426v22" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)" transform="rotate(180 435 437)"/>
+
+  <!-- 服務 -->
+  <rect x="20" y="456" width="130" height="96" class="tag"/>
+  <text x="85" y="500" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">② 權限服務</text>
+  <text x="85" y="522" font-size="12" text-anchor="middle" class="tagtext">狀態與快取</text>
+  <rect x="170" y="456" width="530" height="96" class="card stroke" stroke-width="2.5"/>
+  <text x="184" y="482" font-size="15" font-weight="700" class="mono fg">permission-store.ts</text>
+  <text x="370" y="482" font-size="13" class="mono fg">loadPermissions() reset()</text>
+  <text x="184" y="508" font-size="13" class="fg">只呼叫 API 一次、失敗不快取、區分 401 與其他錯誤</text>
+  <text x="184" y="532" font-size="12" class="mut">換人登入時作廢</text>
+
+  <path d="M435 556v22" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)" transform="rotate(180 435 567)"/>
+
+  <!-- 資料 -->
+  <rect x="20" y="586" width="130" height="40" class="tag"/>
+  <text x="85" y="612" font-size="15" font-weight="700" text-anchor="middle" class="tagtext">① 資料來源</text>
+  <rect x="170" y="586" width="530" height="40" class="card stroke" stroke-width="2.5"/>
+  <text x="184" y="611" font-size="13" class="fg">權限 API：<tspan class="mono">[{ id, unitName, sum }]</tspan>　真正的授權在這裡執行</text>
+</svg>

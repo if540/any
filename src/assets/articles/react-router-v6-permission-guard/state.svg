@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" width="720" height="440" role="img" aria-labelledby="t">
+  <title id="t">權限的四種狀態與轉換：載入中、已取得、未登入、載入失敗</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="440" class="bg"/>
+
+  <rect x="20" y="170" width="150" height="70" class="tag"/>
+  <text x="95" y="200" font-size="16" font-weight="700" text-anchor="middle" class="tagtext">載入中</text>
+  <text x="95" y="222" font-size="12" text-anchor="middle" class="mono tagtext">loading</text>
+
+  <!-- ok -->
+  <path d="M172 190C260 120 300 90 372 82" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="240" y="108" font-size="12" class="fg">200</text>
+  <rect x="388" y="52" width="200" height="70" class="o"/>
+  <rect x="380" y="44" width="200" height="70" class="card stroke" stroke-width="3"/>
+  <text x="480" y="74" font-size="16" font-weight="700" text-anchor="middle" class="fg">已取得</text>
+  <text x="480" y="96" font-size="12" text-anchor="middle" class="mono mut">ok + perms</text>
+
+  <!-- unauthorized -->
+  <path d="M172 205H372" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="270" y="196" font-size="12" text-anchor="middle" class="fg">401</text>
+  <rect x="380" y="170" width="200" height="70" class="card stroke" stroke-width="2.5"/>
+  <text x="480" y="200" font-size="16" font-weight="700" text-anchor="middle" class="fg">未登入</text>
+  <text x="480" y="222" font-size="12" text-anchor="middle" class="mono mut">unauthorized</text>
+
+  <!-- error -->
+  <path d="M172 222C260 290 300 320 372 328" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="268" y="332" font-size="12" class="fg">其他錯誤</text>
+  <rect x="380" y="296" width="200" height="70" class="card stroke" stroke-width="2.5"/>
+  <text x="480" y="326" font-size="16" font-weight="700" text-anchor="middle" class="fg">載入失敗</text>
+  <text x="480" y="348" font-size="12" text-anchor="middle" class="mono mut">error（不快取）</text>
+
+  <!-- 回到 loading -->
+  <path d="M582 79H640V30H95V166" class="stroke" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
+  <text x="368" y="24" font-size="12" text-anchor="middle" class="mut">換人登入：作廢快取、重新載入頁面</text>
+  <path d="M582 331H640V410H95V244" class="stroke" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
+  <text x="368" y="428" font-size="12" text-anchor="middle" class="mut">重試：失敗的結果沒有被快取</text>
+
+  <text x="600" y="210" font-size="12" class="mut">→ 導到登入頁</text>
+</svg>

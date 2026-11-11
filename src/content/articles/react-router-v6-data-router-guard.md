@@ -22,7 +22,7 @@ faq:
     answer: 清掉權限快取後呼叫 router.revalidate()，root 路由的 loader 會重新執行，Can 元件跟著更新。只清快取再換頁不夠，實測 Can 仍沿用上一個人的權限。也可以直接重新載入頁面。
 ---
 
-這是〈[React Router v6 權限守衛設計（上）](/any/articles/react-router-v6-permission-guard/)〉的下篇。上篇設計了共用的部分：位元判斷 `can()`、只呼叫一次的 `loadPermissions()`、把權限要求標在路由設定的 `handle.permission`，以及 `<Can>` 元件，並示範 `<BrowserRouter>` 專案怎麼守衛頁面。
+這是〈[React Router v6 權限守衛設計（上）](/any/articles/react-router-v6-permission-guard/)〉的下篇。上篇把權限守衛拆成五層：權限 API、只載入一次的權限服務 `loadPermissions()`、純函式 `can()`、權限宣告表 `access.ts`，以及最上層的 `<Guard>`、`<Can>`、選單，並示範 `<BrowserRouter>` 專案的實作。
 
 這篇講用 `createBrowserRouter` 的專案。頁面守衛可以放在 loader，在畫面渲染**之前**就擋下來，體驗更好；但 loader 的執行方式跟元件不同，照著上篇的直覺做，會踩到幾個坑。
 
