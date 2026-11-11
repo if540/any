@@ -5,7 +5,7 @@ description: React Router v6 已停止維護，6.30.6 仍有兩個未修補的�
 pubDate: 2026-11-11
 tags: [React, React Router, 資安]
 series: security
-draft: true
+draft: false
 coverTitle: "React Router\n6.30 → 7.18"
 coverMotif: chain
 tldr: "v6 開啟全部 future flags 後，升到 v7 幾乎沒有破壞性變更，實測 v6 程式升到 7.18.5 後 44 個測試全過。必改的是 Node 20、React 18 以上，以及套件改成 react-router。用到才要改的有：json 和 defer 在 v7 已移除、formMethod 變成大寫、splat 路由的相對連結解析方式改變、action 回傳 4xx 後不再重新讀取。這些大多可以先在 v6 開 flag 改好，最後一步才換版本。"
