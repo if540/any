@@ -43,10 +43,10 @@
   <!-- 頁面 -->
   <rect x="20" y="306" width="330" height="184" class="card stroke" stroke-width="2.5"/>
   <text x="36" y="334" font-size="16" font-weight="700" class="fg">① 進入頁面的守衛</text>
-  <text x="36" y="364" font-size="14" font-weight="700" class="fg">寫法 A：&lt;BrowserRouter&gt;</text>
+  <text x="36" y="364" font-size="14" font-weight="700" class="fg">&lt;BrowserRouter&gt;：上篇</text>
   <text x="36" y="386" font-size="13" class="fg">&lt;Guard&gt; 包住路由的 element</text>
   <path d="M36 402H334" class="stroke" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
-  <text x="36" y="428" font-size="14" font-weight="700" class="fg">寫法 B：data router</text>
+  <text x="36" y="428" font-size="14" font-weight="700" class="fg">data router：下篇</text>
   <text x="36" y="450" font-size="13" class="fg">守衛包住路由的 loader 和 action</text>
   <text x="36" y="474" font-size="13" font-weight="700" class="ink">沒登入 → 登入頁；沒權限 → 403</text>
 
