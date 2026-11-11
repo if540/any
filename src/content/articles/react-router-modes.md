@@ -8,7 +8,7 @@ series: security
 draft: true
 coverTitle: "React Router\n三種模式"
 coverMotif: stack
-tldr: "React Router 用哪一種模式，看最上層用的是哪個 API：BrowserRouter 是 Declarative，只管網址對應元件；createBrowserRouter 是 Data，多了 loader、action、載入狀態；Framework 再加上 Vite 外掛，提供伺服器渲染、程式碼分割與型別安全。功能一層包一層，越往外 React Router 做得越多。v6 有前兩種，Framework 要 v7 以上。v8 在 2026 年 6 月發布，v6 已停止維護。"
+tldr: "React Router 用哪一種模式，看最上層用的是哪個 API：BrowserRouter 是 Declarative，只管網址對應元件；createBrowserRouter 是 Data，多了 loader、action、載入狀態；Framework 再加上 Vite 外掛，提供伺服器渲染、程式碼分割與型別安全。功能一層包一層，越往外 React Router 做得越多、你能自己決定的越少，所以自由度最高的是 Declarative，不是 Framework。v6 有前兩種，Framework 要 v7 以上。v8 在 2026 年 6 月發布，v6 已停止維護。"
 faq:
   - question: 怎麼知道專案用的是哪一種模式？
     answer: 看最上層用哪個 API。BrowserRouter（或 HashRouter、MemoryRouter）包住 Routes 的是 Declarative；用 createBrowserRouter 建立、交給 RouterProvider 的是 Data；有 @react-router/dev 的 Vite 外掛和 app/routes.ts 的是 Framework。
@@ -58,6 +58,29 @@ React Router 的文件現在會在每一頁標註「這個功能適用哪種模�
 ![三種模式是一層包一層。最內層是 Declarative，用 BrowserRouter 和 Routes：網址對應元件、巢狀路由與 Outlet；Link、NavLink、useNavigate、useParams、useSearchParams；資料怎麼抓、載入中怎麼顯示，全部自己處理，例如用 useEffect、React Query、SWR。中間是 Data，用 createBrowserRouter 和 RouterProvider：加上 loader、action、Form、useFetcher、useNavigation、errorElement，路由定義搬到 React 元件樹外面。最外層是 Framework，用 Vite 外掛、routes.ts 和路由模組：加上伺服器渲染、靜態產生、自動程式碼分割、型別安全的參數與 href()。下方說明：功能是疊加的，往外一層，React Router 幫你做的事越多，你能自己決定的事越少。](../../assets/articles/react-router-modes/modes.svg)
 
 官方文件的說法是：三種模式的功能是**疊加**的，從 Declarative 到 Data 再到 Framework，每往外一層就多一些功能，代價是交出更多架構上的控制權。所以選模式的問題不是「要不要伺服器渲染」，而是「想自己做多少事」。
+
+### 容易誤會：Framework 不是自由度最高
+
+「Framework」聽起來像「可以拿來打造框架的工具」，很容易以為它最能自訂。其實剛好相反：它的意思是 **React Router 本身變成一個框架**，跟 Next.js 是同一類東西。
+
+函式庫和框架的差別，在於誰呼叫誰：
+
+- **函式庫**：你寫主程式，需要時呼叫它。Declarative 模式就是這樣，React Router 只是 App 裡的一個元件。
+- **框架**：框架寫好主流程，你照它的規定把程式放進指定位置，由它來呼叫你。Framework 模式的路由要寫在 `app/routes.ts`、每個路由一個檔案、匯出名稱固定的 `loader` 和 `default`、打包一定用 Vite，什麼時候執行你的 loader 也由它決定。
+
+用「誰決定」來看三種模式：
+
+| 誰決定 | Declarative | Data | Framework |
+| --- | --- | --- | --- |
+| 資料怎麼抓、什麼時候抓 | 你 | React Router（loader） | React Router |
+| 路由寫在哪、怎麼寫 | 你 | 你（物件陣列，放哪都行） | React Router（`routes.ts`、檔案慣例） |
+| 打包工具 | 你 | 你 | React Router（只能 Vite） |
+| 程式碼怎麼分割 | 你 | 你（用 `lazy`） | React Router（自動） |
+| 伺服器渲染怎麼做 | 你 | 你 | React Router（內建） |
+
+Framework 模式也不是完全不能調整：在它的慣例裡，還是能選伺服器渲染或單頁應用、自訂伺服器、換部署平台的轉接器、調整 Vite 設定。只是這些自訂都在框架畫好的範圍內，不是從頭自己設計。
+
+**自由度：Declarative 最高，Framework 最低；現成功能則剛好反過來。**
 
 ## Declarative：只管網址對應元件
 
