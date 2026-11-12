@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" width="720" height="420" role="img" aria-labelledby="t">
+  <title id="t">五層架構各自適合的測試方式：只有行為層用 BDD</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="420" class="bg"/>
+  <text x="20" y="32" font-size="13" font-weight="700" class="mut">架構的層</text>
+  <text x="300" y="32" font-size="13" font-weight="700" class="mut">適合的測試</text>
+
+  <rect x="20" y="46" width="260" height="76" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="76" font-size="15" font-weight="700" class="fg">⑤ 套用</text>
+  <text x="36" y="100" font-size="13" class="mut">頁面、按鈕、選單的行為</text>
+  <rect x="308" y="54" width="392" height="76" class="o"/>
+  <rect x="300" y="46" width="392" height="76" class="card stroke" stroke-width="3"/>
+  <text x="316" y="76" font-size="15" font-weight="700" class="fg">BDD 規格檔</text>
+  <text x="316" y="100" font-size="13" class="fg">這一層就是需求本身，值得讓非工程師看得懂</text>
+
+  <rect x="20" y="134" width="260" height="60" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="160" font-size="15" font-weight="700" class="fg">④ 權限宣告</text>
+  <text x="36" y="182" font-size="13" class="mut">access.ts</text>
+  <rect x="300" y="134" width="400" height="60" class="card stroke" stroke-width="2.5"/>
+  <text x="316" y="160" font-size="14" class="fg">不用另外測</text>
+  <text x="316" y="182" font-size="13" class="mut">它的對錯，就是 ⑤ 的規格在驗證的東西</text>
+
+  <rect x="20" y="206" width="260" height="60" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="232" font-size="15" font-weight="700" class="fg">③ 判斷核心</text>
+  <text x="36" y="254" font-size="13" class="mono mut">can()</text>
+  <rect x="300" y="206" width="400" height="60" class="card stroke" stroke-width="2.5"/>
+  <text x="316" y="232" font-size="14" class="fg">一般單元測試</text>
+  <text x="316" y="254" font-size="13" class="mut">純函式，位元組合用表格式測試最快</text>
+
+  <rect x="20" y="278" width="260" height="60" class="card stroke" stroke-width="2.5"/>
+  <text x="36" y="304" font-size="15" font-weight="700" class="fg">② 權限服務</text>
+  <text x="36" y="326" font-size="13" class="mono mut">loadPermissions()</text>
+  <rect x="300" y="278" width="400" height="60" class="card stroke" stroke-width="2.5"/>
+  <text x="316" y="304" font-size="14" class="fg">一般單元測試</text>
+  <text x="316" y="326" font-size="13" class="mut">快取、失敗重試是技術細節，業務人員不關心</text>
+
+  <rect x="20" y="350" width="260" height="54" class="tag"/>
+  <text x="36" y="374" font-size="15" font-weight="700" class="tagtext">① 權限 API</text>
+  <text x="36" y="394" font-size="12" class="tagtext">真正的授權</text>
+  <rect x="300" y="350" width="400" height="54" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="316" y="374" font-size="14" class="fg">後端自己的測試，或端對端測試</text>
+  <text x="316" y="394" font-size="13" class="mut">前端的 BDD 用的是假 API，驗證不到這一層</text>
+</svg>
