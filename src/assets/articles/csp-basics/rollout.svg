@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" role="img" aria-labelledby="t">
+  <title id="t">導入 CSP 的四個步驟：先只回報，修完再強制，並用瀏覽器測試把關</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fg"/></marker></defs>
+  <style>
+    .bg{fill:#fafaf7}.fg{fill:#111111}.stroke{stroke:#111111}.card{fill:#ffffff}
+    .ink{fill:#b8430a}.mut{fill:#5e5e5e}
+    .o{fill:#ff6b1a}.tag{fill:#111111}.tagtext{fill:#fafaf7}
+    text{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+    .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#111111}.fg{fill:#fafaf7}.stroke{stroke:#fafaf7}.card{fill:#1b1b1b}
+      .ink{fill:#ff6b1a}.mut{fill:#a8a8a8}
+      .tag{fill:#fafaf7}.tagtext{fill:#111111}
+    }
+  </style>
+  <rect width="720" height="400" class="bg"/>
+<rect x="20" y="20" width="160" height="200" class="card stroke" stroke-width="2.5"/>
+  <circle cx="44" cy="48" r="14" class="tag"/><text x="44" y="53" font-size="14" font-weight="700" text-anchor="middle" class="tagtext">1</text>
+  <text x="66" y="54" font-size="15" font-weight="700" class="fg">只回報</text>
+  <text x="34" y="92" font-size="13" class="fg">Report-Only 標頭</text>
+  <text x="34" y="114" font-size="13" class="fg">不擋，只記錄</text>
+<rect x="196" y="20" width="160" height="200" class="card stroke" stroke-width="2.5"/>
+  <circle cx="220" cy="48" r="14" class="tag"/><text x="220" y="53" font-size="14" font-weight="700" text-anchor="middle" class="tagtext">2</text>
+  <text x="242" y="54" font-size="15" font-weight="700" class="fg">收集</text>
+  <text x="210" y="92" font-size="13" class="fg">跑過所有頁面</text>
+  <text x="210" y="114" font-size="13" class="fg">看違規報告</text>
+<rect x="372" y="20" width="160" height="200" class="card stroke" stroke-width="2.5"/>
+  <circle cx="396" cy="48" r="14" class="tag"/><text x="396" y="53" font-size="14" font-weight="700" text-anchor="middle" class="tagtext">3</text>
+  <text x="418" y="54" font-size="15" font-weight="700" class="fg">修正</text>
+  <text x="386" y="92" font-size="13" class="fg">加 nonce、移除</text>
+  <text x="386" y="114" font-size="13" class="fg">行內事件和 style</text>
+<rect x="555" y="27" width="160" height="200" class="o"/><rect x="548" y="20" width="160" height="200" class="card stroke" stroke-width="3"/>
+  <circle cx="572" cy="48" r="14" class="tag"/><text x="572" y="53" font-size="14" font-weight="700" text-anchor="middle" class="tagtext">4</text>
+  <text x="594" y="54" font-size="15" font-weight="700" class="fg">強制</text>
+  <text x="562" y="92" font-size="13" class="fg">換成正式的</text>
+  <text x="562" y="114" font-size="13" class="fg">CSP 標頭</text>
+  <text x="34" y="160" font-size="12" class="mut">ZAP 仍會報</text>
+  <text x="34" y="180" font-size="12" class="mut">「沒有 CSP」</text>
+  <text x="210" y="160" font-size="12" class="mut">Playwright 走過</text>
+  <text x="210" y="180" font-size="12" class="mut">主要流程</text>
+  <text x="386" y="160" font-size="12" class="mut">回到第 2 步，</text>
+  <text x="386" y="180" font-size="12" class="mut">直到沒有違規</text>
+  <text x="562" y="160" font-size="12" class="mut">弱掃這時才會</text>
+  <text x="562" y="180" font-size="12" class="mut">變乾淨</text>
+  <path d="M182 120h12" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/><path d="M358 120h12" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/><path d="M534 120h12" class="stroke" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+  <rect x="20" y="248" width="680" height="136" class="card stroke" stroke-width="2.5" stroke-dasharray="8 5"/>
+  <text x="40" y="280" font-size="15" font-weight="700" class="fg">弱掃通過，不代表網站沒被 CSP 弄壞</text>
+  <text x="40" y="308" font-size="14" class="fg">ZAP 只讀回應標頭，不執行頁面。實測一個被 CSP 擋掉所有程式、按鈕點不動的頁面，</text>
+  <text x="40" y="330" font-size="14" class="fg">ZAP 的結果跟正常的頁面一模一樣</text>
+  <text x="40" y="360" font-size="14" font-weight="700" class="ink">每次交付前，用 Playwright 走過主要流程，有 CSP 違規就讓測試失敗</text>
+</svg>
