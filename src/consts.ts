@@ -46,6 +46,7 @@ export const NAV = [
   { href: '/articles/', label: '文章' },
   { href: '/journal/', label: '日誌' },
   { href: '/security/', label: '資安' },
+  { href: '/claude-skills/', label: 'Claude Skills' },
   { href: '/skills/', label: '技能樹' },
   { href: '/about/', label: '關於' },
 ];
@@ -57,6 +58,11 @@ export const SERIES = {
     title: '資安',
     href: '/security/',
     description: '從前端工程師的角度看資訊安全：token、cookie、連結與瀏覽器的防護機制，每個說法都用實驗驗證。',
+  },
+  'claude-skills': {
+    title: 'Claude Skills',
+    href: '/claude-skills/',
+    description: '寫好 Claude 的 skill（SKILL.md）：載入機制、frontmatter 欄位、會正確觸發的 description、附加檔案、fork 與可直接改用的範例。',
   },
 } as const;
 

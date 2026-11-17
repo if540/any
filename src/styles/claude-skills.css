@@ -1,0 +1,207 @@
+/* ===== Claude Skills 專題：Skills 撰寫指南（SPA） =====
+   沿用全站語彙：3px 黑框、橘色偏移陰影、等寬字標籤。程式碼區塊固定深底。 */
+
+.cs { --cs-code-bg: #111111; --cs-code-fg: #f2f2ee; --cs-code-dim: #9a9a95; --cs-code-key: #ffb27f; --cs-code-str: #ffd9a8; }
+.cs code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface); padding: 0.05em 0.35em; border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent); overflow-wrap: anywhere; }
+.cs .accent { color: var(--orange); }
+.cs h2 { margin: 0; font-size: clamp(1.5rem, 3.5vw, 2rem); }
+.cs h3 { margin: 2rem 0 0.75rem; }
+.cs p { margin: 0 0 1em; }
+
+/* ---- Hero ---- */
+.cs-hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: center;
+}
+.cs-eyebrow { margin: 0 0 0.5rem; font: 700 0.8rem var(--font-mono); letter-spacing: 0.14em; color: var(--link); }
+.cs-hero h1 { margin: 0 0 1rem; font-size: clamp(2.4rem, 7vw, 4rem); line-height: 1.1; }
+.cs-lead { font-size: 1.1rem; font-weight: 500; }
+.cs-lead code { font-size: 0.85em; }
+
+.cs-anatomy {
+  margin: 0; background: var(--cs-code-bg); color: var(--cs-code-fg);
+  border: 3px solid var(--line); box-shadow: 8px 8px 0 var(--orange);
+  font: 0.82rem/1.7 var(--font-mono); min-width: 0;
+}
+.cs-anatomy-bar { padding: 0.5rem 1rem; border-bottom: 1px solid #333; color: var(--cs-code-dim); font-size: 0.75rem; overflow-wrap: anywhere; }
+.cs-zone { padding: 0.75rem 1rem; border-left: 6px solid transparent; }
+.cs-zone + .cs-zone { border-top: 1px dashed #3a3a3a; }
+.cs-z1 { border-left-color: var(--orange); }
+.cs-z2 { border-left-color: #fafaf7; }
+.cs-z3 { border-left-color: #7a7a76; }
+.cs-zone-tag { display: inline-block; margin: 0 0 0.35rem !important; padding: 0 0.5rem; font: 700 0.72rem var(--font-sans); background: #fafaf7; color: #111; }
+.cs-z1 .cs-zone-tag { background: var(--orange); }
+.cs-anatomy pre { margin: 0; overflow-x: auto; white-space: pre; }
+.cs-anatomy .k { color: var(--cs-code-key); }
+.cs-anatomy .s { color: var(--cs-code-str); }
+.cs-anatomy .c { color: var(--cs-code-dim); }
+
+/* ---- Layout：左側章節、右側內容 ---- */
+.cs-layout { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: clamp(2.5rem, 6vw, 4rem); scroll-margin-top: 1rem; }
+.cs-nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; position: sticky; top: 1rem; }
+.cs-nav a {
+  display: flex; gap: 0.6rem; align-items: baseline; padding: 0.45rem 0.7rem;
+  color: var(--fg); text-decoration: none; font-weight: 700; font-size: 0.95rem; border: 2px solid transparent;
+}
+.cs-nav .num { font: 700 0.75rem var(--font-mono); color: var(--muted); }
+.cs-nav a:hover { border-color: var(--line); }
+.cs-nav a[aria-current='page'] { background: var(--orange); color: var(--black); border-color: var(--line); box-shadow: 4px 4px 0 var(--line); }
+.cs-nav a[aria-current='page'] .num { color: var(--black); }
+
+.cs-views { min-width: 0; }
+.cs-view { min-width: 0; }
+.cs-view > * { min-width: 0; }
+/* 沒有 JavaScript：章節依序排列 */
+.cs-view + .cs-view { margin-top: 4rem; padding-top: 2.5rem; border-top: 3px solid var(--line); }
+.cs.is-spa .cs-view + .cs-view { margin-top: 0; padding-top: 0; border-top: 0; }
+.cs-view[hidden] { display: none; }
+.cs-kicker { margin: 0 0 0.35rem !important; font: 700 0.8rem var(--font-mono); letter-spacing: 0.1em; color: var(--link); }
+.cs-view h2 { border-bottom: 3px solid var(--line); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.cs-view h2:focus { outline: none; }
+.cs-view h2:focus-visible { outline: none; } /* 程式移入的焦點，用 role=status 念出章節名稱 */
+.cs-intro { color: var(--muted); max-width: var(--measure); }
+
+/* ---- 三層載入 ---- */
+.cs-layers { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
+.cs-layers li {
+  display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) auto; gap: 1rem; align-items: center;
+  padding: 0.9rem 1.1rem; border: 3px solid var(--line); background: var(--surface);
+}
+.cs-layers li:first-child { box-shadow: 6px 6px 0 var(--orange); }
+.cs-layers h3 { margin: 0; font-size: 1.05rem; }
+.cs-layers p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.cs-when { font: 700 0.8rem var(--font-mono); }
+.cs-cost { font: 700 0.78rem var(--font-mono); padding: 0.15rem 0.55rem; border: 2px solid var(--line); white-space: nowrap; }
+.cs-layers li:first-child .cs-cost { background: var(--orange); color: var(--black); }
+
+/* ---- 表格 ---- */
+.cs-table { overflow-x: auto; margin: 1rem 0 1.25rem; }
+.cs-table table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+.cs-table th, .cs-table td { border: 1.5px solid var(--line); padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; min-width: 7em; }
+.cs-table thead th { background: var(--fg); color: var(--bg); }
+.cs-table tbody th { font-weight: 700; }
+.cs-table thead th code { background: transparent; color: inherit; }
+.cs-table .grp th { background: color-mix(in srgb, var(--fg) 8%, var(--bg)); font: 700 0.75rem var(--font-mono); letter-spacing: 0.1em; padding-block: 0.3rem; }
+.cs-badge, .cs-cc { display: inline-block; font: 700 0.7rem var(--font-sans); padding: 0 0.4rem; margin-left: 0.25rem; white-space: nowrap; vertical-align: 0.1em; }
+.cs-badge { background: var(--orange); color: var(--black); }
+.cs-cc { border: 1.5px solid currentColor; color: var(--muted); }
+.cs-fields tr { transition: opacity 0.2s; }
+.cs-fields.is-portable tr.cc-only { opacity: 0.35; }
+.cs-fields.is-portable tr.cc-only td:first-child code { text-decoration: line-through; }
+.cs-fields.is-portable .cs-cc { color: var(--fg); border-color: var(--orange); }
+@media (prefers-reduced-motion: reduce) { .cs-fields tr { transition: none; } }
+
+.cs-mode { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin: 1rem 0 0.5rem; }
+.cs-mode[hidden] { display: none; }
+.cs-mode-label { font: 700 0.8rem var(--font-mono); }
+.cs-seg { display: inline-flex; flex-wrap: wrap; border: 3px solid var(--line); }
+.cs-seg button { font: 700 0.9rem var(--font-sans); min-height: 2.75rem; padding: 0.3rem 0.9rem; border: 0; background: var(--surface); color: var(--fg); cursor: pointer; }
+.cs-seg button + button { border-left: 3px solid var(--line); }
+.cs-seg button[aria-pressed='true'] { background: var(--orange); color: var(--black); }
+.cs-note { font-size: 0.9rem; color: var(--muted); }
+
+/* ---- description ---- */
+.cs-formula { margin: 1.5rem 0; padding: 1.1rem 1.25rem; border: 3px solid var(--line); background: var(--surface); box-shadow: 6px 6px 0 var(--orange); }
+.cs-formula p { margin: 0 0 0.75rem; font: 0.95rem/2 var(--font-mono); }
+.cs-formula figcaption { display: flex; flex-wrap: wrap; gap: 0.35rem 1.25rem; font-size: 0.85rem; color: var(--muted); }
+.cs-formula figcaption mark { margin-right: 0.35rem; }
+.cs mark { color: inherit; background: none; padding: 0.05em 0.25em; }
+.cs mark.what { background: var(--orange); color: var(--black); }
+.cs mark.when { text-decoration: underline 3px var(--orange); text-underline-offset: 0.25em; }
+.cs mark.kw { background: var(--fg); color: var(--bg); }
+
+.cs-rules { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.cs-rules li { border: 2px solid var(--line); padding: 0.75rem 0.9rem; font-size: 0.95rem; background: var(--surface); }
+.cs-rules b { display: block; }
+
+.cs-pairs { margin: 0; display: grid; gap: 0.75rem; }
+.cs-pairs > div { display: grid; grid-template-columns: 6rem minmax(0, 1fr); border: 2px solid var(--line); background: var(--surface); }
+.cs-pairs dt { padding: 0.5rem 0.75rem; font: 700 0.75rem var(--font-mono); border-right: 2px solid var(--line); }
+.cs-pairs dd { margin: 0; padding: 0.5rem 0.75rem; font: 0.85rem/1.6 var(--font-mono); overflow-wrap: anywhere; }
+.cs-pairs dt:nth-of-type(2), .cs-pairs dd:nth-of-type(2) { border-top: 1.5px dashed var(--line); }
+.cs-pairs dd.no { text-decoration: line-through 2px; text-decoration-color: var(--orange); color: var(--muted); }
+
+.cs-callout { margin: 1.5rem 0; padding: 0.9rem 1.1rem; background: var(--surface); border: 3px solid var(--orange); box-shadow: 5px 5px 0 var(--orange); }
+.cs-callout p { margin: 0; }
+.cs-callout-label { font: 700 0.85rem var(--font-mono) !important; letter-spacing: 0.08em; color: var(--link); margin-bottom: 0.3rem !important; }
+
+/* ---- 本體 ---- */
+.cs-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.cs-grid2 > * { min-width: 0; }
+.cs-card { border: 3px solid var(--line); padding: 1rem 1.1rem; background: var(--surface); }
+.cs-card h3 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+.cs-card p { margin: 0; font-size: 0.95rem; }
+.cs-card .cs-card-label { font: 700 0.75rem var(--font-mono); color: var(--link); margin-bottom: 0.25rem; letter-spacing: 0.06em; }
+
+.cs-scale { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 3px solid var(--line); background: var(--surface); }
+.cs-scale li { display: grid; gap: 0.35rem; align-content: start; padding: 0.9rem 1rem; font-size: 0.93rem; }
+.cs-scale li + li { border-left: 3px solid var(--line); }
+.cs-scale li > span:last-child { color: var(--muted); }
+.cs-level { font: 700 0.75rem var(--font-mono); }
+.cs-meter { display: block; height: 0.5rem; border: 2px solid var(--line); }
+.cs-meter span { display: block; height: 100%; background: var(--orange); }
+
+.cs-list { margin: 0 0 1em; padding-left: 1.25rem; max-width: var(--measure); }
+.cs-list li + li { margin-top: 0.4em; }
+.cs-list li::marker { color: var(--orange); }
+
+/* ---- 程式碼 ---- */
+.cs-code { margin: 0; background: var(--cs-code-bg); color: var(--cs-code-fg); border: 3px solid var(--line); min-width: 0; }
+.cs-code figcaption { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; padding: 0.35rem 0.5rem 0.35rem 1rem; border-bottom: 1px solid #333; font: 0.75rem var(--font-mono); color: var(--cs-code-dim); }
+.cs-code figcaption span { overflow-wrap: anywhere; }
+.cs-code pre { margin: 0; padding: 1rem; overflow-x: auto; font: 0.82rem/1.7 var(--font-mono); }
+.cs-code pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; overflow-wrap: normal; }
+.cs-copy { font: 700 0.8rem var(--font-sans); min-height: 2.25rem; padding: 0.2rem 0.8rem; background: #fafaf7; color: #111; border: 2px solid #fafaf7; cursor: pointer; flex: none; }
+.cs-copy:hover { background: var(--orange); border-color: var(--orange); }
+.cs-copy[hidden] { display: none; }
+
+.cs-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.25rem 0 1rem; }
+.cs-tabs[hidden] { display: none; }
+.cs-tabs button { font: 700 0.95rem var(--font-sans); text-align: left; min-height: 2.75rem; padding: 0.4rem 0.9rem; background: var(--surface); color: var(--fg); border: 3px solid var(--line); cursor: pointer; }
+.cs-tabs small { display: block; font: 0.72rem var(--font-mono); color: var(--muted); }
+.cs-tabs button[aria-selected='true'] { background: var(--orange); color: var(--black); box-shadow: 4px 4px 0 var(--line); }
+.cs-tabs button[aria-selected='true'] small { color: var(--black); }
+.cs-panel + .cs-panel { margin-top: 2rem; }
+.cs-panel.is-tab + .cs-panel.is-tab { margin-top: 0; }
+.cs-panel[hidden] { display: none; }
+.cs-panel.is-tab .cs-panel-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cs-panel-title { margin-top: 0 !important; }
+
+/* ---- 除錯、檢查清單 ---- */
+.cs-debug { margin: 0 0 1.5rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.cs-debug > div { border: 2px solid var(--line); padding: 0.75rem 0.9rem; background: var(--surface); }
+.cs-debug dt { font: 700 0.8rem var(--font-mono); color: var(--link); }
+.cs-debug dd { margin: 0.25rem 0 0; font-size: 0.95rem; }
+.cs-check-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.cs-checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; max-width: var(--measure); }
+.cs-checklist label { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.8rem; border: 2px solid var(--line); background: var(--surface); cursor: pointer; }
+.cs-checklist input { width: 1.25rem; height: 1.25rem; margin-top: 0.3rem; accent-color: var(--orange); flex: none; }
+.cs-checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+
+/* ---- 上一章／下一章 ---- */
+.cs-pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap; }
+.cs-pager a { display: grid; padding: 0.6rem 1rem; border: 3px solid var(--line); color: var(--fg); text-decoration: none; font-weight: 700; background: var(--surface); min-width: 0; }
+.cs-pager a:hover { box-shadow: 5px 5px 0 var(--orange); color: var(--fg); }
+.cs-pager small { font: 0.75rem var(--font-mono); color: var(--muted); }
+.cs-pager .next { margin-left: auto; text-align: right; }
+
+.cs-sources { margin-top: 4rem; padding-top: 1.5rem; border-top: 3px solid var(--line); }
+.cs-sources h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+.cs-sources ul { margin: 0 0 0.75rem; padding-left: 1.25rem; }
+.cs-back { margin-top: 2rem; font-weight: 700; }
+
+/* ---- 窄螢幕 ---- */
+@media (max-width: 64rem) {
+  .cs-hero { grid-template-columns: minmax(0, 1fr); }
+  .cs-layout { grid-template-columns: minmax(0, 1fr); }
+  .cs-nav ol { position: static; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .cs-nav a { border-color: var(--line); padding: 0.3rem 0.6rem; font-size: 0.88rem; min-height: 2.75rem; align-items: center; }
+}
+@media (max-width: 40rem) {
+  .cs-rules, .cs-grid2, .cs-debug { grid-template-columns: minmax(0, 1fr); }
+  .cs-scale { grid-template-columns: minmax(0, 1fr); }
+  .cs-scale li + li { border-left: 0; border-top: 3px solid var(--line); }
+  .cs-layers li { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
+  .cs-layers .cs-cost { justify-self: start; }
+  .cs-pairs > div { grid-template-columns: minmax(0, 1fr); }
+  .cs-pairs dt { border-right: 0; border-bottom: 1.5px solid var(--line); }
+}

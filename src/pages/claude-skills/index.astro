@@ -1,0 +1,525 @@
+---
+// Claude Skills 專題單元的首頁：Skills 撰寫指南，單頁應用（SPA）
+// 有 JavaScript 時以網址 hash 切換章節（#load、#fields…）；沒有 JavaScript 時所有章節依序顯示，錨點照常可用。
+import '../../styles/claude-skills.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { SERIES, AUTHORS } from '../../consts';
+import { getArticles } from '../../utils/content';
+import { absoluteUrl, withBase } from '../../utils/url';
+
+const unit = SERIES['claude-skills'];
+const posts = (await getArticles()).filter((p) => p.data.series === 'claude-skills');
+const url = absoluteUrl(unit.href, Astro.site);
+const home = absoluteUrl('/', Astro.site);
+const published = new Date('2026-11-17');
+
+const chapters = [
+  { id: 'load', title: '怎麼被載入' },
+  { id: 'fields', title: 'Frontmatter 欄位' },
+  { id: 'description', title: '寫好 description' },
+  { id: 'body', title: '內容與寫作原則' },
+  { id: 'files', title: '附加檔案與 scripts' },
+  { id: 'advanced', title: 'fork、參數、動態注入' },
+  { id: 'examples', title: '完整範例' },
+  { id: 'pitfalls', title: '常見錯誤與檢查' },
+];
+const pager = (id: string) => {
+  const i = chapters.findIndex((c) => c.id === id);
+  return { prev: chapters[i - 1], next: chapters[i + 1] };
+};
+// 每章底部的上一章／下一章（內容是固定的章節名稱，不含使用者輸入）
+type Chapter = (typeof chapters)[number];
+const pagerHtml = ({ prev, next }: { prev?: Chapter; next?: Chapter }) => `
+  <nav class="cs-pager" aria-label="章節切換">
+    ${prev ? `<a class="prev" href="#${prev.id}"><small>上一章</small>${prev.title}</a>` : '<span></span>'}
+    ${next ? `<a class="next" href="#${next.id}"><small>下一章</small>${next.title}</a>` : ''}
+  </nav>`;
+
+const sources = [
+  { title: 'Extend Claude with skills（Claude Code 文件）', href: 'https://code.claude.com/docs/en/skills' },
+  { title: 'Skill authoring best practices（Claude Platform 文件）', href: 'https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices' },
+];
+
+const examples = [
+  {
+    id: 'workflow',
+    tab: '工作流程',
+    sub: '自動觸發',
+    path: '.claude/skills/writing-commits/SKILL.md',
+    note: '讀取暫存的 diff，用專案的 Conventional Commits 格式寫 commit message。allowed-tools 讓它讀 git 不必每次詢問。',
+    code: `---
+name: writing-commits
+description: Writes commit messages in this repo's Conventional Commits style by reading the staged diff. Use when the user asks for a commit message, wants to commit, or says 幫我寫 commit.
+allowed-tools: Bash(git diff *) Bash(git status *)
+---
+
+## Staged changes
+!\`git diff --cached\`
+
+## Rules
+- Format: <type>(<scope>): <summary>, summary ≤ 72 chars, imperative mood
+- type is one of: feat, fix, docs, refactor, test, chore
+- Body explains WHY, not what; wrap at 72 chars
+- If the diff mixes unrelated changes, suggest splitting before writing
+
+## Example
+Input: added retry to fetchUser, plus a test
+Output: feat(api): retry fetchUser on transient 5xx errors
+
+## If nothing is staged
+Say so and show \`git status\`; do not invent a message.`,
+  },
+  {
+    id: 'task',
+    tab: '任務',
+    sub: '手動、fork',
+    path: '.claude/skills/audit-deps/SKILL.md',
+    note: '只能用 /audit-deps 手動啟動，在 subagent 裡跑完再回報，不會塞滿主對話。',
+    code: `---
+name: audit-deps
+description: Audits project dependencies for outdated or vulnerable packages and returns a prioritized upgrade list.
+disable-model-invocation: true
+context: fork
+agent: general-purpose
+argument-hint: [package-dir]
+---
+
+Audit the dependencies in $ARGUMENTS (default: repo root).
+
+1. Detect the package manager from the lockfile.
+2. Run its outdated and audit commands.
+3. For each finding, note current → latest version and whether it is a major bump.
+4. Return a table: package | current | latest | severity | breaking? | recommendation.
+   Put security issues first, then major bumps.
+
+Do not modify any files. If no lockfile is found, report that and stop.`,
+  },
+  {
+    id: 'reference',
+    tab: '參考',
+    sub: '搭配附加檔案',
+    path: '.claude/skills/api-conventions/SKILL.md',
+    note: '本體只放最常用的三條規則，細節放在附加檔案；paths 讓它只在處理 API 程式碼時觸發。',
+    code: `---
+name: api-conventions
+description: REST API design conventions for this codebase (naming, error format, pagination, versioning). Use when creating or reviewing API endpoints, routes, or controllers.
+paths: src/api/**
+---
+
+- Plural nouns for resources: /users, /orders/{id}
+- Errors always return { "error": { "code", "message" } } with the right HTTP status
+- List endpoints use cursor pagination (?cursor=&limit=, max 100)
+
+For the full error code table, read [errors.md](errors.md).
+For pagination edge cases, read [pagination.md](pagination.md).`,
+  },
+];
+
+const treeCode = `pdf-processing/
+├── SKILL.md          # 概要與導覽（必要）
+├── reference.md      # 詳細 API，需要時才讀
+├── examples.md       # 範例集，需要時才讀
+└── scripts/
+    └── fill_form.py  # 直接執行，不載入內容`;
+
+const navCode = `## Additional resources
+- 表單欄位對照與完整 API：見 [reference.md](reference.md)
+- 填表範例：見 [examples.md](examples.md)
+- 填表請執行 python scripts/fill_form.py in.pdf fields.json
+  （不要自己重寫邏輯）`;
+
+const checklist = [
+  'description 同時寫了「做什麼」與「何時用」，且用第三人稱',
+  '用「應觸發」與「不應觸發」的提示各測過一次',
+  'SKILL.md 本體少於 500 行，最重要的規則在最上面',
+  '附加檔案只做一層參照，且每個都寫明何時讀',
+  '有副作用的 skill 設了 disable-model-invocation: true',
+  '腳本自己處理錯誤，並列出依賴套件',
+  '用詞一致，沒有會過期的資訊',
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    '@id': `${url}#guide`,
+    url,
+    headline: 'Skills 撰寫指南',
+    description: unit.description,
+    inLanguage: 'zh-Hant-TW',
+    datePublished: published.toISOString(),
+    isPartOf: { '@id': `${home}#website` },
+    author: { '@type': 'Person', name: AUTHORS.claude.name, url: AUTHORS.claude.sameAs[0] },
+    citation: sources.map((s) => s.href),
+    hasPart: chapters.map((c) => ({ '@type': 'WebPageElement', name: c.title, url: `${url}#${c.id}` })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首頁', item: home },
+      { '@type': 'ListItem', position: 2, name: `${unit.title} 專題`, item: url },
+    ],
+  },
+];
+---
+<BaseLayout
+  title={`Skills 撰寫指南｜${unit.title} 專題`}
+  description={unit.description}
+  type="article"
+  publishedTime={published}
+  authorNames={AUTHORS.claude.name}
+  jsonLd={jsonLd}
+>
+  <div class="cs" data-cs-app>
+    <header class="cs-hero">
+      <div class="cs-hero-text">
+        <p class="cs-eyebrow">專題單元 / CLAUDE SKILLS</p>
+        <h1>Skills 撰寫指南<span class="accent" aria-hidden="true">.</span></h1>
+        <p class="cs-lead">一個 skill 就是一個資料夾加一份 <code>SKILL.md</code>。上半部的 frontmatter 決定 Claude 什麼時候想到它，下半部的內容決定它想到之後做得好不好。</p>
+        <p class="meta">作者：{AUTHORS.claude.name} · 依官方文件整理 · <time datetime="2026-11-17">2026-11-17</time></p>
+      </div>
+      <figure class="cs-anatomy">
+        <figcaption class="cs-anatomy-bar">.claude/skills/writing-commits/SKILL.md</figcaption>
+        <div class="cs-zone cs-z1">
+          <p class="cs-zone-tag">第 1 層・永遠在 context</p>
+          <pre><span class="c">---</span>
+<span class="k">name</span>: writing-commits
+<span class="k">description</span>: <span class="s">Writes commit messages from</span>
+  <span class="s">the staged diff. Use when the user</span>
+  <span class="s">asks for a commit message.</span>
+<span class="c">---</span></pre>
+        </div>
+        <div class="cs-zone cs-z2">
+          <p class="cs-zone-tag">第 2 層・觸發後載入</p>
+          <pre><span class="k">## Rules</span>
+- Format: type(scope): summary
+- Body explains WHY, not what
+<span class="k">## Staged changes</span>
+!`git diff --cached`</pre>
+        </div>
+        <div class="cs-zone cs-z3">
+          <p class="cs-zone-tag">第 3 層・需要時才讀</p>
+          <pre><span class="c">For the full type list, read</span>
+[reference.md](reference.md)
+<span class="c">Validate with</span> scripts/lint_msg.py</pre>
+        </div>
+      </figure>
+    </header>
+
+    <div class="cs-layout" data-cs-layout>
+      <nav class="cs-nav" aria-label="指南章節">
+        <ol>
+          {chapters.map((c, i) => (
+            <li><a href={`#${c.id}`} data-cs-link={c.id}><span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>{c.title}</a></li>
+          ))}
+        </ol>
+      </nav>
+
+      <div class="cs-views">
+        <!-- 01 -->
+        <section id="load" class="cs-view" aria-labelledby="load-title" data-cs-view>
+          <p class="cs-kicker">01 · 漸進式揭露</p>
+          <h2 id="load-title" tabindex="-1">Skill 怎麼被載入</h2>
+          <p class="cs-intro">內容分三層，只有用得到的那層才會進到 context。寫 skill 時，每一段文字都該想清楚它屬於哪一層。</p>
+          <ol class="cs-layers">
+            <li>
+              <span class="cs-when">啟動時</span>
+              <div><h3>Metadata：name 與 description</h3><p>所有 skill 的描述一開始就放進 context，Claude 只靠這段決定要不要用它。</p></div>
+              <span class="cs-cost">每個 skill 都付</span>
+            </li>
+            <li>
+              <span class="cs-when">觸發時</span>
+              <div><h3>SKILL.md 本體</h3><p>被呼叫後整份載入，並留在對話裡跨回合存在。每一行都是持續性的 token 成本。</p></div>
+              <span class="cs-cost">建議少於 500 行</span>
+            </li>
+            <li>
+              <span class="cs-when">需要時</span>
+              <div><h3>附加檔案與 scripts</h3><p>Claude 依 SKILL.md 的指引才去讀參考檔或執行腳本；腳本只有輸出會進 context。</p></div>
+              <span class="cs-cost">用到才付</span>
+            </li>
+          </ol>
+          <h3>存放位置（Claude Code）</h3>
+          <div class="cs-table" role="region" aria-label="存放位置" tabindex="0">
+            <table>
+              <thead><tr><th scope="col">範圍</th><th scope="col">路徑</th><th scope="col">適用</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">個人</th><td><code>~/.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>本機所有專案</td></tr>
+                <tr><th scope="row">專案</th><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>此 repo，commit 後團隊共用</td></tr>
+                <tr><th scope="row">Plugin</th><td><code>&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code></td><td>以 <code>/plugin-name:skill-name</code> 呼叫</td></tr>
+                <tr><th scope="row">claude.ai 帳號</th><td>上傳到 claude.ai 的 skill</td><td>Cowork、雲端，以及登入同帳號的終端機</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>資料夾不要命名為 <code>synced</code> 或 <code>anthropic-skills</code>，這兩個是保留名稱，會被略過。</p>
+          <Fragment set:html={pagerHtml(pager('load'))} />
+        </section>
+
+        <!-- 02 -->
+        <section id="fields" class="cs-view" aria-labelledby="fields-title" data-cs-view>
+          <p class="cs-kicker">02 · Frontmatter</p>
+          <h2 id="fields-title" tabindex="-1">欄位速查</h2>
+          <p class="cs-intro">所有欄位都是選填，但強烈建議寫 <code>description</code>。開頭的 <code>---</code> 必須是檔案第一行，欄位名稱拼錯時 Claude Code 會靜默忽略。</p>
+          <div class="cs-mode" data-cs-mode hidden>
+            <span class="cs-mode-label" id="mode-label">使用環境</span>
+            <div class="cs-seg" role="group" aria-labelledby="mode-label">
+              <button type="button" aria-pressed="true" data-mode="cc">Claude Code</button>
+              <button type="button" aria-pressed="false" data-mode="portable">上傳 claude.ai／Skills API</button>
+            </div>
+          </div>
+          <p class="cs-note" data-cs-mode-note>標記「僅 Claude Code」的欄位，上傳到 claude.ai 或 Skills API 時不能用，多一個就會上傳失敗。</p>
+          <div class="cs-table" role="region" aria-label="Frontmatter 欄位" tabindex="0">
+            <table class="cs-fields" data-cs-fields>
+              <thead><tr><th scope="col">欄位</th><th scope="col">用途</th><th scope="col">重點</th></tr></thead>
+              <tbody>
+                <tr class="grp"><th colspan="3" scope="colgroup">觸發</th></tr>
+                <tr><td><code>name</code></td><td><code>/</code> 選單中的指令名</td><td>預設取資料夾名；小寫英數與連字號，最多 64 字元，不可含 claude、anthropic</td></tr>
+                <tr><td><code>description</code> <span class="cs-badge">建議必填</span></td><td>做什麼＋何時用</td><td>觸發的唯一依據；規格上限 1,024 字元</td></tr>
+                <tr class="cc-only"><td><code>when_to_use</code> <span class="cs-cc">僅 Claude Code</span></td><td>補充觸發句型、範例請求</td><td>接在 description 後，合計 1,536 字元後截斷</td></tr>
+                <tr class="cc-only"><td><code>paths</code> <span class="cs-cc">僅 Claude Code</span></td><td>glob 限定觸發範圍</td><td>只在處理符合的檔案時自動載入</td></tr>
+                <tr class="cc-only"><td><code>disable-model-invocation</code> <span class="cs-cc">僅 Claude Code</span></td><td><code>true</code> 時只能手動 <code>/name</code></td><td>用在有副作用的流程：deploy、commit、發訊息</td></tr>
+                <tr class="cc-only"><td><code>user-invocable</code> <span class="cs-cc">僅 Claude Code</span></td><td><code>false</code> 時只有 Claude 能用</td><td>用在背景知識類 skill</td></tr>
+                <tr class="grp"><th colspan="3" scope="colgroup">權限</th></tr>
+                <tr><td><code>allowed-tools</code></td><td>該回合免詢問即可使用的工具</td><td>例 <code>Bash(git add *) Read</code>；只是預先授權，不限制其他工具</td></tr>
+                <tr class="cc-only"><td><code>disallowed-tools</code> <span class="cs-cc">僅 Claude Code</span></td><td>skill 執行期間移除的工具</td><td>例如背景迴圈禁止 <code>AskUserQuestion</code></td></tr>
+                <tr class="cc-only"><td><code>hooks</code> <span class="cs-cc">僅 Claude Code</span></td><td>skill 呼叫後註冊的 hooks</td><td>必守規則放這裡比寫在內文可靠</td></tr>
+                <tr class="grp"><th colspan="3" scope="colgroup">執行</th></tr>
+                <tr class="cc-only"><td><code>context</code> <span class="cs-cc">僅 Claude Code</span></td><td>設 <code>fork</code> 在 subagent 中執行</td><td>subagent 看不到對話歷史</td></tr>
+                <tr class="cc-only"><td><code>agent</code> <span class="cs-cc">僅 Claude Code</span></td><td>fork 時用哪種 subagent</td><td><code>Explore</code>、<code>Plan</code>、<code>general-purpose</code>（預設）或 <code>.claude/agents/</code> 自訂</td></tr>
+                <tr class="cc-only"><td><code>background</code> <span class="cs-cc">僅 Claude Code</span></td><td>fork 時是否背景執行</td><td>預設 <code>true</code>；設 <code>false</code> 會等結果，並保留完整工具集</td></tr>
+                <tr class="cc-only"><td><code>model</code>、<code>effort</code> <span class="cs-cc">僅 Claude Code</span></td><td>該回合的模型與思考程度</td><td>fork 時改為設定 subagent</td></tr>
+                <tr class="cc-only"><td><code>shell</code> <span class="cs-cc">僅 Claude Code</span></td><td><code>bash</code> 或 <code>powershell</code></td><td>用於動態注入的指令</td></tr>
+                <tr class="grp"><th colspan="3" scope="colgroup">參數</th></tr>
+                <tr class="cc-only"><td><code>argument-hint</code> <span class="cs-cc">僅 Claude Code</span></td><td>自動完成時顯示的參數提示</td><td>例 <code>[issue-number]</code></td></tr>
+                <tr class="cc-only"><td><code>arguments</code> <span class="cs-cc">僅 Claude Code</span></td><td>具名參數</td><td>搭配 <code>$name</code> 佔位符</td></tr>
+                <tr class="grp"><th colspan="3" scope="colgroup">描述性</th></tr>
+                <tr><td><code>license</code>、<code>compatibility</code>、<code>metadata</code></td><td>授權、環境需求、自訂資料</td><td>Claude Code 接受但不會作用</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>誰可以呼叫</h3>
+          <div class="cs-table" role="region" aria-label="誰可以呼叫" tabindex="0">
+            <table>
+              <thead><tr><th scope="col">設定</th><th scope="col">你能呼叫</th><th scope="col">Claude 自動呼叫</th><th scope="col">description 在 context</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">預設</th><td>是</td><td>是</td><td>是</td></tr>
+                <tr><th scope="row"><code>disable-model-invocation: true</code></th><td>是</td><td>否</td><td>否</td></tr>
+                <tr><th scope="row"><code>user-invocable: false</code></th><td>否</td><td>是</td><td>是</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <Fragment set:html={pagerHtml(pager('fields'))} />
+        </section>
+
+        <!-- 03 -->
+        <section id="description" class="cs-view" aria-labelledby="description-title" data-cs-view>
+          <p class="cs-kicker">03 · 觸發</p>
+          <h2 id="description-title" tabindex="-1">寫出能正確觸發的 description</h2>
+          <p class="cs-intro">Claude 只看 description 就要從可能上百個 skill 中挑出對的那個，所以它必須同時說清楚「做什麼」與「什麼情況用」。</p>
+          <figure class="cs-formula">
+            <p lang="en"><mark class="what">Extract text and tables from PDF files, fill forms.</mark> Use when <mark class="when">working with PDF files</mark> or when the user mentions <mark class="kw">PDFs, forms, document extraction</mark>.</p>
+            <figcaption>
+              <span><mark class="what">橘底</mark>能力，用動詞開頭</span>
+              <span><mark class="when">底線</mark>使用情境</span>
+              <span><mark class="kw">反白</mark>使用者會說出口的關鍵字</span>
+            </figcaption>
+          </figure>
+          <ul class="cs-rules">
+            <li><b>用第三人稱</b>description 會被注入系統提示。寫「Processes Excel files」，不要寫「I can help you…」或「You can use this…」。</li>
+            <li><b>放入使用者會說的字</b>副檔名（<code>.xlsx</code>）、同義詞（PR、pull request）、中英文說法都可以寫進去。</li>
+            <li><b>重點放最前面</b>清單太長時會從尾端截斷，少用的 skill 甚至會被拿掉 description。</li>
+            <li><b>區分相近的 skill</b>有兩個類似 skill 時寫明邊界，例如「Not for Google Sheets」。</li>
+            <li><b>避免角括號</b><code>&lt;branch&gt;</code> 會顯示成 <code>&amp;lt;branch&amp;gt;</code>，改用 <code>[branch]</code> 或放到 <code>argument-hint</code>。</li>
+            <li><b>含冒號要加引號</b>值裡出現「冒號加空格」會讓 YAML 解析失敗，skill 就失去 description。</li>
+          </ul>
+          <h3>改寫對照</h3>
+          <dl class="cs-pairs">
+            <div><dt>太籠統</dt><dd class="no" lang="en">Helps with documents</dd><dt>改成</dt><dd lang="en">Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.</dd></div>
+            <div><dt>太籠統</dt><dd class="no" lang="en">Processes data</dd><dt>改成</dt><dd lang="en">Analyze Excel spreadsheets, create pivot tables, generate charts. Use when analyzing Excel files, spreadsheets, tabular data, or .xlsx files.</dd></div>
+            <div><dt>第一人稱</dt><dd class="no" lang="en">I can help you write commits</dd><dt>改成</dt><dd lang="en">Generate descriptive commit messages by analyzing git diffs. Use when the user asks for help writing commit messages or reviewing staged changes.</dd></div>
+          </dl>
+          <div class="cs-callout" role="note">
+            <p class="cs-callout-label">小技巧（非官方建議）</p>
+            <p>description 主體用英文寫通常最穩，再在 <code>when_to_use</code> 補幾句你實際會打的中文，例如「幫我寫 commit message」。</p>
+          </div>
+          <Fragment set:html={pagerHtml(pager('description'))} />
+        </section>
+
+        <!-- 04 -->
+        <section id="body" class="cs-view" aria-labelledby="body-title" data-cs-view>
+          <p class="cs-kicker">04 · SKILL.md 本體</p>
+          <h2 id="body-title" tabindex="-1">內容結構與寫作原則</h2>
+          <p class="cs-intro">預設 Claude 已經很聰明，只寫它不知道的東西：你的慣例、流程、踩過的坑。</p>
+          <div class="cs-grid2">
+            <div class="cs-card"><p class="cs-card-label">Reference・參考型</p><h3>規範、風格、領域知識</h3><p>在對話中內嵌運作，適合讓 Claude 自動觸發。例如 API 設計規範。</p></div>
+            <div class="cs-card"><p class="cs-card-label">Task・任務型</p><h3>一步步的動作</h3><p>如 deploy、commit。常搭配 <code>disable-model-invocation: true</code> 或 <code>context: fork</code>。</p></div>
+          </div>
+          <h3>依任務的脆弱程度決定自由度</h3>
+          <ol class="cs-scale">
+            <li><span class="cs-level">高自由度</span><span class="cs-meter" aria-hidden="true"><span style="width:90%"></span></span><b>文字原則、檢查項目</b><span>多種做法都對，例如 code review。</span></li>
+            <li><span class="cs-level">中自由度</span><span class="cs-meter" aria-hidden="true"><span style="width:55%"></span></span><b>範本、帶參數的虛擬碼</b><span>有偏好做法，但允許變化。</span></li>
+            <li><span class="cs-level">低自由度</span><span class="cs-meter" aria-hidden="true"><span style="width:18%"></span></span><b>指定執行某個腳本</b><span>容易出錯的操作，例如資料庫 migration。</span></li>
+          </ol>
+          <h3>寫作原則</h3>
+          <ul class="cs-list">
+            <li>直接寫「做什麼」，不要敘述背景或解釋 Claude 已知的概念。</li>
+            <li>最重要的規則放最上面。對話壓縮後，每個 skill 只保留前 5,000 tokens。</li>
+            <li>寫成整個任務都適用的句子。用「每次修改後都跑測試」，不要只寫「跑測試」，因為 skill 不會被重讀。</li>
+            <li>多步驟流程用編號清單，關鍵操作加上「執行、驗證、修正、再驗證」的回圈。</li>
+            <li>用具體範例（輸入輸出對照）取代抽象描述。</li>
+            <li>用詞前後一致，不要一下「API endpoint」一下「URL」。</li>
+            <li>不寫會過期的資訊；真的需要時放在「舊做法」區塊。</li>
+            <li>MCP 工具寫完整名稱，例如 <code>GitHub:create_issue</code>。</li>
+            <li>一定要每次遵守的規則（例如編輯前必跑 lint）改用 hook，不要只靠文字。</li>
+          </ul>
+          <Fragment set:html={pagerHtml(pager('body'))} />
+        </section>
+
+        <!-- 05 -->
+        <section id="files" class="cs-view" aria-labelledby="files-title" data-cs-view>
+          <p class="cs-kicker">05 · 第 3 層</p>
+          <h2 id="files-title" tabindex="-1">附加檔案與 scripts</h2>
+          <p class="cs-intro">把 SKILL.md 當成目錄，細節拆到同資料夾的其他檔案，用不到就不佔 context。</p>
+          <div class="cs-grid2">
+            <figure class="cs-code"><figcaption><span>資料夾結構</span></figcaption><pre><code>{treeCode}</code></pre></figure>
+            <figure class="cs-code"><figcaption><span>SKILL.md 裡的導覽</span></figcaption><pre><code>{navCode}</code></pre></figure>
+          </div>
+          <ul class="cs-list">
+            <li>參照只做一層：所有檔案都從 SKILL.md 直接連出，不要 A 連 B 再連 C，否則 Claude 可能只讀到一部分。</li>
+            <li>超過 100 行的參考檔，開頭放目錄。</li>
+            <li>確定性、易錯的工作（解析、驗證、格式轉換）寫成腳本，比讓 Claude 每次現場寫程式更穩、更省 token。</li>
+            <li>寫清楚腳本是要「執行」還是「閱讀」。</li>
+            <li>腳本自己處理錯誤並印出清楚訊息，不要出現來歷不明的數字。</li>
+            <li>列出需要安裝的套件，不要假設環境已經有。</li>
+            <li>路徑一律用 <code>/</code>，不要用 Windows 的 <code>\</code>。</li>
+          </ul>
+          <Fragment set:html={pagerHtml(pager('files'))} />
+        </section>
+
+        <!-- 06 -->
+        <section id="advanced" class="cs-view" aria-labelledby="advanced-title" data-cs-view>
+          <p class="cs-kicker">06 · Claude Code 進階</p>
+          <h2 id="advanced-title" tabindex="-1">context: fork、參數、動態注入</h2>
+          <h3>context: fork 與 agent</h3>
+          <p>設定 <code>context: fork</code> 後，SKILL.md 的內容會成為一個新 subagent 的任務提示，<code>agent</code> 決定用哪種 subagent，未填則為 <code>general-purpose</code>。</p>
+          <ul class="cs-list">
+            <li>subagent 看不到你的對話歷史，指令必須自給自足。若任務依賴前面的討論，就不要用 fork。</li>
+            <li>只適合「有明確任務」的 skill。只有規範、沒有任務的 skill 用 fork，subagent 會空手而回。</li>
+            <li><code>Explore</code>、<code>Plan</code> 不載入 CLAUDE.md 與 git status，需要的背景都要寫進 SKILL.md。</li>
+            <li>預設在背景執行，你可以繼續工作。但背景 subagent 的工具較少，且它的修改不在 <code>/rewind</code> 範圍內。需要完整工具或立即拿結果時，設 <code>background: false</code>。</li>
+            <li>反過來的用法：在 <code>.claude/agents/</code> 的自訂 subagent 用 <code>skills</code> 欄位預載 skill，讓 agent 帶著 skill 當參考資料。</li>
+          </ul>
+          <h3>傳參數</h3>
+          <div class="cs-table" role="region" aria-label="參數寫法" tabindex="0">
+            <table>
+              <thead><tr><th scope="col">寫法</th><th scope="col">意義</th><th scope="col">例子</th></tr></thead>
+              <tbody>
+                <tr><th scope="row"><code>$ARGUMENTS</code></th><td>全部參數</td><td><code>/fix-issue 123</code> → Fix GitHub issue 123</td></tr>
+                <tr><th scope="row"><code>$0</code>、<code>$1</code></th><td>依位置取用，從 0 開始</td><td>同 <code>$ARGUMENTS[0]</code></td></tr>
+                <tr><th scope="row"><code>$issue</code></th><td>具名參數</td><td>搭配 <code>arguments: [issue, branch]</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>沒有任何佔位符時，Claude Code 會自動在內容尾端附上 <code>ARGUMENTS: &lt;輸入&gt;</code>。</p>
+          <h3>動態注入</h3>
+          <p><code>!`指令`</code> 會在內容送給 Claude 之前先執行，並把輸出替換進來，讓 Claude 拿到實際資料而不是猜測。例如 <code>!`git diff HEAD`</code> 或 <code>!`gh pr diff`</code>。這些指令仍會經過權限檢查。</p>
+          <Fragment set:html={pagerHtml(pager('advanced'))} />
+        </section>
+
+        <!-- 07 -->
+        <section id="examples" class="cs-view" aria-labelledby="examples-title" data-cs-view>
+          <p class="cs-kicker">07 · 拿去改</p>
+          <h2 id="examples-title" tabindex="-1">完整範例</h2>
+          <p class="cs-intro">三種常見類型各一個，可以直接複製後改成自己的。</p>
+          <div class="cs-tabs" role="tablist" aria-label="範例類型" data-cs-tablist hidden>
+            {examples.map((ex, i) => (
+              <button type="button" role="tab" id={`tab-${ex.id}`} aria-controls={`panel-${ex.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+                {ex.tab}<small>{ex.sub}</small>
+              </button>
+            ))}
+          </div>
+          {examples.map((ex) => (
+            <div class="cs-panel" id={`panel-${ex.id}`} data-cs-panel>
+              <h3 id={`panel-title-${ex.id}`} class="cs-panel-title">{ex.tab}（{ex.sub}）</h3>
+              <p>{ex.note}</p>
+              <figure class="cs-code">
+                <figcaption><span>{ex.path}</span><button type="button" class="cs-copy" data-cs-copy hidden>複製<span class="visually-hidden">{ex.tab}範例</span></button></figcaption>
+                <pre><code>{ex.code}</code></pre>
+              </figure>
+            </div>
+          ))}
+          <Fragment set:html={pagerHtml(pager('examples'))} />
+        </section>
+
+        <!-- 08 -->
+        <section id="pitfalls" class="cs-view" aria-labelledby="pitfalls-title" data-cs-view>
+          <p class="cs-kicker">08 · 除錯</p>
+          <h2 id="pitfalls-title" tabindex="-1">常見錯誤與檢查清單</h2>
+          <div class="cs-table" role="region" aria-label="常見錯誤" tabindex="0">
+            <table>
+              <thead><tr><th scope="col">錯誤</th><th scope="col">後果</th><th scope="col">修正</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">description 太籠統</th><td>不觸發或亂觸發</td><td>寫明能力、情境、關鍵字</td></tr>
+                <tr><th scope="row">YAML 格式錯誤，例如值裡有未加引號的冒號</th><td>skill 仍載入但沒有 metadata，Claude 無法自動配對</td><td>含冒號的值加引號；用 <code>claude --debug</code> 或 <code>claude plugin validate .claude/skills</code> 檢查</td></tr>
+                <tr><th scope="row"><code>---</code> 不在第一行</th><td>整個 frontmatter 被當成內文</td><td>刪掉上方空行或 BOM</td></tr>
+                <tr><th scope="row">欄位名拼錯，例如 <code>allowed_tools</code></th><td>靜默被忽略</td><td>照表用連字號；只有 <code>when_to_use</code> 是底線</td></tr>
+                <tr><th scope="row">所有東西塞進 SKILL.md</th><td>每次觸發都吃大量 token</td><td>拆到附加檔案，本體少於 500 行</td></tr>
+                <tr><th scope="row">參考型 skill 加了 <code>context: fork</code></th><td>subagent 沒任務，空手而回</td><td>參考型 skill 不要 fork</td></tr>
+                <tr><th scope="row">deploy 類 skill 允許自動觸發</th><td>Claude 覺得「準備好了」就自己部署</td><td>加 <code>disable-model-invocation: true</code></td></tr>
+                <tr><th scope="row">以為 <code>allowed-tools</code> 會限制工具</th><td>其他工具仍可使用</td><td>要限制請用 <code>disallowed-tools</code> 或權限 deny 規則</td></tr>
+                <tr><th scope="row">上傳 claude.ai 時帶 Claude Code 專屬欄位</th><td>上傳直接失敗</td><td>只留規格允許的 6 個欄位</td></tr>
+                <tr><th scope="row">多層巢狀參照</th><td>Claude 只讀到一半</td><td>所有參考檔從 SKILL.md 直接連出</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>除錯</h3>
+          <dl class="cs-debug">
+            <div><dt>不觸發</dt><dd>問 Claude「What skills are available?」確認有載入；用使用者實際會說的詞改 description；若設了 <code>paths</code>，確認檔案在工作目錄內。</dd></div>
+            <div><dt>太常觸發</dt><dd>把 description 寫得更具體，或改成只能手動呼叫。</dd></div>
+            <div><dt>中途不再遵守</dt><dd>必守規則改用 hook；對話壓縮後重新呼叫一次 skill。</dd></div>
+            <div><dt>description 被截斷</dt><dd>skill 太多時用 <code>/doctor</code> 看清單成本，用 <code>/skill-doctor</code> 找出沒在用的 skill。</dd></div>
+          </dl>
+          <p>看到 skill 有觸發，只代表 Claude 找到它，不代表做對了。準備幾個真實提示，在新 session 各跑一次「有 skill」與「關掉 skill」再比較。官方 <code>skill-creator</code> plugin 可以自動跑 evals、評分、A/B 比較版本，也能幫你調整 description 的觸發準確度。</p>
+          <div class="cs-check-head">
+            <h3 id="checklist-title">上架前檢查清單</h3>
+            <span class="meta" data-cs-progress aria-hidden="true"></span>
+          </div>
+          <ul class="cs-checklist" aria-labelledby="checklist-title" data-cs-checklist>
+            {checklist.map((item, i) => (
+              <li><label><input type="checkbox" id={`check-${i}`} /><span>{item}</span></label></li>
+            ))}
+          </ul>
+          <Fragment set:html={pagerHtml(pager('pitfalls'))} />
+        </section>
+      </div>
+    </div>
+
+    <p class="visually-hidden" role="status" data-cs-status></p>
+
+    <section class="cs-sources" aria-labelledby="sources-title">
+      <h2 id="sources-title">資料來源</h2>
+      <ul>
+        {sources.map((s) => <li><a href={s.href} rel="noopener">{s.title}</a></li>)}
+      </ul>
+      <p class="meta">內容整理於 2026-11-17。欄位與限制會隨版本更新，以官方文件為準。</p>
+    </section>
+
+    {posts.length > 0 && (
+      <section aria-labelledby="unit-articles">
+        <div class="section-head">
+          <h2 id="unit-articles">單元文章</h2>
+          <span class="meta">共 {posts.length} 篇</span>
+        </div>
+        {posts.map((post) => <ArticleCard post={post} />)}
+      </section>
+    )}
+    <p class="cs-back"><a href={withBase('/')}>← 回到首頁</a></p>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initClaudeSkills } from '../../scripts/claude-skills';
+  const root = document.querySelector<HTMLElement>('[data-cs-app]');
+  if (root) initClaudeSkills(root);
+</script>

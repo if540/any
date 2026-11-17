@@ -125,12 +125,19 @@ mood: 開心                      # 選填
 
 ## 專題單元
 
-專題單元把同一個主題的文章收在一起，並有自己的首頁。目前有「資安」（`/security/`）。
+專題單元把同一個主題的文章收在一起，並有自己的首頁。目前有「資安」（`/security/`）與「Claude Skills」（`/claude-skills/`）。
 
 - 文章在 frontmatter 加 `series: security` 就歸到單元；文章網址維持 `/articles/<slug>/` 不變
 - 歸到單元的文章，麵包屑會多一層「資安專題」，文末多一個回到專題的連結
 - 單元定義在 `src/consts.ts` 的 `SERIES`（名稱、網址、說明）；填了不存在的 key，build 會失敗
 - 新增單元：在 `SERIES` 加一筆，再建立 `src/pages/<單元>/index.astro` 當首頁
+
+**Claude Skills 單元**的首頁就是「Skills 撰寫指南」，做成單頁應用（SPA）：
+
+- 8 個章節以網址 hash 切換（`/claude-skills/#fields`），可分享、上一頁可用；切換後焦點移到章節標題，並用 `role="status"` 念出
+- 欄位表可切換「Claude Code／上傳 claude.ai」、範例分頁（tabs，方向鍵切換）、複製按鈕、檢查清單（記在瀏覽器）
+- 沒有 JavaScript 時所有章節依序顯示，錨點照常可用
+- 頁面在 `src/pages/claude-skills/index.astro`，互動在 `src/scripts/claude-skills.ts`，樣式在 `src/styles/claude-skills.css`
 
 **資安單元的主視覺**用 three.js 繪製（`src/scripts/security-hero.ts`）：
 
