@@ -5,7 +5,7 @@ description: CSP 不阻止注入，而是讓注入的內容做不了事。用 ZA
 pubDate: 2026-11-17
 tags: [資安, CSP, Next.js]
 series: security
-draft: true
+draft: false
 coverTitle: "前端該懂的\nCSP"
 coverMotif: target
 tldr: "CSP 是第二道防線：攻擊者把內容塞進頁面後，它決定那些內容能不能執行、能不能把資料送出去、能不能把網站嵌進別人的頁面。ZAP 的 CSP 檢查只看回應標頭，用 nonce 加 strict-dynamic、補齊 default-src、object-src、base-uri、form-action、frame-ancestors，再加上 X-Content-Type-Options，實測可以讓 CSP 相關警告全部消失。但弱掃通過不代表網站正常：實測一個被 CSP 擋掉所有程式的 Next.js 靜態頁面，ZAP 一樣沒有任何 CSP 警告，所以要用 Playwright 在瀏覽器裡把關。"
