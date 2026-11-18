@@ -6,6 +6,8 @@
  * - Frontmatter 欄位快搜：Ctrl+F（Mac 為 ⌘F）聚焦，捲過 hero 後固定在視窗頂端
  * 沒有 JavaScript 時，所有章節依序顯示，錨點照常可用。
  */
+import { initArgPlayground } from './skill-args';
+
 const STORE_KEY = 'any:claude-skills:checklist';
 
 export function initClaudeSkills(root: HTMLElement) {
@@ -18,6 +20,7 @@ export function initClaudeSkills(root: HTMLElement) {
 
   initRouter(root, announce);
   initFieldSearch(root, announce);
+  initArgPlayground(root);
   initFieldMode(root, announce);
   initTabs(root);
   initCopy(root, announce);

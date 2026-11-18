@@ -36,6 +36,19 @@ const pagerHtml = ({ prev, next }: { prev?: Chapter; next?: Chapter }) => `
     ${next ? `<a class="next" href="#${next.id}"><small>下一章</small>${next.title}</a>` : ''}
   </nav>`;
 
+const demoHtml = (d: Demo) => `
+  <figure class="cs-demo" aria-labelledby="demo-${d.id}">
+    <figcaption id="demo-${d.id}">${esc(d.title)}</figcaption>
+    <div class="cs-demo-grid">
+      <div class="cs-demo-step"><p class="cs-demo-label">① SKILL.md</p><pre><code>${esc(d.skill)}</code></pre></div>
+      <div class="cs-demo-right">
+        <div class="cs-demo-step"><p class="cs-demo-label">② 你輸入</p><pre class="cs-demo-input"><code>${esc(d.input)}</code></pre></div>
+        <div class="cs-demo-step is-result"><p class="cs-demo-label">③ ${d.resultLabel ?? 'Claude 收到'}</p><pre><code>${hl(d.result)}</code></pre></div>
+      </div>
+    </div>
+    ${d.note ? `<p class="cs-demo-note">${esc(d.note)}</p>` : ''}
+  </figure>`;
+
 // Frontmatter 欄位：表格與「欄位快搜」共用同一份資料（use、note 是固定的 HTML 片段）
 const fields = [
   { names: ['name'], group: '觸發', use: '<code>/</code> 選單中的指令名', note: '預設取資料夾名；小寫英數與連字號，最多 64 字元，不可含 claude、anthropic' },
@@ -67,6 +80,145 @@ const searchIndex = fields.map((f) => ({
   note: stripTags(f.note),
   cc: Boolean(f.cc),
 }));
+
+// 第 06 章的範例：每個範例是「SKILL.md → 你輸入 → Claude 收到」。
+// result 裡用 ⟦⟧ 包住被替換進去的值，畫面上會標成橘色。
+type Demo = { id: string; title: string; skill: string; input: string; result: string; note?: string; resultLabel?: string };
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const hl = (s: string) => esc(s).replace(/⟦([\s\S]*?)⟧/g, '<mark>$1</mark>');
+
+const forkDemo: Demo = {
+  id: 'fork',
+  title: '把 PR 摘要交給 subagent 去做',
+  skill: `---
+name: pr-summary
+description: Summarize changes in a pull request
+context: fork
+agent: Explore
+allowed-tools: Bash(gh *)
+---
+
+## Pull request context
+- PR diff: !\`gh pr diff\`
+- Changed files: !\`gh pr diff --name-only\`
+
+## Your task
+Summarize this pull request in 3 bullet points,
+then list risky changes with file names.`,
+  input: '/pr-summary',
+  resultLabel: '實際發生的事',
+  result: `1. Claude Code 先執行 gh pr diff 等指令，把輸出填進內容
+2. 開一個新的 ⟦Explore⟧ subagent，整份內容就是它的任務
+   （它看不到你和 Claude 之前聊過什麼）
+3. subagent 讀檔、整理，在背景跑完
+4. 主對話只收到它回傳的⟦摘要⟧，diff 原文不會塞進主對話`,
+};
+
+const argDemos: Demo[] = [
+  {
+    id: 'all',
+    title: '$ARGUMENTS：整串照貼',
+    skill: `---
+name: fix-issue
+description: Fix a GitHub issue
+disable-model-invocation: true
+---
+
+Fix GitHub issue $ARGUMENTS following our coding standards.`,
+    input: '/fix-issue 123',
+    result: 'Fix GitHub issue ⟦123⟧ following our coding standards.',
+    note: '指令名稱後面打的所有文字，原封不動放進 $ARGUMENTS 的位置。',
+  },
+  {
+    id: 'index',
+    title: '$0、$1、$2：依位置拆開',
+    skill: `---
+name: migrate-component
+description: Migrate a component from one language to another
+---
+
+Migrate the $0 component from $1 to $2.
+Preserve all existing behavior and tests.`,
+    input: '/migrate-component SearchBar JavaScript TypeScript',
+    result: `Migrate the ⟦SearchBar⟧ component from ⟦JavaScript⟧ to ⟦TypeScript⟧.
+Preserve all existing behavior and tests.`,
+    note: '用空白切開，第一個是 $0（從 0 開始數）。$0 等於 $ARGUMENTS[0]，只是寫法比較短。',
+  },
+  {
+    id: 'quote',
+    title: '有空白的值：用引號包起來',
+    skill: `---
+name: greet
+description: Write a greeting card
+---
+
+Write a card for $0. Tone: $1.`,
+    input: '/greet "王小明 先生" formal',
+    result: 'Write a card for ⟦王小明 先生⟧. Tone: ⟦formal⟧.',
+    note: '沒加引號的話，「王小明」會變成 $0，「先生」變成 $1。',
+  },
+  {
+    id: 'named',
+    title: 'arguments：幫位置取名字',
+    skill: `---
+name: fix-on-branch
+description: Fix an issue on a given branch
+arguments: [issue, branch]
+---
+
+Check out $branch, then fix issue #$issue.`,
+    input: '/fix-on-branch 123 hotfix/login',
+    result: 'Check out ⟦hotfix/login⟧, then fix issue #⟦123⟧.',
+    note: 'arguments 依順序對應位置：issue 是第 1 個、branch 是第 2 個。名字比 $0、$1 好讀，也不怕寫錯順序。',
+  },
+  {
+    id: 'none',
+    title: '沒寫任何佔位符：自動附在最後',
+    skill: `---
+name: explain
+description: Explain a file in plain language
+---
+
+Explain what this file does for a new teammate.`,
+    input: '/explain src/auth.ts',
+    result: `Explain what this file does for a new teammate.
+
+⟦ARGUMENTS: src/auth.ts⟧`,
+    note: '內容裡沒有任何佔位符時，Claude Code 會在最後補一行 ARGUMENTS，所以你打的字不會不見。',
+  },
+];
+
+const injectDemo: Demo = {
+  id: 'inject',
+  title: '先跑指令，再把結果交給 Claude',
+  skill: `---
+name: commit-check
+description: Review staged changes before committing
+---
+
+## 目前狀態
+- 分支：!\`git branch --show-current\`
+- 已暫存的檔案：
+
+\`\`\`!
+git diff --cached --stat
+\`\`\`
+
+## 你的任務
+檢查上面的變更有沒有不該提交的檔案。`,
+  input: '/commit-check',
+  result: `## 目前狀態
+- 分支：⟦feature/login⟧
+- 已暫存的檔案：
+
+⟦ src/auth.ts  | 12 ++++++----
+ .env.local   |  2 ++
+ 2 files changed, 10 insertions(+), 4 deletions(-)⟧
+
+## 你的任務
+檢查上面的變更有沒有不該提交的檔案。`,
+  note: 'Claude 看不到 !`…` 這些指令本身，只看到執行結果。所以它一開始就知道 .env.local 被暫存了。',
+};
 
 const sources = [
   { title: 'Extend Claude with skills（Claude Code 文件）', href: 'https://code.claude.com/docs/en/skills' },
@@ -447,29 +599,80 @@ const jsonLd = [
         <section id="advanced" class="cs-view" aria-labelledby="advanced-title" data-cs-view>
           <p class="cs-kicker">06 · Claude Code 進階</p>
           <h2 id="advanced-title" tabindex="-1">context: fork、參數、動態注入</h2>
-          <h3>context: fork 與 agent</h3>
-          <p>設定 <code>context: fork</code> 後，SKILL.md 的內容會成為一個新 subagent 的任務提示，<code>agent</code> 決定用哪種 subagent，未填則為 <code>general-purpose</code>。</p>
+          <p class="cs-intro">這三個功能都在「Claude 看到內容之前」發生作用。下面每個範例都分成三格：你寫的 SKILL.md、你在對話框打的指令、Claude 最後實際收到的內容。橘色標記就是被替換進去的部分。</p>
+
+          <ol class="cs-order" aria-label="一次呼叫的處理順序">
+            <li><b>你輸入</b><span>/指令 加上參數</span></li>
+            <li><b>Claude Code 填內容</b><span>參數換進佔位符、執行 !`指令` 換成輸出</span></li>
+            <li><b>交給 Claude</b><span>有 <code>context: fork</code> 時改交給新的 subagent</span></li>
+          </ol>
+
+          <h3 id="adv-fork">context: fork 與 agent</h3>
+          <p>設定 <code>context: fork</code> 後，SKILL.md 的內容會成為一個新 subagent 的任務，<code>agent</code> 決定用哪種 subagent，未填則為 <code>general-purpose</code>。好處是讀大量資料的過程留在 subagent 裡，主對話只拿到結論。</p>
+          <Fragment set:html={demoHtml(forkDemo)} />
           <ul class="cs-list">
             <li>subagent 看不到你的對話歷史，指令必須自給自足。若任務依賴前面的討論，就不要用 fork。</li>
             <li>只適合「有明確任務」的 skill。只有規範、沒有任務的 skill 用 fork，subagent 會空手而回。</li>
             <li><code>Explore</code>、<code>Plan</code> 不載入 CLAUDE.md 與 git status，需要的背景都要寫進 SKILL.md。</li>
             <li>預設在背景執行，你可以繼續工作。但背景 subagent 的工具較少，且它的修改不在 <code>/rewind</code> 範圍內。需要完整工具或立即拿結果時，設 <code>background: false</code>。</li>
-            <li>反過來的用法：在 <code>.claude/agents/</code> 的自訂 subagent 用 <code>skills</code> 欄位預載 skill，讓 agent 帶著 skill 當參考資料。</li>
           </ul>
-          <h3>傳參數</h3>
-          <div class="cs-table" role="region" aria-label="參數寫法" tabindex="0">
+
+          <h3 id="adv-args">傳參數</h3>
+          <p>參數就是你打在指令名稱後面的文字。在 SKILL.md 裡用佔位符標出「這裡要放參數」，Claude Code 會在送出前把佔位符換成你打的字。從最簡單的開始看：</p>
+          <div class="cs-demos">
+            {argDemos.map((d) => <Fragment set:html={demoHtml(d)} />)}
+          </div>
+          <h4 class="cs-h4">兩個容易踩的細節</h4>
+          <div class="cs-table" role="region" aria-label="參數的邊界情況" tabindex="0">
             <table>
-              <thead><tr><th scope="col">寫法</th><th scope="col">意義</th><th scope="col">例子</th></tr></thead>
+              <thead><tr><th scope="col">情況</th><th scope="col">SKILL.md 寫</th><th scope="col">你輸入</th><th scope="col">Claude 收到</th></tr></thead>
               <tbody>
-                <tr><th scope="row"><code>$ARGUMENTS</code></th><td>全部參數</td><td><code>/fix-issue 123</code> → Fix GitHub issue 123</td></tr>
-                <tr><th scope="row"><code>$0</code>、<code>$1</code></th><td>依位置取用，從 0 開始</td><td>同 <code>$ARGUMENTS[0]</code></td></tr>
-                <tr><th scope="row"><code>$issue</code></th><td>具名參數</td><td>搭配 <code>arguments: [issue, branch]</code></td></tr>
+                <tr><th scope="row">位置沒有對應的參數</th><td><code>From $0 to $2</code></td><td><code>/x A B</code></td><td><code>From A to $2</code>（<code>$2</code> 原樣留著）</td></tr>
+                <tr><th scope="row">具名參數沒有對應的值</th><td><code>branch: $branch</code></td><td><code>/x 123</code></td><td><code>branch: </code>（變成空字串）</td></tr>
+                <tr><th scope="row">內文真的要寫錢字號</th><td><code>Price is \$1.00</code></td><td><code>/x A B</code></td><td><code>Price is $1.00</code>（反斜線跳脫，不會被換掉）</td></tr>
               </tbody>
             </table>
           </div>
-          <p>沒有任何佔位符時，Claude Code 會自動在內容尾端附上 <code>ARGUMENTS: &lt;輸入&gt;</code>。</p>
-          <h3>動態注入</h3>
-          <p><code>!`指令`</code> 會在內容送給 Claude 之前先執行，並把輸出替換進來，讓 Claude 拿到實際資料而不是猜測。例如 <code>!`git diff HEAD`</code> 或 <code>!`gh pr diff`</code>。這些指令仍會經過權限檢查。</p>
+
+          <div class="cs-play" data-cs-play hidden>
+            <div class="cs-play-head">
+              <h4 class="cs-h4" id="play-title">自己試試看</h4>
+              <div class="cs-play-presets" role="group" aria-label="載入範例">
+                <button type="button" data-preset="index">位置參數</button>
+                <button type="button" data-preset="named">具名參數</button>
+                <button type="button" data-preset="none">沒有佔位符</button>
+              </div>
+            </div>
+            <div class="cs-play-grid">
+              <div class="cs-play-field">
+                <label for="play-body">SKILL.md 內文</label>
+                <textarea id="play-body" rows="6" spellcheck="false" data-play-body></textarea>
+              </div>
+              <div class="cs-play-side">
+                <div class="cs-play-field">
+                  <label for="play-names">arguments 欄位（選填，用空白分隔）</label>
+                  <input id="play-names" type="text" spellcheck="false" autocomplete="off" data-play-names />
+                </div>
+                <div class="cs-play-field">
+                  <label for="play-args">你在指令後面打的字</label>
+                  <div class="cs-play-cmd"><span aria-hidden="true">/my-skill</span><input id="play-args" type="text" spellcheck="false" autocomplete="off" data-play-args /></div>
+                </div>
+                <dl class="cs-play-vars" aria-label="各佔位符的值" data-play-vars></dl>
+              </div>
+            </div>
+            <p class="cs-demo-label">Claude 收到</p>
+            <output class="cs-play-out" for="play-body play-names play-args" data-play-out></output>
+          </div>
+
+          <h3 id="adv-inject">動態注入</h3>
+          <p>在 SKILL.md 寫 <code>!`指令`</code>，Claude Code 會先執行它，把輸出貼在那個位置，再交給 Claude。多行指令用 <code>```!</code> 開頭的程式碼區塊。適合把「現在的狀態」（分支、diff、PR 內容）直接放進提示，Claude 不必自己去查。</p>
+          <Fragment set:html={demoHtml(injectDemo)} />
+          <ul class="cs-list">
+            <li><code>!</code> 要在行首或空白後面才會生效；<code>KEY=!`cmd`</code> 這種寫法會被當成一般文字。</li>
+            <li>任何一個指令失敗（結束碼不是 0），整個 skill 就不會載入。預期會回傳非 0 的指令，在後面加 <code>|| true</code>。</li>
+            <li>這些指令不會跳出權限詢問，但仍會比對你的權限規則；沒被允許的指令會讓 skill 中止，可以用 <code>allowed-tools</code> 預先授權。</li>
+            <li>要引用 skill 資料夾裡的腳本，用 <code>{'${CLAUDE_SKILL_DIR}'}/scripts/xxx.sh</code>，不管目前在哪個目錄都找得到。</li>
+          </ul>
           <Fragment set:html={pagerHtml(pager('advanced'))} />
         </section>
 

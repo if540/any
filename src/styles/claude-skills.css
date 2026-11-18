@@ -264,3 +264,67 @@
   .cs-pairs > div { grid-template-columns: minmax(0, 1fr); }
   .cs-pairs dt { border-right: 0; border-bottom: 1.5px solid var(--line); }
 }
+
+/* ---- 第 06 章：範例（SKILL.md → 你輸入 → Claude 收到） ---- */
+.cs-h4 { font-size: 1rem; margin: 1.75rem 0 0.6rem; }
+.cs-order { list-style: none; counter-reset: step; margin: 1.25rem 0 0.5rem; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 3px solid var(--line); background: var(--surface); }
+.cs-order li { counter-increment: step; display: grid; gap: 0.15rem; padding: 0.75rem 0.9rem; font-size: 0.9rem; position: relative; }
+.cs-order li + li { border-left: 3px solid var(--line); }
+.cs-order li::before { content: counter(step); font: 700 0.75rem var(--font-mono); color: var(--link); }
+.cs-order span { color: var(--muted); }
+
+.cs-demos { display: grid; gap: 1.5rem; }
+.cs-demo { margin: 1.25rem 0; border: 3px solid var(--line); background: var(--surface); }
+.cs-demos .cs-demo { margin: 0; }
+.cs-demo > figcaption { padding: 0.5rem 0.9rem; font-weight: 700; border-bottom: 3px solid var(--line); background: var(--fg); color: var(--bg); }
+.cs-demo-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+.cs-demo-grid > * { min-width: 0; }
+.cs-demo-right { display: grid; align-content: start; border-left: 3px solid var(--line); }
+.cs-demo-step { padding: 0.75rem 0.9rem; min-width: 0; }
+.cs-demo-right .cs-demo-step + .cs-demo-step { border-top: 2px dashed var(--line); }
+.cs-demo-label { margin: 0 0 0.4rem !important; font: 700 0.75rem var(--font-mono); letter-spacing: 0.06em; color: var(--link); }
+.cs-demo pre, .cs-play-out {
+  margin: 0; padding: 0.75rem 0.9rem; overflow-x: auto; background: var(--cs-code-bg); color: var(--cs-code-fg);
+  font: 0.8rem/1.7 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.cs-demo pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; overflow-wrap: normal; }
+.cs-demo pre.cs-demo-input { background: var(--bg); color: var(--fg); border: 2px solid var(--line); }
+.cs .cs-demo mark, .cs .cs-play-out mark { background: var(--orange); color: var(--black); padding: 0 0.1em; }
+.cs .cs-play-out mark.is-empty { background: transparent; color: var(--orange); outline: 1px dashed var(--orange); }
+.cs-demo-note { margin: 0 !important; padding: 0.6rem 0.9rem; border-top: 3px solid var(--line); font-size: 0.92rem; }
+
+/* 試算區 */
+.cs-play { margin: 2rem 0 1rem; padding: 1rem 1.1rem 1.1rem; border: 3px solid var(--orange); box-shadow: 6px 6px 0 var(--orange); background: var(--surface); }
+.cs-play[hidden] { display: none; }
+.cs-play-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; }
+.cs-play-head .cs-h4 { margin: 0; }
+.cs-play-presets { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.cs-play-presets button { font: 700 0.85rem var(--font-sans); min-height: 2.5rem; padding: 0.25rem 0.75rem; background: var(--surface); color: var(--fg); border: 2px solid var(--line); cursor: pointer; }
+.cs-play-presets button[aria-pressed='true'] { background: var(--orange); color: var(--black); }
+.cs-play-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1rem; margin: 1rem 0; }
+.cs-play-grid > * { min-width: 0; }
+.cs-play-side { display: grid; gap: 0.75rem; align-content: start; }
+.cs-play-field { display: grid; gap: 0.3rem; }
+.cs-play-field label { font: 700 0.8rem var(--font-sans); }
+.cs-play textarea, .cs-play input {
+  width: 100%; font: 0.85rem/1.6 var(--font-mono); color: var(--fg); background: var(--bg);
+  border: 2px solid var(--line); padding: 0.5rem 0.6rem; border-radius: 0;
+}
+.cs-play textarea { resize: vertical; min-height: 8rem; }
+.cs-play textarea:focus-visible, .cs-play input:focus-visible { outline: 3px solid var(--orange); outline-offset: 1px; }
+.cs-play-cmd { display: flex; align-items: stretch; }
+.cs-play-cmd span { display: grid; place-items: center; white-space: nowrap; padding: 0 0.6rem; font: 700 0.85rem var(--font-mono); background: var(--fg); color: var(--bg); border: 2px solid var(--line); border-right: 0; }
+.cs-play-cmd input { min-width: 0; }
+.cs-play-vars { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.75rem; margin: 0; font: 0.82rem var(--font-mono); }
+.cs-play-vars dt { font-weight: 700; color: var(--link); }
+.cs-play-vars dd { margin: 0; overflow-wrap: anywhere; }
+.cs-play-out { display: block; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 3rem; }
+
+@media (max-width: 48rem) {
+  .cs-demo-grid, .cs-play-grid { grid-template-columns: minmax(0, 1fr); }
+  .cs-demo-right { border-left: 0; border-top: 3px solid var(--line); }
+}
+@media (max-width: 40rem) {
+  .cs-order { grid-template-columns: minmax(0, 1fr); }
+  .cs-order li + li { border-left: 0; border-top: 3px solid var(--line); }
+}
