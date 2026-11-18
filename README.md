@@ -136,6 +136,8 @@ mood: 開心                      # 選填
 
 - 8 個章節以網址 hash 切換（`/claude-skills/#fields`），可分享、上一頁可用；切換後焦點移到章節標題，並用 `role="status"` 念出
 - 欄位表可切換「Claude Code／上傳 claude.ai」、範例分頁（tabs，方向鍵切換）、複製按鈕、檢查清單（記在瀏覽器）
+- Frontmatter 欄位快搜：在 hero 區，`Ctrl+F`（Mac 為 `⌘F`）聚焦，已在快搜內再按一次會交給瀏覽器原生尋找；捲過 hero 後固定在視窗頂端、滿寬。選到欄位會切到「Frontmatter 欄位」章節並標示該列
+- 欄位資料只有一份（頁面 frontmatter 的 `fields`），表格與快搜共用
 - 沒有 JavaScript 時所有章節依序顯示，錨點照常可用
 - 頁面在 `src/pages/claude-skills/index.astro`，互動在 `src/scripts/claude-skills.ts`，樣式在 `src/styles/claude-skills.css`
 

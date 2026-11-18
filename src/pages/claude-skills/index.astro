@@ -36,6 +36,38 @@ const pagerHtml = ({ prev, next }: { prev?: Chapter; next?: Chapter }) => `
     ${next ? `<a class="next" href="#${next.id}"><small>下一章</small>${next.title}</a>` : ''}
   </nav>`;
 
+// Frontmatter 欄位：表格與「欄位快搜」共用同一份資料（use、note 是固定的 HTML 片段）
+const fields = [
+  { names: ['name'], group: '觸發', use: '<code>/</code> 選單中的指令名', note: '預設取資料夾名；小寫英數與連字號，最多 64 字元，不可含 claude、anthropic' },
+  { names: ['description'], group: '觸發', badge: '建議必填', use: '做什麼＋何時用', note: '觸發的唯一依據；規格上限 1,024 字元' },
+  { names: ['when_to_use'], group: '觸發', cc: true, use: '補充觸發句型、範例請求', note: '接在 description 後，合計 1,536 字元後截斷' },
+  { names: ['paths'], group: '觸發', cc: true, use: 'glob 限定觸發範圍', note: '只在處理符合的檔案時自動載入' },
+  { names: ['disable-model-invocation'], group: '觸發', cc: true, use: '<code>true</code> 時只能手動 <code>/name</code>', note: '用在有副作用的流程：deploy、commit、發訊息' },
+  { names: ['user-invocable'], group: '觸發', cc: true, use: '<code>false</code> 時只有 Claude 能用', note: '用在背景知識類 skill' },
+  { names: ['allowed-tools'], group: '權限', use: '該回合免詢問即可使用的工具', note: '例 <code>Bash(git add *) Read</code>；只是預先授權，不限制其他工具' },
+  { names: ['disallowed-tools'], group: '權限', cc: true, use: 'skill 執行期間移除的工具', note: '例如背景迴圈禁止 <code>AskUserQuestion</code>' },
+  { names: ['hooks'], group: '權限', cc: true, use: 'skill 呼叫後註冊的 hooks', note: '必守規則放這裡比寫在內文可靠' },
+  { names: ['context'], group: '執行', cc: true, use: '設 <code>fork</code> 在 subagent 中執行', note: 'subagent 看不到對話歷史' },
+  { names: ['agent'], group: '執行', cc: true, use: 'fork 時用哪種 subagent', note: '<code>Explore</code>、<code>Plan</code>、<code>general-purpose</code>（預設）或 <code>.claude/agents/</code> 自訂' },
+  { names: ['background'], group: '執行', cc: true, use: 'fork 時是否背景執行', note: '預設 <code>true</code>；設 <code>false</code> 會等結果，並保留完整工具集' },
+  { names: ['model', 'effort'], group: '執行', cc: true, use: '該回合的模型與思考程度', note: 'fork 時改為設定 subagent' },
+  { names: ['shell'], group: '執行', cc: true, use: '<code>bash</code> 或 <code>powershell</code>', note: '用於動態注入的指令' },
+  { names: ['argument-hint'], group: '參數', cc: true, use: '自動完成時顯示的參數提示', note: '例 <code>[issue-number]</code>' },
+  { names: ['arguments'], group: '參數', cc: true, use: '具名參數', note: '搭配 <code>$name</code> 佔位符' },
+  { names: ['license', 'compatibility', 'metadata'], group: '描述性', use: '授權、環境需求、自訂資料', note: 'Claude Code 接受但不會作用' },
+] as { names: string[]; group: string; use: string; note: string; cc?: boolean; badge?: string }[];
+const fieldGroups = [...new Set(fields.map((f) => f.group))];
+const stripTags = (html: string) => html.replace(/<[^>]+>/g, '');
+// 給快搜用的純文字資料（JSON 放在頁面上，由 src/scripts/claude-skills.ts 讀取）
+const searchIndex = fields.map((f) => ({
+  id: `field-${f.names[0]}`,
+  names: f.names,
+  group: f.group,
+  use: stripTags(f.use),
+  note: stripTags(f.note),
+  cc: Boolean(f.cc),
+}));
+
 const sources = [
   { title: 'Extend Claude with skills（Claude Code 文件）', href: 'https://code.claude.com/docs/en/skills' },
   { title: 'Skill authoring best practices（Claude Platform 文件）', href: 'https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices' },
@@ -179,6 +211,26 @@ const jsonLd = [
         <h1>Skills 撰寫指南<span class="accent" aria-hidden="true">.</span></h1>
         <p class="cs-lead">一個 skill 就是一個資料夾加一份 <code>SKILL.md</code>。上半部的 frontmatter 決定 Claude 什麼時候想到它，下半部的內容決定它想到之後做得好不好。</p>
         <p class="meta">作者：{AUTHORS.claude.name} · 依官方文件整理 · <time datetime="2026-11-17">2026-11-17</time></p>
+        <!-- 欄位快搜：需要 JavaScript，沒有時保持隱藏；捲過 hero 後固定在視窗頂端、滿寬 -->
+        <div class="cs-search-slot" data-cs-search-slot hidden>
+          <div class="cs-search" data-cs-search>
+            <div class="cs-search-inner">
+              <label class="cs-search-box">
+                <span class="visually-hidden">搜尋 Frontmatter 欄位</span>
+                <svg class="cs-search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"/></svg>
+                <input
+                  id="cs-search-input" type="text" role="combobox" autocomplete="off" spellcheck="false"
+                  aria-autocomplete="list" aria-expanded="false" aria-controls="cs-search-list" aria-describedby="cs-search-hint"
+                  placeholder="搜尋 frontmatter 欄位…" data-cs-search-input
+                />
+                <kbd class="cs-kbd" aria-hidden="true" data-cs-search-kbd>Ctrl F</kbd>
+              </label>
+              <p id="cs-search-hint" class="visually-hidden">快速鍵 Ctrl+F。用上下方向鍵選擇，Enter 跳到欄位說明，Esc 關閉。</p>
+              <ul id="cs-search-list" class="cs-search-list" role="listbox" aria-label="符合的欄位" data-cs-search-list hidden></ul>
+            </div>
+          </div>
+        </div>
+        <script type="application/json" data-cs-search-data set:html={JSON.stringify(searchIndex).replace(/</g, '\\u003c')}></script>
       </div>
       <figure class="cs-anatomy">
         <figcaption class="cs-anatomy-bar">.claude/skills/writing-commits/SKILL.md</figcaption>
@@ -273,28 +325,22 @@ const jsonLd = [
             <table class="cs-fields" data-cs-fields>
               <thead><tr><th scope="col">欄位</th><th scope="col">用途</th><th scope="col">重點</th></tr></thead>
               <tbody>
-                <tr class="grp"><th colspan="3" scope="colgroup">觸發</th></tr>
-                <tr><td><code>name</code></td><td><code>/</code> 選單中的指令名</td><td>預設取資料夾名；小寫英數與連字號，最多 64 字元，不可含 claude、anthropic</td></tr>
-                <tr><td><code>description</code> <span class="cs-badge">建議必填</span></td><td>做什麼＋何時用</td><td>觸發的唯一依據；規格上限 1,024 字元</td></tr>
-                <tr class="cc-only"><td><code>when_to_use</code> <span class="cs-cc">僅 Claude Code</span></td><td>補充觸發句型、範例請求</td><td>接在 description 後，合計 1,536 字元後截斷</td></tr>
-                <tr class="cc-only"><td><code>paths</code> <span class="cs-cc">僅 Claude Code</span></td><td>glob 限定觸發範圍</td><td>只在處理符合的檔案時自動載入</td></tr>
-                <tr class="cc-only"><td><code>disable-model-invocation</code> <span class="cs-cc">僅 Claude Code</span></td><td><code>true</code> 時只能手動 <code>/name</code></td><td>用在有副作用的流程：deploy、commit、發訊息</td></tr>
-                <tr class="cc-only"><td><code>user-invocable</code> <span class="cs-cc">僅 Claude Code</span></td><td><code>false</code> 時只有 Claude 能用</td><td>用在背景知識類 skill</td></tr>
-                <tr class="grp"><th colspan="3" scope="colgroup">權限</th></tr>
-                <tr><td><code>allowed-tools</code></td><td>該回合免詢問即可使用的工具</td><td>例 <code>Bash(git add *) Read</code>；只是預先授權，不限制其他工具</td></tr>
-                <tr class="cc-only"><td><code>disallowed-tools</code> <span class="cs-cc">僅 Claude Code</span></td><td>skill 執行期間移除的工具</td><td>例如背景迴圈禁止 <code>AskUserQuestion</code></td></tr>
-                <tr class="cc-only"><td><code>hooks</code> <span class="cs-cc">僅 Claude Code</span></td><td>skill 呼叫後註冊的 hooks</td><td>必守規則放這裡比寫在內文可靠</td></tr>
-                <tr class="grp"><th colspan="3" scope="colgroup">執行</th></tr>
-                <tr class="cc-only"><td><code>context</code> <span class="cs-cc">僅 Claude Code</span></td><td>設 <code>fork</code> 在 subagent 中執行</td><td>subagent 看不到對話歷史</td></tr>
-                <tr class="cc-only"><td><code>agent</code> <span class="cs-cc">僅 Claude Code</span></td><td>fork 時用哪種 subagent</td><td><code>Explore</code>、<code>Plan</code>、<code>general-purpose</code>（預設）或 <code>.claude/agents/</code> 自訂</td></tr>
-                <tr class="cc-only"><td><code>background</code> <span class="cs-cc">僅 Claude Code</span></td><td>fork 時是否背景執行</td><td>預設 <code>true</code>；設 <code>false</code> 會等結果，並保留完整工具集</td></tr>
-                <tr class="cc-only"><td><code>model</code>、<code>effort</code> <span class="cs-cc">僅 Claude Code</span></td><td>該回合的模型與思考程度</td><td>fork 時改為設定 subagent</td></tr>
-                <tr class="cc-only"><td><code>shell</code> <span class="cs-cc">僅 Claude Code</span></td><td><code>bash</code> 或 <code>powershell</code></td><td>用於動態注入的指令</td></tr>
-                <tr class="grp"><th colspan="3" scope="colgroup">參數</th></tr>
-                <tr class="cc-only"><td><code>argument-hint</code> <span class="cs-cc">僅 Claude Code</span></td><td>自動完成時顯示的參數提示</td><td>例 <code>[issue-number]</code></td></tr>
-                <tr class="cc-only"><td><code>arguments</code> <span class="cs-cc">僅 Claude Code</span></td><td>具名參數</td><td>搭配 <code>$name</code> 佔位符</td></tr>
-                <tr class="grp"><th colspan="3" scope="colgroup">描述性</th></tr>
-                <tr><td><code>license</code>、<code>compatibility</code>、<code>metadata</code></td><td>授權、環境需求、自訂資料</td><td>Claude Code 接受但不會作用</td></tr>
+                {fieldGroups.map((g) => (
+                  <Fragment>
+                    <tr class="grp"><th colspan="3" scope="colgroup">{g}</th></tr>
+                    {fields.filter((f) => f.group === g).map((f) => (
+                      <tr id={`field-${f.names[0]}`} class={f.cc ? 'cc-only' : undefined} data-cs-field={f.names[0]}>
+                        <td>
+                          <Fragment set:html={f.names.map((n) => `<code>${n}</code>`).join('、')} />
+                          {f.badge && <> <span class="cs-badge">{f.badge}</span></>}
+                          {f.cc && <> <span class="cs-cc">僅 Claude Code</span></>}
+                        </td>
+                        <td set:html={f.use} />
+                        <td set:html={f.note} />
+                      </tr>
+                    ))}
+                  </Fragment>
+                ))}
               </tbody>
             </table>
           </div>

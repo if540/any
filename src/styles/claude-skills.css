@@ -35,9 +35,68 @@
 .cs-anatomy .s { color: var(--cs-code-str); }
 .cs-anatomy .c { color: var(--cs-code-dim); }
 
+/* ---- 欄位快搜 ---- */
+.cs-search-slot { margin-top: 1.5rem; }
+.cs-search-slot[hidden] { display: none; }
+.cs-search { position: relative; z-index: 20; }
+.cs-search-inner { position: relative; }
+.cs-search-box {
+  display: flex; align-items: center; gap: 0.75rem; min-height: 3.25rem; padding: 0 0.6rem 0 1rem;
+  background: var(--surface); border: 3px solid var(--line); cursor: text;
+}
+.cs-search-box:focus-within { box-shadow: 5px 5px 0 var(--orange); }
+.cs-search-icon { width: 1.25rem; height: 1.25rem; flex: none; color: var(--muted); }
+.cs-search-box input {
+  flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg);
+  font: 500 1rem var(--font-sans); padding: 0.6rem 0; outline: none;
+}
+.cs-search-box input::placeholder { color: var(--muted); opacity: 1; }
+.cs-kbd {
+  flex: none; font: 700 0.78rem var(--font-mono); padding: 0.15rem 0.45rem;
+  border: 2px solid var(--line); color: var(--fg); background: var(--bg); white-space: nowrap;
+}
+.cs-search-list {
+  position: absolute; left: 0; right: 0; top: calc(100% + 0.4rem); margin: 0; padding: 0.35rem; list-style: none;
+  max-height: min(24rem, 60vh); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--surface); border: 3px solid var(--line); box-shadow: 6px 6px 0 var(--orange);
+}
+.cs-search-list[hidden] { display: none; }
+.cs-search-list [role='option'] {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.1rem 0.75rem;
+  padding: 0.5rem 0.65rem; cursor: pointer; border: 2px solid transparent;
+}
+.cs-search-list [role='option'][aria-selected='true'] { border-color: var(--line); background: color-mix(in srgb, var(--orange) 18%, var(--surface)); }
+.cs-opt-name { font-weight: 700; overflow-wrap: anywhere; }
+.cs-opt-name code { font-size: 0.9em; }
+.cs-opt-group { font: 700 0.72rem var(--font-mono); color: var(--muted); align-self: center; }
+.cs-opt-desc { grid-column: 1 / -1; font-size: 0.88rem; color: var(--muted); }
+.cs .cs-search-list mark { background: var(--orange); color: var(--black); padding: 0; text-decoration: none; }
+/* 觸控裝置沒有實體鍵盤，不顯示快速鍵提示 */
+@media (hover: none) and (pointer: coarse) { .cs-kbd { display: none; } }
+.cs-search-empty { padding: 0.6rem 0.65rem; color: var(--muted); font-size: 0.92rem; }
+
+/* 捲過 hero：固定在視窗頂端、滿寬，內容對齊全站 container */
+.cs-search.is-stuck {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding-block: 0.6rem; background: var(--bg); border-bottom: 3px solid var(--line);
+}
+.cs-search.is-stuck .cs-search-inner { width: min(100% - 2 * var(--gutter), var(--wide)); margin-inline: auto; }
+.cs-search.is-stuck .cs-search-box { min-height: 2.9rem; }
+.cs-search.is-stuck .cs-search-box:focus-within { box-shadow: 4px 4px 0 var(--orange); }
+@media (prefers-reduced-motion: no-preference) {
+  .cs-search.is-stuck { animation: cs-drop 0.18s ease-out; }
+  @keyframes cs-drop { from { transform: translateY(-100%); } to { transform: none; } }
+}
+
+/* 從快搜跳過來的欄位：橘色閃一下 */
+.cs-fields tr.is-hit td { animation: cs-hit 2s ease-out; }
+.cs-fields tr:focus { outline: 3px solid var(--orange); outline-offset: -3px; }
+@keyframes cs-hit { 0%, 40% { background: color-mix(in srgb, var(--orange) 35%, var(--surface)); } 100% { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .cs-fields tr.is-hit td { animation: none; background: color-mix(in srgb, var(--orange) 25%, var(--surface)); } }
+
 /* ---- Layout：左側章節、右側內容 ---- */
-.cs-layout { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: clamp(2.5rem, 6vw, 4rem); scroll-margin-top: 1rem; }
-.cs-nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; position: sticky; top: 1rem; }
+.cs-layout { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: clamp(2.5rem, 6vw, 4rem); scroll-margin-top: calc(var(--cs-stuck-h, 0px) + 1rem); }
+.cs-nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; position: sticky; top: calc(var(--cs-stuck-h, 0px) + 1rem); }
 .cs-nav a {
   display: flex; gap: 0.6rem; align-items: baseline; padding: 0.45rem 0.7rem;
   color: var(--fg); text-decoration: none; font-weight: 700; font-size: 0.95rem; border: 2px solid transparent;

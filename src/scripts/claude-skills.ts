@@ -3,6 +3,7 @@
  * - 以網址 hash（#load、#fields…）切換章節，上一頁／下一頁可用，網址可分享
  * - 切換後焦點移到章節標題，並用 role="status" 念出目前章節
  * - 欄位表的使用環境切換、範例分頁、複製按鈕、檢查清單（記在瀏覽器）
+ * - Frontmatter 欄位快搜：Ctrl+F（Mac 為 ⌘F）聚焦，捲過 hero 後固定在視窗頂端
  * 沒有 JavaScript 時，所有章節依序顯示，錨點照常可用。
  */
 const STORE_KEY = 'any:claude-skills:checklist';
@@ -16,6 +17,7 @@ export function initClaudeSkills(root: HTMLElement) {
   };
 
   initRouter(root, announce);
+  initFieldSearch(root, announce);
   initFieldMode(root, announce);
   initTabs(root);
   initCopy(root, announce);
@@ -162,5 +164,184 @@ function initChecklist(root: HTMLElement) {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(boxes.map((b) => b.checked))); } catch { /* 忽略 */ }
   };
   boxes.forEach((b) => b.addEventListener('change', update));
+  update();
+}
+
+interface FieldEntry { id: string; names: string[]; group: string; use: string; note: string; cc: boolean }
+
+function initFieldSearch(root: HTMLElement, announce: (t: string) => void) {
+  const slot = root.querySelector<HTMLElement>('[data-cs-search-slot]');
+  const bar = root.querySelector<HTMLElement>('[data-cs-search]');
+  const input = root.querySelector<HTMLInputElement>('[data-cs-search-input]');
+  const list = root.querySelector<HTMLUListElement>('[data-cs-search-list]');
+  const kbd = root.querySelector<HTMLElement>('[data-cs-search-kbd]');
+  const dataEl = root.querySelector<HTMLScriptElement>('[data-cs-search-data]');
+  if (!slot || !bar || !input || !list || !dataEl) return;
+
+  let entries: FieldEntry[] = [];
+  try { entries = JSON.parse(dataEl.textContent ?? '[]'); } catch { return; }
+  slot.hidden = false;
+
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  if (kbd) kbd.textContent = isMac ? '⌘ F' : 'Ctrl F';
+  const hint = document.getElementById('cs-search-hint');
+  if (hint && isMac) hint.textContent = hint.textContent!.replace('Ctrl+F', 'Command+F');
+
+  // ---- 搜尋與結果清單（combobox + listbox） ----
+  let results: FieldEntry[] = [];
+  let active = -1;
+
+  const score = (e: FieldEntry, q: string) => {
+    if (!q) return 1;
+    const names = e.names.join(' ').toLowerCase();
+    if (e.names.some((n) => n.toLowerCase() === q)) return 100;
+    if (e.names.some((n) => n.toLowerCase().startsWith(q))) return 50;
+    if (names.includes(q)) return 30;
+    if (`${e.use} ${e.note} ${e.group}`.toLowerCase().includes(q)) return 10;
+    return 0;
+  };
+
+  const mark = (text: string, q: string) => {
+    const frag = document.createDocumentFragment();
+    const i = q ? text.toLowerCase().indexOf(q) : -1;
+    if (i < 0) { frag.append(text); return frag; }
+    const m = document.createElement('mark');
+    m.textContent = text.slice(i, i + q.length);
+    frag.append(text.slice(0, i), m, text.slice(i + q.length));
+    return frag;
+  };
+
+  const setActive = (i: number) => {
+    active = i;
+    [...list.children].forEach((li, j) => li.setAttribute('aria-selected', String(j === i)));
+    const li = list.children[i] as HTMLElement | undefined;
+    if (li) { input.setAttribute('aria-activedescendant', li.id); li.scrollIntoView({ block: 'nearest' }); }
+    else input.removeAttribute('aria-activedescendant');
+  };
+
+  const open = (show: boolean) => {
+    list.hidden = !show;
+    input.setAttribute('aria-expanded', String(show));
+    if (!show) setActive(-1);
+  };
+
+  const render = () => {
+    const q = input.value.trim().toLowerCase();
+    results = entries
+      .map((e) => ({ e, s: score(e, q) }))
+      .filter((r) => r.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .map((r) => r.e);
+    list.replaceChildren();
+    if (results.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'cs-search-empty';
+      li.textContent = `找不到「${input.value.trim()}」相關的欄位`;
+      li.setAttribute('role', 'presentation');
+      list.append(li);
+    }
+    results.forEach((e, i) => {
+      const li = document.createElement('li');
+      li.id = `cs-opt-${i}`;
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', 'false');
+      const name = document.createElement('span');
+      name.className = 'cs-opt-name';
+      e.names.forEach((n, k) => {
+        if (k) name.append('、');
+        const c = document.createElement('code');
+        c.append(mark(n, q));
+        name.append(c);
+      });
+      if (e.cc) {
+        const tag = document.createElement('span');
+        tag.className = 'cs-cc';
+        tag.textContent = '僅 Claude Code';
+        name.append(' ', tag);
+      }
+      const desc = document.createElement('span');
+      desc.className = 'cs-opt-desc';
+      desc.append(mark(e.use, q));
+      const grp = document.createElement('span');
+      grp.className = 'cs-opt-group';
+      grp.textContent = e.group;
+      li.append(name, grp, desc);
+      li.addEventListener('mousedown', (ev) => ev.preventDefault()); // 保留輸入框焦點
+      li.addEventListener('click', () => choose(i));
+      list.append(li);
+    });
+    open(true);
+    if (results.length) setActive(0);
+    if (input.value.trim()) announce(results.length ? `找到 ${results.length} 個欄位` : '找不到符合的欄位');
+  };
+
+  const choose = (i: number) => {
+    const e = results[i];
+    if (!e) return;
+    open(false);
+    input.blur();
+    if (location.hash !== '#fields') location.hash = 'fields';
+    window.setTimeout(() => {
+      const row = document.getElementById(e.id);
+      if (!row) return;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      row.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+      row.classList.remove('is-hit');
+      void row.offsetWidth;
+      row.classList.add('is-hit');
+      row.tabIndex = -1;
+      row.focus({ preventScroll: true });
+      announce(`已跳到欄位 ${e.names.join('、')}：${e.use}`);
+    }, 120);
+  };
+
+  input.addEventListener('input', render);
+  input.addEventListener('focus', render);
+  input.addEventListener('blur', () => window.setTimeout(() => open(false), 100));
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      if (list.hidden) { render(); return; }
+      if (!results.length) return;
+      const d = ev.key === 'ArrowDown' ? 1 : -1;
+      setActive((active + d + results.length) % results.length);
+    } else if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (active >= 0) choose(active);
+    } else if (ev.key === 'Escape') {
+      if (!list.hidden) { ev.preventDefault(); open(false); }
+      else if (input.value) { ev.preventDefault(); input.value = ''; }
+      else input.blur();
+    }
+  });
+
+  // ---- 快速鍵：Ctrl+F／⌘F 聚焦快搜；已經在快搜裡再按一次，交還給瀏覽器原生的尋找 ----
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key.toLowerCase() !== 'f' || ev.altKey || ev.shiftKey) return;
+    if (!(isMac ? ev.metaKey : ev.ctrlKey)) return;
+    if (document.activeElement === input) return;
+    ev.preventDefault();
+    input.focus();
+    input.select();
+  });
+
+  // ---- 捲過 hero 後固定在視窗頂端、滿寬 ----
+  let stuck = false;
+  const update = () => {
+    const shouldStick = slot.getBoundingClientRect().top < 0;
+    if (shouldStick === stuck) return;
+    stuck = shouldStick;
+    if (stuck) slot.style.height = `${bar.offsetHeight}px`;
+    else slot.style.height = '';
+    bar.classList.toggle('is-stuck', stuck);
+    root.style.setProperty('--cs-stuck-h', stuck ? `${bar.offsetHeight}px` : '0px');
+  };
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; update(); });
+  }, { passive: true });
+  window.addEventListener('resize', () => { if (stuck) root.style.setProperty('--cs-stuck-h', `${bar.offsetHeight}px`); });
   update();
 }
